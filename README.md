@@ -1,1 +1,10 @@
-# Interactive_Media_Design_Coursework-
+# EBU6305
+## Group Number: 2025EBU6305G12
+## Project Title: {needed}
+## Members:
+
+LI SHEN, 2023213588, 231224376, 2023213588@bupt.cn
+
+
+
+## Assigned TA: 
