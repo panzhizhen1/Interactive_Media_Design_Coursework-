@@ -3,7 +3,7 @@
 ## Group Number: 2025EBU6305G12  
 ## Project Title: `{needed}`  
 
-## 👥 Group Members
+## Group Members
 
 | Name | BUPT ID | QMUL ID | Email |
 | :--- | :--- | :--- | :--- |
