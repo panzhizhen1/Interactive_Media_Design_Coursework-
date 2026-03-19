@@ -5,10 +5,11 @@
 
 ## Group Members
 
-| Name | BUPT ID | QMUL ID | Email |
-| :--- | :--- | :--- | :--- |
-| **LI SHEN** | 2023213588 | 231224376 | 2023213588@bupt.cn |
-| **GU JIALU** | 2023213523 | 231225007 | jp2023213523@qmul.ac.uk |
-| **Zhizhen Pan** | 2023213604 | 231224929 | panzhizhen@bupt.edu.cn |
+| Name             | BUPT ID    | QMUL ID   | Email |
+|:-----------------|:-----------|:----------| :--- |
+| **LI SHEN**      | 2023213588 | 231224376 | 2023213588@bupt.cn |
+| **GU JIALU**     | 2023213523 | 231225007 | jp2023213523@qmul.ac.uk |
+| **Zhizhen Pan**  | 2023213604 | 231224929 | panzhizhen@bupt.edu.cn |
+| **Jinglin Wang** | 2023213527 | 231224697 | jinglin.wang@se23.qmul.ac.uk |
 
 ## Assigned TA: Jun Gu
