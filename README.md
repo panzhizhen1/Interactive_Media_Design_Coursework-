@@ -18,14 +18,15 @@
 
 Each member owns exactly **one** of the **5 main pages/sections**. The page owner is responsible for **content**, **interaction design**, **implementation**, and **integration readiness** for that page.
 
-| Section| Owner |
-| 1. `{Page 1 Homepage}` | `{Wenyun Zhong}` |
-| 2. `{Page 2 Learning}` | `{Shen Li}` |
-| 3. `{Page 3 Game}` | `{Jialu Gu}` |
-| 4. `{Page 4 Test}` | `{Jinglin Wang}` |
-| 5. `{Page 5 Community}` | `{Zhizhen Pan}` |
+| Section | Owner |
+| :--- | :--- |
+| 1. Homepage | Wenyun Zhong |
+| 2. Learning | Shen Li |
+| 3. Game | Jialu Gu |
+| 4. Test | Jinglin Wang |
+| 5. Community | Zhizhen Pan |
 
-### Page Responsibilities (Detailed)
+### Page Responsibilities
 
 #### 1) Homepage
 - Define and present the **unique selling point** of the website in the first screen.
