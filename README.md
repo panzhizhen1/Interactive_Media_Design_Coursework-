@@ -11,6 +11,7 @@
 | **Jialu Gu**     | 2023213523 | 231225007 | jp2023213523@qmul.ac.uk |
 | **Zhizhen Pan**  | 2023213604 | 231224929 | panzhizhen@bupt.edu.cn |
 | **Jinglin Wang** | 2023213527 | 231224697 | jinglin.wang@se23.qmul.ac.uk |
+| **Wenyun Zhong** | 2023213579 | 231224516 | 2023213579@bupt.cn |
 
 ## Team Roles & Page Ownership
 
