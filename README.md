@@ -1,7 +1,7 @@
 # EBU6305 - Interactive Media Design Coursework
 
 ## Group Number: 2025EBU6305G12  
-## Project Title: `{needed}`  
+## Project Title: Hue Hub: Interactive Color Learning
 
 ## Group Members
 
@@ -13,9 +13,11 @@
 | **Jinglin Wang** | 2023213527 | 231224697 | jinglin.wang@se23.qmul.ac.uk |
 | **Wenyun Zhong** | 2023213579 | 231224516 | 2023213579@bupt.cn |
 
-## Team Roles & Page Ownership
+## Topic choice & Page Ownership
 
-**Team Lead:** 
+**Topic: Color**
+
+**Team Leader: TBD** 
 
 Each member owns exactly **one** of the **5 main pages/sections**. The page owner is responsible for **content**, **interaction design**, **implementation**, and **integration readiness** for that page.
 
