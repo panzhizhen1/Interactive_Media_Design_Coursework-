@@ -10,4 +10,4 @@
 | :--- | :--- | :--- | :--- |
 | **LI SHEN** | 2023213588 | 231224376 | 2023213588@bupt.cn |
 | **GU JIALU** | 2023213523 | 231225007 | jp2023213523@qmul.ac.uk |
-| **Zhizhen Pan** | 2023213524 | 231224929 | panzhizhen@bupt.edu.cn |
+| **Zhizhen Pan** | 2023213604 | 231224929 | panzhizhen@bupt.edu.cn |
