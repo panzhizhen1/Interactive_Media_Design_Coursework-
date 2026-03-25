@@ -17,7 +17,7 @@
 
 **Topic: Color**
 
-**Team Leader: TBD** 
+**Team Leader: Zhizhen Pan** 
 
 Each member owns exactly **one** of the **5 main pages/sections**. The page owner is responsible for **content**, **interaction design**, **implementation**, and **integration readiness** for that page.
 
