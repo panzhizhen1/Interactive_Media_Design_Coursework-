@@ -4,7 +4,7 @@
 <img src="./wireframes/Homepage_wireframe.png" alt="Homepage Wireframe" width="900" />
 
 ## 2. Information Architecture
-
+<img src="./wireframes/Learning Page.png" alt="Learning Page Wireframe"/>
 
 ## 3. Game
 <img width="1001" height="655" alt="image" src="https://github.com/user-attachments/assets/5429c524-a4cf-4878-9f44-73774054c98e" />
