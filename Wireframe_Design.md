@@ -1,7 +1,7 @@
 # Wireframe Design
 
 ## 1. Homepage
-
+<img src=".wireframes/Homepage_wireframe.png" alt="Homepage Wireframe" width="900" />
 
 ## 2. Information Architecture
 
@@ -12,7 +12,7 @@
 
 
 ## 4. Test
-<img src="./wireframes/Test_wireframe.png" alt="Community Wireframe" width="900" />
+<img src="./wireframes/Test_wireframe.png" alt="Test Wireframe" width="900" />
 
 ## 5. Community
 <img src="./wireframes/Community_wireframe.png" alt="Community Wireframe" width="900" />
