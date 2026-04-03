@@ -1,7 +1,7 @@
 # Wireframe Design
 
 ## 1. Homepage
-<img src=".wireframes/Homepage_wireframe.png" alt="Homepage Wireframe" width="900" />
+<img src="./wireframes/Homepage_wireframe.png" alt="Homepage Wireframe" width="900" />
 
 ## 2. Information Architecture
 
