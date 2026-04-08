@@ -1,0 +1,199 @@
+/* Homepage layout: hero, row2 (learn + test), row3 (game + community + theme picker). */
+
+main.page-home {
+  max-width: var(--content-max);
+  margin: var(--space-md) auto;
+  padding: var(--space-md);
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* Row 1 — banner + tagline (wireframe: text toward the right) */
+.home-hero {
+  position: relative;
+  min-height: clamp(11rem, 24vw, 17rem);
+  border-radius: var(--radius-md);
+  border: 2px dashed rgba(15, 23, 42, 0.18);
+  background: var(--color-content-panel);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-xl) var(--space-lg);
+  box-shadow: 0 6px 24px rgba(3, 4, 94, 0.08);
+}
+
+.home-hero__tagline {
+  margin: 0;
+  max-width: min(100%, 22rem);
+  font-size: clamp(var(--text-xl), 3vw, var(--text-2xl));
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* Row 2 (2 cols) & row 3 (3 cols) — grid rows */
+.home-row {
+  display: grid;
+  gap: var(--space-lg);
+  align-items: stretch;
+}
+
+.home-row--3 {
+  grid-template-columns: 1fr;
+}
+
+.home-row--2 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 48rem) {
+  .home-row--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .home-row--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+a.home-card {
+  margin: 0;
+  padding: var(--space-xl);
+  min-height: 7.5rem;
+  display: grid;
+  place-items: center;
+  background: var(--color-content-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(3, 4, 94, 0.08);
+  text-decoration: none;
+  color: var(--color-text);
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+a.home-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 24px rgba(3, 4, 94, 0.12);
+  transform: translateY(-2px);
+}
+
+a.home-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.home-card__text {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: inherit;
+}
+
+.home-col-theme {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Theme module — third column of row 3 */
+.theme-picker {
+  margin-top: 0;
+  flex: 1;
+  padding: var(--space-lg) var(--space-xl);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: 0 2px 0 rgba(3, 4, 94, 0.06);
+}
+
+.theme-picker__title {
+  margin: 0 0 var(--space-lg);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.theme-picker__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg) var(--space-xl);
+}
+
+.theme-picker__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+}
+
+.theme-picker__theme-option {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 2px solid rgba(15, 23, 42, 0.12);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.theme-picker__theme-option:hover {
+  transform: scale(1.06);
+}
+
+.theme-picker__theme-option:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.theme-picker__theme-option--selected {
+  outline: 3px solid var(--color-surface);
+  box-shadow: 0 0 0 2px var(--theme-stop-2);
+}
+
+.theme-picker__mode-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: stretch;
+}
+
+.theme-picker__mode-label {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+}
+
+.theme-picker__mode {
+  padding: 0.45rem 2rem 0.45rem 0.75rem;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%230f172a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  min-width: 7.5rem;
+}
+
+.theme-picker__mode option:disabled {
+  color: #94a3b8;
+}

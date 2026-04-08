@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home — Color Learning</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/pages/homepage.css" />
+  </head>
+  <body>
+    <header class="site-header" role="banner">
+      <div id="site-navbar" aria-live="polite"></div>
+    </header>
+
+    <main id="main-content" class="page-home">
+      <section class="home-hero" aria-label="Intro banner">
+        <p class="home-hero__tagline">Explore the world of colors!</p>
+      </section>
+
+      <section class="home-row home-row--2" aria-label="Learn and test">
+        <a class="home-card" href="learning.html" aria-label="Go to Learn">
+          <p class="home-card__text">learn</p>
+        </a>
+        <a class="home-card" href="test.html" aria-label="Go to Test">
+          <p class="home-card__text">test</p>
+        </a>
+      </section>
+
+      <section class="home-row home-row--3" aria-label="Game, community, and site colors">
+        <a class="home-card" href="game.html" aria-label="Go to Game">
+          <p class="home-card__text">game</p>
+        </a>
+        <a class="home-card" href="community.html" aria-label="Go to Community">
+          <p class="home-card__text">community</p>
+        </a>
+        <div class="home-col-theme">
+          <section class="theme-picker" aria-labelledby="theme-picker-heading" data-theme-picker>
+            <p id="theme-picker-heading" class="theme-picker__title">Choose your favorite color for the website!</p>
+            <div class="theme-picker__row">
+              <div
+                class="theme-picker__swatches"
+                role="radiogroup"
+                aria-label="Site color theme"
+              >
+                <button
+                  type="button"
+                  class="theme-picker__theme-option"
+                  data-theme-option="blue"
+                  style="background-color: #00b4d8"
+                  aria-label="Ocean blue theme"
+                ></button>
+                <button
+                  type="button"
+                  class="theme-picker__theme-option"
+                  data-theme-option="teal"
+                  style="background-color: #68d8d6"
+                  aria-label="Mint teal theme"
+                ></button>
+                <button
+                  type="button"
+                  class="theme-picker__theme-option"
+                  data-theme-option="rose"
+                  style="background-color: #ffb3c6"
+                  aria-label="Rose pink theme"
+                ></button>
+              </div>
+              <div class="theme-picker__mode-wrap">
+                <label class="theme-picker__mode-label" for="theme-color-mode">mode</label>
+                <select id="theme-color-mode" class="theme-picker__mode" data-theme-mode aria-label="Color selection mode">
+                  <option value="default" selected>default</option>
+                  <option value="rgb" disabled>RGB</option>
+                  <option value="hsv" disabled>HSV</option>
+                </select>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+      <div id="site-footer"></div>
+    </footer>
+
+    <script src="js/theme.js" defer></script>
+    <script src="js/main.js" defer></script>
+    <script src="js/navbar.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/pages/homepage.js" defer></script>
+  </body>
+</html>
