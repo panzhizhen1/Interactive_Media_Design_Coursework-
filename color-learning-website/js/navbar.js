@@ -11,8 +11,12 @@
     links.forEach(function (a) {
       const target = a.getAttribute("data-nav");
       if (!target) return;
+      const testSubpage =
+        target === "test.html" &&
+        /^test(?:-[a-z]+)?\.html$/i.test(file);
       const match =
         target === file ||
+        testSubpage ||
         (file === "" && target === "index.html");
       a.classList.toggle("is-active", match);
     });
