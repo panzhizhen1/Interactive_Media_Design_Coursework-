@@ -8,39 +8,13 @@
  */
 (function () {
   "use strict";
-
   // --- BEGIN AUTO-GENERATED (node scripts/sync-fragments.mjs) ---
-  var EMBEDDED_NAVBAR =
-    '<div class="site-header__inner">' +
-    '<div class="site-header__end">' +
-    '<button type="button" class="site-nav__toggle" data-nav-toggle aria-expanded="false" aria-controls="primary-nav">' +
-    "Menu" +
-    "</button>" +
-    '<nav class="site-nav" id="primary-nav" aria-label="Primary">' +
-    '<ul class="site-nav__list">' +
-    '<li><a class="site-nav__link" href="index.html" data-nav="index.html">Home</a></li>' +
-    '<li><a class="site-nav__link" href="learning.html" data-nav="learning.html">Learn</a></li>' +
-    '<li><a class="site-nav__link" href="game.html" data-nav="game.html">Game</a></li>' +
-    '<li><a class="site-nav__link" href="test.html" data-nav="test.html">Test</a></li>' +
-    '<li><a class="site-nav__link" href="community.html" data-nav="community.html">Community</a></li>' +
-    "</ul>" +
-    "</nav>" +
-    '<div class="user-menu" data-user-menu>' +
-    '<button type="button" class="user-menu-trigger" aria-label="Account" title="Sign in" data-auth-trigger aria-haspopup="true" aria-expanded="false">' +
-    '<span class="user-avatar user-avatar--placeholder" data-user-avatar aria-hidden="true"></span>' +
-    "</button>" +
-    '<div class="user-menu__dropdown" data-user-dropdown hidden>' +
-    '<button type="button" class="user-menu__logout" data-auth-logout>Log out</button>' +
-    "</div>" +
-    "</div>" +
-    "</div>" +
-    "</div>";
-
-  var EMBEDDED_FOOTER =
-    '<div class="site-footer__inner">' +
-    "<p>Color Learning · Course project · <span id=\"footer-year\"></span></p>" +
-    "</div>";
+  var EMBEDDED_NAVBAR = "<div class=\"site-header__inner\">\r\n  <div class=\"site-header__end\">\r\n    <button type=\"button\" class=\"site-nav__toggle\" data-nav-toggle aria-expanded=\"false\" aria-controls=\"primary-nav\">\r\n      Menu\r\n    </button>\r\n    <nav class=\"site-nav\" id=\"primary-nav\" aria-label=\"Primary\">\r\n      <ul class=\"site-nav__list\">\r\n        <li><a class=\"site-nav__link\" href=\"index.html\" data-nav=\"index.html\">Home</a></li>\r\n        <li><a class=\"site-nav__link\" href=\"learning.html\" data-nav=\"learning.html\">Learn</a></li>\r\n        <li><a class=\"site-nav__link\" href=\"game.html\" data-nav=\"game.html\">Game</a></li>\r\n        <li><a class=\"site-nav__link\" href=\"test.html\" data-nav=\"test.html\">Test</a></li>\r\n        <li><a class=\"site-nav__link\" href=\"community.html\" data-nav=\"community.html\">Community</a></li>\r\n      </ul>\r\n    </nav>\r\n    <div class=\"user-menu\" data-user-menu>\r\n      <button\r\n        type=\"button\"\r\n        class=\"user-menu-trigger\"\r\n        aria-label=\"Account\"\r\n        title=\"Sign in\"\r\n        data-auth-trigger\r\n        aria-haspopup=\"true\"\r\n        aria-expanded=\"false\"\r\n      >\r\n        <span class=\"user-avatar user-avatar--placeholder\" data-user-avatar aria-hidden=\"true\"></span>\r\n      </button>\r\n      <div class=\"user-menu__dropdown\" data-user-dropdown hidden>\r\n        <button type=\"button\" class=\"user-menu__logout\" data-auth-logout>Log out</button>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>";
+  var EMBEDDED_FOOTER = "<div class=\"site-footer__inner\">\r\n  <p>Color Learning · Course project · <span id=\"footer-year\"></span></p>\r\n</div>";
   // --- END AUTO-GENERATED ---
+
+
+
 
   async function loadFragment(targetSelector, url, embeddedHtml) {
     var el = document.querySelector(targetSelector);
