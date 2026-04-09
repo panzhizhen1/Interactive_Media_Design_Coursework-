@@ -14,9 +14,86 @@
       <div id="site-navbar" aria-live="polite"></div>
     </header>
 
-    <main id="main-content">
-      <h1 class="page-title">Community</h1>
-      <p class="lead">Placeholder community area. Add discussions or a gallery later.</p>
+    <main id="main-content" class="community-page">
+      <section class="community-hero" aria-labelledby="community-title">
+        <h1 class="page-title community-hero__title" id="community-title">Color Learning Community</h1>
+        <p class="lead community-hero__lead">Share your color palettes and learning notes with peers.</p>
+        <button type="button" class="community-hero__cta" data-scroll-composer>+ Create New Post</button>
+      </section>
+
+      <div class="community-layout">
+        <section class="community-feed" aria-label="Community feed">
+          <article class="composer-card" id="composer" aria-labelledby="composer-title">
+            <h2 class="sr-only" id="composer-title">Create a new post</h2>
+            <p class="composer-card__prompt">
+              Learning Prompt: How does this color choice impact users with color vision deficiency?
+            </p>
+
+            <form data-post-form>
+              <label class="sr-only" for="post-content">Post content</label>
+              <textarea
+                id="post-content"
+                class="composer-card__textarea"
+                name="content"
+                data-post-content
+                placeholder="Write your learning note here..."
+                maxlength="500"
+                required
+              ></textarea>
+
+              <div class="composer-card__tags" role="radiogroup" aria-label="Post tag" data-tag-group>
+                <button type="button" class="tag-pill is-active" data-tag="#Accessibility" aria-pressed="true">#Accessibility</button>
+                <button type="button" class="tag-pill" data-tag="#RGB_HSV" aria-pressed="false">#RGB_HSV</button>
+                <button type="button" class="tag-pill" data-tag="#Theory" aria-pressed="false">#Theory</button>
+                <button type="button" class="tag-pill" data-tag="#Palettes" aria-pressed="false">#Palettes</button>
+              </div>
+
+              <div class="composer-card__controls">
+                <div class="color-control">
+                  <label for="attach-color">Attach Color</label>
+                  <div class="color-control__inputs">
+                    <input id="attach-color-hex" class="hex-input" type="text" value="#2b78e4" maxlength="7" data-color-hex />
+                    <input id="attach-color" type="color" value="#2b78e4" data-color-picker />
+                  </div>
+                </div>
+                <button type="submit" class="btn-post">Post and Earn 5 points</button>
+              </div>
+            </form>
+          </article>
+
+          <div class="feed-filter" aria-label="Feed filters">
+            <span class="feed-filter__label">Filter by:</span>
+            <button type="button" class="feed-filter__option is-active" data-filter="latest">Latest</button>
+            <button type="button" class="feed-filter__option" data-filter="popular">Popular</button>
+            <button type="button" class="feed-filter__option" data-filter="#Accessibility">#Accessibility</button>
+          </div>
+
+          <section class="post-list" aria-live="polite" data-post-list></section>
+        </section>
+
+        <aside class="community-side" aria-label="Community insights">
+          <section class="widget-card" aria-labelledby="progress-title">
+            <h2 id="progress-title">My Learning Progress</h2>
+            <div class="stats-grid">
+              <p class="stats-grid__item">
+                <span class="stats-grid__label">Total Points</span>
+                <span class="stats-grid__value" data-user-points>0</span>
+              </p>
+              <p class="stats-grid__item">
+                <span class="stats-grid__label">Posts</span>
+                <span class="stats-grid__value" data-user-posts>0</span>
+              </p>
+            </div>
+            <p class="widget-card__note" data-user-streak>Post today to start your streak.</p>
+          </section>
+
+          <section class="widget-card" aria-labelledby="leaderboard-title">
+            <h2 id="leaderboard-title">Weekly Top Learners</h2>
+            <ol class="leaderboard" data-leaderboard-list></ol>
+            <p class="widget-card__note">Ranking combines game, test, and community points.</p>
+          </section>
+        </aside>
+      </div>
     </main>
 
     <footer class="site-footer" role="contentinfo">
