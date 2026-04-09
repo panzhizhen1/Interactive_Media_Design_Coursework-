@@ -1,42 +1,249 @@
 /**
- * Lightweight front-end auth placeholder.
- * - Browsing is always allowed without login.
- * - Clicking avatar opens sign-in when signed out.
- * - When signed in, hover (or keyboard focus) shows Log out; confirm on click.
- * - Session is stored in localStorage.
+ * Local auth + local user data management (Scheme 1).
+ * - Account system stays in localStorage (no backend)
+ * - Supports sign in + sign up
+ * - Exposes CLWAuth API for other pages
  */
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "clw_current_user";
+  var STORAGE = {
+    currentUser: "clw_current_user",
+    accounts: "clw_accounts_v1"
+  };
   var DEMO_ACCOUNTS = {
-    studentA: "StudentA123!",
-    studentB: "StudentB123!",
-    studentC: "StudentC123!"
+    studentA: { password: "StudentA123!", displayName: "Student A" },
+    studentB: { password: "StudentB123!", displayName: "Student B" },
+    studentC: { password: "StudentC123!", displayName: "Student C" }
   };
 
-  function getCurrentUser() {
+  function readJSON(key, fallback) {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
+      var raw = localStorage.getItem(key);
+      if (!raw) return fallback;
       var parsed = JSON.parse(raw);
-      return parsed && parsed.username ? parsed.username : null;
-    } catch (e) {
-      console.warn("[auth.js] Failed to read current user:", e);
-      return null;
+      return parsed == null ? fallback : parsed;
+    } catch (error) {
+      console.warn("[auth.js] readJSON failed:", key, error);
+      return fallback;
     }
   }
 
+  function writeJSON(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.warn("[auth.js] writeJSON failed:", key, error);
+    }
+  }
+
+  function normalizeUsername(input) {
+    return String(input || "").trim();
+  }
+
+  function isValidUsername(username) {
+    return /^[A-Za-z0-9_]{3,20}$/.test(username);
+  }
+
+  function isValidPassword(password) {
+    return typeof password === "string" && password.length >= 6;
+  }
+
+  function buildDefaultStats() {
+    return {
+      points: 0,
+      postCount: 0,
+      streakDays: 0,
+      lastActiveDate: ""
+    };
+  }
+
+  function readAccounts() {
+    var data = readJSON(STORAGE.accounts, { users: {} });
+    if (!data || typeof data !== "object" || !data.users || typeof data.users !== "object") {
+      return { users: {} };
+    }
+    return data;
+  }
+
+  function writeAccounts(data) {
+    writeJSON(STORAGE.accounts, data);
+  }
+
+  function ensureSeedAccounts() {
+    var store = readAccounts();
+    var changed = false;
+    Object.keys(DEMO_ACCOUNTS).forEach(function (username) {
+      if (store.users[username]) return;
+      var demo = DEMO_ACCOUNTS[username];
+      store.users[username] = {
+        username: username,
+        password: demo.password,
+        profile: {
+          displayName: demo.displayName,
+          avatarColor: "#2b78e4"
+        },
+        stats: buildDefaultStats(),
+        createdAt: new Date().toISOString()
+      };
+      changed = true;
+    });
+    if (changed) writeAccounts(store);
+  }
+
+  function getCurrentUser() {
+    var user = readJSON(STORAGE.currentUser, null);
+    if (user && typeof user.username === "string" && user.username.trim()) {
+      return user.username.trim();
+    }
+    return null;
+  }
+
   function setCurrentUser(username) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ username: username }));
+    writeJSON(STORAGE.currentUser, { username: username });
+    document.dispatchEvent(
+      new CustomEvent("clw:auth-changed", {
+        detail: { username: username, isLoggedIn: true }
+      })
+    );
   }
 
   function clearCurrentUser() {
-    localStorage.removeItem(STORAGE_KEY);
+    var username = getCurrentUser();
+    localStorage.removeItem(STORAGE.currentUser);
+    document.dispatchEvent(
+      new CustomEvent("clw:auth-changed", {
+        detail: { username: username, isLoggedIn: false }
+      })
+    );
   }
 
   function getInitial(username) {
     return username ? username.charAt(0).toUpperCase() : "?";
+  }
+
+  function getUserRecord(username) {
+    var name = normalizeUsername(username);
+    if (!name) return null;
+    var store = readAccounts();
+    return store.users[name] || null;
+  }
+
+  function getUserStats(username) {
+    var record = getUserRecord(username);
+    return record && record.stats ? Object.assign({}, record.stats) : buildDefaultStats();
+  }
+
+  function ensureUser(username) {
+    var name = normalizeUsername(username);
+    if (!name) return null;
+    var store = readAccounts();
+    if (!store.users[name]) {
+      store.users[name] = {
+        username: name,
+        password: "",
+        profile: {
+          displayName: name,
+          avatarColor: "#2b78e4"
+        },
+        stats: buildDefaultStats(),
+        createdAt: new Date().toISOString()
+      };
+      writeAccounts(store);
+    } else if (!store.users[name].stats) {
+      store.users[name].stats = buildDefaultStats();
+      writeAccounts(store);
+    }
+    return store.users[name];
+  }
+
+  function updateUserStats(username, patch) {
+    var name = normalizeUsername(username);
+    if (!name) return buildDefaultStats();
+    var store = readAccounts();
+    if (!store.users[name]) return buildDefaultStats();
+    var prev = store.users[name].stats || buildDefaultStats();
+    store.users[name].stats = Object.assign({}, prev, patch || {});
+    writeAccounts(store);
+    document.dispatchEvent(
+      new CustomEvent("clw:user-data-updated", {
+        detail: { username: name, stats: Object.assign({}, store.users[name].stats) }
+      })
+    );
+    return Object.assign({}, store.users[name].stats);
+  }
+
+  function recordActivity(username, payload) {
+    var name = normalizeUsername(username);
+    if (!name) return buildDefaultStats();
+    ensureUser(name);
+
+    var stats = getUserStats(name);
+    var pointsDelta = Number(payload && payload.pointsDelta ? payload.pointsDelta : 0);
+    var postDelta = Number(payload && payload.postDelta ? payload.postDelta : 0);
+    var now = new Date();
+    var today = now.toISOString().slice(0, 10);
+    var prevDate = stats.lastActiveDate;
+
+    if (prevDate !== today) {
+      if (!prevDate) {
+        stats.streakDays = 1;
+      } else {
+        var prev = new Date(prevDate + "T00:00:00.000Z");
+        var diffDays = Math.floor((Date.parse(today + "T00:00:00.000Z") - prev.getTime()) / 86400000);
+        if (diffDays === 1) {
+          stats.streakDays += 1;
+        } else if (diffDays > 1) {
+          stats.streakDays = 1;
+        }
+      }
+    }
+
+    stats.points = Math.max(0, Number(stats.points || 0) + pointsDelta);
+    stats.postCount = Math.max(0, Number(stats.postCount || 0) + postDelta);
+    stats.lastActiveDate = today;
+
+    return updateUserStats(name, stats);
+  }
+
+  function createAccount(usernameInput, passwordInput, displayNameInput) {
+    var username = normalizeUsername(usernameInput);
+    var password = String(passwordInput || "");
+    var displayName = String(displayNameInput || "").trim();
+    if (!isValidUsername(username)) {
+      return { ok: false, message: "Username must be 3-20 chars (letters, numbers, underscore)." };
+    }
+    if (!isValidPassword(password)) {
+      return { ok: false, message: "Password must be at least 6 characters." };
+    }
+
+    var store = readAccounts();
+    if (store.users[username]) {
+      return { ok: false, message: "Username already exists." };
+    }
+
+    store.users[username] = {
+      username: username,
+      password: password,
+      profile: {
+        displayName: displayName || username,
+        avatarColor: "#2b78e4"
+      },
+      stats: buildDefaultStats(),
+      createdAt: new Date().toISOString()
+    };
+    writeAccounts(store);
+    return { ok: true, username: username };
+  }
+
+  function verifyCredentials(usernameInput, passwordInput) {
+    var username = normalizeUsername(usernameInput);
+    var password = String(passwordInput || "");
+    var user = getUserRecord(username);
+    if (!user || user.password !== password) {
+      return { ok: false, message: "Invalid username or password." };
+    }
+    return { ok: true, username: username };
   }
 
   function updateAvatarUI() {
@@ -64,7 +271,7 @@
     avatar.classList.add("user-avatar--placeholder");
     avatar.classList.remove("user-avatar--active");
     avatar.textContent = "";
-    trigger.setAttribute("title", "Sign in");
+    trigger.setAttribute("title", "Sign in or sign up");
     trigger.setAttribute("aria-label", "Account");
     trigger.setAttribute("aria-expanded", "false");
   }
@@ -80,8 +287,12 @@
     backdrop.className = "auth-modal-backdrop";
     backdrop.innerHTML = [
       '<div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">',
+      '  <div class="auth-mode-switch" role="tablist" aria-label="Auth mode">',
+      '    <button type="button" class="auth-mode-switch__btn is-active" data-auth-mode-btn="signin">Sign in</button>',
+      '    <button type="button" class="auth-mode-switch__btn" data-auth-mode-btn="signup">Sign up</button>',
+      "  </div>",
       '  <h2 class="auth-modal__title" id="auth-title">Sign in</h2>',
-      '  <p class="auth-modal__desc">Use one of the prepared demo accounts to unlock member features later.</p>',
+      '  <p class="auth-modal__desc" data-auth-desc>Use your local account to unlock member features.</p>',
       '  <form data-auth-form>',
       '    <div class="auth-modal__field">',
       '      <label class="auth-modal__label" for="auth-username">Username</label>',
@@ -91,20 +302,63 @@
       '      <label class="auth-modal__label" for="auth-password">Password</label>',
       '      <input class="auth-modal__input" id="auth-password" name="password" type="password" autocomplete="current-password" required />',
       "    </div>",
+      '    <div class="auth-modal__field auth-modal__field--signup" hidden>',
+      '      <label class="auth-modal__label" for="auth-password-confirm">Confirm Password</label>',
+      '      <input class="auth-modal__input" id="auth-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" />',
+      "    </div>",
+      '    <div class="auth-modal__field auth-modal__field--signup" hidden>',
+      '      <label class="auth-modal__label" for="auth-display-name">Display Name (optional)</label>',
+      '      <input class="auth-modal__input" id="auth-display-name" name="displayName" autocomplete="nickname" />',
+      "    </div>",
+      '    <p class="auth-help" data-auth-help>Demo accounts: studentA / studentB / studentC</p>',
       '    <p class="auth-message" data-auth-message></p>',
       '    <div class="auth-modal__actions">',
       '      <button type="button" class="auth-modal__btn" data-auth-cancel>Cancel</button>',
-      '      <button type="submit" class="auth-modal__btn auth-modal__btn--primary">Sign in</button>',
+      '      <button type="submit" class="auth-modal__btn auth-modal__btn--primary" data-auth-submit>Sign in</button>',
       "    </div>",
       "  </form>",
       "</div>"
     ].join("");
 
+    var mode = "signin";
     var form = backdrop.querySelector("[data-auth-form]");
     var message = backdrop.querySelector("[data-auth-message]");
+    var desc = backdrop.querySelector("[data-auth-desc]");
+    var help = backdrop.querySelector("[data-auth-help]");
+    var submitBtn = backdrop.querySelector("[data-auth-submit]");
     var cancelBtn = backdrop.querySelector("[data-auth-cancel]");
     var usernameInput = backdrop.querySelector("#auth-username");
     var passwordInput = backdrop.querySelector("#auth-password");
+    var confirmInput = backdrop.querySelector("#auth-password-confirm");
+    var displayNameInput = backdrop.querySelector("#auth-display-name");
+    var modeButtons = backdrop.querySelectorAll("[data-auth-mode-btn]");
+    var signupFields = backdrop.querySelectorAll(".auth-modal__field--signup");
+    var title = backdrop.querySelector("#auth-title");
+
+    function applyMode(nextMode) {
+      mode = nextMode === "signup" ? "signup" : "signin";
+      modeButtons.forEach(function (btn) {
+        var active = btn.getAttribute("data-auth-mode-btn") === mode;
+        btn.classList.toggle("is-active", active);
+      });
+      var signup = mode === "signup";
+      signupFields.forEach(function (el) {
+        el.hidden = !signup;
+      });
+      if (title) title.textContent = signup ? "Create local account" : "Sign in";
+      if (desc) {
+        desc.textContent = signup
+          ? "Your account and stats are saved in this browser only."
+          : "Use your local account to unlock member features.";
+      }
+      if (help) {
+        help.textContent = signup
+          ? "Tip: username can use letters, numbers, underscore."
+          : "Demo accounts: studentA / studentB / studentC";
+      }
+      submitBtn.textContent = signup ? "Create account" : "Sign in";
+      message.textContent = "";
+    }
 
     cancelBtn.addEventListener("click", function () {
       closeModal(backdrop);
@@ -116,22 +370,50 @@
       }
     });
 
+    modeButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        applyMode(btn.getAttribute("data-auth-mode-btn"));
+      });
+    });
+
     form.addEventListener("submit", function (event) {
       event.preventDefault();
-      var username = usernameInput.value.trim();
+      var username = usernameInput.value;
       var password = passwordInput.value;
-      if (!DEMO_ACCOUNTS[username] || DEMO_ACCOUNTS[username] !== password) {
-        message.textContent = "Invalid username or password.";
+      var result;
+
+      if (mode === "signup") {
+        if (password !== confirmInput.value) {
+          message.textContent = "Password confirmation does not match.";
+          return;
+        }
+        result = createAccount(username, password, displayNameInput.value);
+        if (!result.ok) {
+          message.textContent = result.message;
+          return;
+        }
+        setCurrentUser(result.username);
+        ensureUser(result.username);
+        updateAvatarUI();
+        closeModal(backdrop);
+        alert("Account created and signed in as " + result.username + ".");
         return;
       }
 
-      setCurrentUser(username);
+      result = verifyCredentials(username, password);
+      if (!result.ok) {
+        message.textContent = result.message;
+        return;
+      }
+      setCurrentUser(result.username);
+      ensureUser(result.username);
       updateAvatarUI();
       closeModal(backdrop);
-      alert("Signed in as " + username + ".");
+      alert("Signed in as " + result.username + ".");
     });
 
     document.body.appendChild(backdrop);
+    applyMode("signin");
     usernameInput.focus();
   }
 
@@ -158,6 +440,29 @@
     trigger.addEventListener("click", onAvatarClick);
   }
 
+  function initAuthAPI() {
+    window.CLWAuth = {
+      getCurrentUsername: function () {
+        return getCurrentUser() || "Guest";
+      },
+      isLoggedIn: function () {
+        return !!getCurrentUser();
+      },
+      getUserRecord: function (username) {
+        return getUserRecord(username);
+      },
+      getUserStats: function (username) {
+        return getUserStats(username || getCurrentUser());
+      },
+      updateUserStats: function (username, patch) {
+        return updateUserStats(username || getCurrentUser(), patch);
+      },
+      recordActivity: function (username, payload) {
+        return recordActivity(username || getCurrentUser(), payload || {});
+      }
+    };
+  }
+
   if (!document.documentElement.dataset.authDelegationBound) {
     document.documentElement.dataset.authDelegationBound = "1";
     document.addEventListener("click", function (event) {
@@ -168,6 +473,8 @@
   }
 
   function init() {
+    ensureSeedAccounts();
+    initAuthAPI();
     bind();
     updateAvatarUI();
   }
