@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game — Color Learning</title>
+    <title>Paint Game — Color Learning</title>
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/layout.css" />
@@ -14,9 +14,151 @@
       <div id="site-navbar" aria-live="polite"></div>
     </header>
 
-    <main id="main-content">
-      <h1 class="page-title">Game</h1>
-      <p class="lead">Placeholder for an interactive activity. Hook up Canvas or game logic here later.</p>
+    <main id="main-content" class="page-game">
+      <section class="game-intro">
+        <h1 class="page-title">Painting Game</h1>
+        <p class="lead">Pick a black-line drawing, choose a color model (RGB / HSV / CMYK), and click a closed region to fill it like a paint bucket.</p>
+      </section>
+
+      <section id="gallery-view" class="gallery-view" aria-label="Drawing selection area">
+        <div class="drawing-grid">
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">House</h2>
+            <canvas id="preview-0" width="280" height="200" aria-label="House line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="0">Open this drawing</button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">Fish</h2>
+            <canvas id="preview-1" width="280" height="200" aria-label="Fish line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="1">Open this drawing</button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">Flower</h2>
+            <canvas id="preview-2" width="280" height="200" aria-label="Flower line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="2">Open this drawing</button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">Car</h2>
+            <canvas id="preview-3" width="280" height="200" aria-label="Car line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="3">Open this drawing</button>
+          </article>
+        </div>
+      </section>
+
+      <section id="editor-view" class="editor-view" aria-label="Painting workspace" hidden>
+        <div class="editor-topbar">
+          <h2 id="editor-title">Painting Workspace</h2>
+          <button type="button" id="back-to-gallery" class="back-btn">Back to gallery</button>
+        </div>
+
+        <div class="controls">
+          <label class="model-picker" for="color-model">
+            <span>Color Model</span>
+            <select id="color-model">
+              <option value="rgb" selected>RGB</option>
+              <option value="hsv">HSV</option>
+              <option value="cmyk">CMYK</option>
+            </select>
+          </label>
+
+          <div id="controls-rgb" class="model-group" data-model-group="rgb">
+            <label class="value-control">
+              <span>R (0-255)</span>
+              <div class="value-row">
+                <input id="rgb-r" type="range" min="0" max="255" value="255" />
+                <input id="rgb-r-number" type="number" min="0" max="255" value="255" />
+              </div>
+            </label>
+            <label class="value-control">
+              <span>G (0-255)</span>
+              <div class="value-row">
+                <input id="rgb-g" type="range" min="0" max="255" value="80" />
+                <input id="rgb-g-number" type="number" min="0" max="255" value="80" />
+              </div>
+            </label>
+            <label class="value-control">
+              <span>B (0-255)</span>
+              <div class="value-row">
+                <input id="rgb-b" type="range" min="0" max="255" value="80" />
+                <input id="rgb-b-number" type="number" min="0" max="255" value="80" />
+              </div>
+            </label>
+          </div>
+
+          <div id="controls-hsv" class="model-group" data-model-group="hsv" hidden>
+            <label class="value-control">
+              <span>H (0-360)</span>
+              <div class="value-row">
+                <input id="hsv-h" type="range" min="0" max="360" value="0" />
+                <input id="hsv-h-number" type="number" min="0" max="360" value="0" />
+              </div>
+            </label>
+            <label class="value-control">
+              <span>S (0-100)</span>
+              <div class="value-row">
+                <input id="hsv-s" type="range" min="0" max="100" value="69" />
+                <input id="hsv-s-number" type="number" min="0" max="100" value="69" />
+              </div>
+            </label>
+            <label class="value-control">
+              <span>V (0-100)</span>
+              <div class="value-row">
+                <input id="hsv-v" type="range" min="0" max="100" value="100" />
+                <input id="hsv-v-number" type="number" min="0" max="100" value="100" />
+              </div>
+            </label>
+          </div>
+
+          <div id="controls-cmyk" class="model-group" data-model-group="cmyk" hidden>
+            <label class="value-control">
+              <span>C (0-100)</span>
+              <div class="value-row">
+                <input id="cmyk-c" type="range" min="0" max="100" value="0" />
+                <input id="cmyk-c-number" type="number" min="0" max="100" value="0" />
+              </div>
+            </label>
+            <label class="value-control">
+              <span>M (0-100)</span>
+              <div class="value-row">
+                <input id="cmyk-m" type="range" min="0" max="100" value="69" />
+                <input id="cmyk-m-number" type="number" min="0" max="100" value="69" />
+              </div>
+            </label>
+            <label class="value-control">
+              <span>Y (0-100)</span>
+              <div class="value-row">
+                <input id="cmyk-y" type="range" min="0" max="100" value="69" />
+                <input id="cmyk-y-number" type="number" min="0" max="100" value="69" />
+              </div>
+            </label>
+            <label class="value-control">
+              <span>K (0-100)</span>
+              <div class="value-row">
+                <input id="cmyk-k" type="range" min="0" max="100" value="0" />
+                <input id="cmyk-k-number" type="number" min="0" max="100" value="0" />
+              </div>
+            </label>
+          </div>
+
+          <div class="color-preview-wrap">
+            <span>Current color</span>
+            <div id="color-preview" class="color-preview" aria-label="Current color preview"></div>
+          </div>
+        </div>
+
+        <div class="tool-row" aria-label="Tool actions">
+          <button type="button" id="tool-fill" class="tool-btn is-active">Paint Bucket</button>
+          <button type="button" id="tool-eraser" class="tool-btn">Region Eraser</button>
+          <button type="button" id="reset-drawing" class="tool-btn tool-btn--warn">Reset Current Drawing</button>
+          <button type="button" id="save-image" class="tool-btn tool-btn--success">Save as Image</button>
+        </div>
+
+        <p class="hint">How to use: choose a color model, then use slider or number input, choose a tool, and click a closed region.</p>
+        <canvas id="editor-canvas" width="900" height="620" aria-label="Painting canvas"></canvas>
+      </section>
     </main>
 
     <footer class="site-footer" role="contentinfo">

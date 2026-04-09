@@ -1,1 +1,206 @@
-/* Game page styles — extend here. */
+.page-game {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.game-intro .lead {
+  margin-bottom: 0;
+}
+
+.drawing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.drawing-card {
+  background: #ffffff;
+  border: 2px solid #d7e2ff;
+  border-radius: 14px;
+  padding: 0.8rem;
+  box-shadow: 0 6px 16px rgba(3, 4, 94, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.drawing-card__title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.drawing-card canvas {
+  width: 100%;
+  height: auto;
+  border: 2px solid #222;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.enter-btn,
+.back-btn,
+.tool-btn {
+  border: none;
+  border-radius: 10px;
+  background: #1f5eff;
+  color: #fff;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.enter-btn:hover,
+.back-btn:hover,
+.tool-btn:hover {
+  background: #184fd8;
+}
+
+.editor-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.editor-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.editor-topbar h2 {
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.8rem;
+  border: 2px solid #d7e2ff;
+  border-radius: 12px;
+  background: #fbfdff;
+}
+
+.model-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-weight: 700;
+}
+
+.model-picker select {
+  border: 1px solid #a8b5d9;
+  border-radius: 8px;
+  padding: 0.3rem 0.4rem;
+  min-width: 130px;
+}
+
+.model-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.7rem;
+}
+
+.model-group[hidden] {
+  display: none !important;
+}
+
+.value-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.value-control span {
+  font-weight: 700;
+}
+
+.value-row {
+  display: grid;
+  grid-template-columns: 1fr 82px;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.value-row input[type='range'] {
+  width: 100%;
+}
+
+.value-row input[type='number'] {
+  width: 100%;
+  border: 1px solid #a8b5d9;
+  border-radius: 8px;
+  padding: 0.34rem 0.5rem;
+}
+
+.color-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.color-preview {
+  height: 44px;
+  border: 2px solid #111;
+  border-radius: 8px;
+  background: rgb(255, 80, 80);
+}
+
+.tool-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tool-btn {
+  background: #3559b8;
+}
+
+.tool-btn.is-active {
+  background: #0a7a2a;
+}
+
+.tool-btn--warn {
+  background: #b85800;
+}
+
+.tool-btn--warn:hover {
+  background: #9d4b00;
+}
+
+.tool-btn--success {
+  background: #0d8b59;
+}
+
+.tool-btn--success:hover {
+  background: #086c45;
+}
+
+.hint {
+  margin: 0;
+  color: #465271;
+}
+
+#editor-canvas {
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  border: 2px solid #111;
+  border-radius: 12px;
+  background: #fff;
+  touch-action: manipulation;
+}
+
+@media (max-width: 720px) {
+  .model-picker {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .value-row {
+    grid-template-columns: 1fr;
+  }
+}
