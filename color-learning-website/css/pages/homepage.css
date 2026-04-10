@@ -15,25 +15,43 @@ main.page-home {
 /* Row 1 — banner + tagline (wireframe: text toward the right) */
 .home-hero {
   position: relative;
-  min-height: clamp(11rem, 24vw, 17rem);
+  min-height: clamp(7.5rem, 14vw, 10.5rem);
   border-radius: var(--radius-md);
-  border: 2px dashed rgba(15, 23, 42, 0.18);
-  background: var(--color-content-panel);
+  border: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: var(--space-xl) var(--space-lg);
-  box-shadow: 0 6px 24px rgba(3, 4, 94, 0.08);
+  padding: var(--space-md) var(--space-lg);
+  box-shadow: none;
 }
 
 .home-hero__tagline {
   margin: 0;
-  max-width: min(100%, 22rem);
-  font-size: clamp(var(--text-xl), 3vw, var(--text-2xl));
+  width: 100%;
+  max-width: none;
+  font-size: clamp(2.8rem, 8.2vw, 6.8rem);
   font-weight: 700;
-  line-height: var(--line-height-tight);
-  color: var(--color-text);
+  line-height: 1.02;
+  color: hsl(0 100% 50%);
   text-align: right;
+}
+
+.home-hero__letter {
+  display: inline-block;
+  position: relative;
+  color: hsl(var(--letter-hue, 0) 95% 58%);
+  transform-origin: center 78%;
+  transition: transform 180ms ease;
+  will-change: transform;
+}
+
+.home-hero__letter--space {
+  width: 0.36em;
+}
+
+.home-hero__letter.is-active {
+  transform: scale(1.35) translateY(-0.03em);
 }
 
 /* Row 2 (2 cols) & row 3 (3 cols) — grid rows */
@@ -77,6 +95,10 @@ a.home-card {
     box-shadow 0.15s ease,
     transform 0.15s ease,
     border-color 0.15s ease;
+}
+
+.home-row--2 .home-card {
+  min-height: clamp(9rem, 17vw, 12rem);
 }
 
 a.home-card:hover {
