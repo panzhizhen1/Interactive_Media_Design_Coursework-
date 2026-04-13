@@ -18,7 +18,10 @@
       <section class="community-hero" aria-labelledby="community-title">
         <h1 class="page-title community-hero__title" id="community-title">Color Learning Community</h1>
         <p class="lead community-hero__lead">Share your color palettes and learning notes with peers.</p>
-        <button type="button" class="community-hero__cta" data-scroll-composer>+ Create New Post</button>
+        <div class="community-hero__actions">
+          <button type="button" class="community-hero__cta" data-scroll-composer>+ Create New Post</button>
+          <button type="button" class="community-hero__cta community-hero__cta--ghost" data-open-guidelines>Community Guidelines</button>
+        </div>
       </section>
 
       <div class="community-layout">
@@ -40,6 +43,10 @@
                 maxlength="500"
                 required
               ></textarea>
+              <div class="composer-card__meta">
+                <p class="composer-card__counter" data-char-counter>0 / 500</p>
+                <p class="composer-card__origin" data-draft-origin hidden></p>
+              </div>
 
               <div class="composer-card__tags" role="radiogroup" aria-label="Post tag" data-tag-group>
                 <button type="button" class="tag-pill is-active" data-tag="#Accessibility" aria-pressed="true">#Accessibility</button>
@@ -58,14 +65,15 @@
                 </div>
                 <button type="submit" class="btn-post">Post and Earn 5 points</button>
               </div>
-              <p class="composer-card__feedback" data-community-feedback aria-live="polite"></p>
+              <p class="composer-card__feedback" data-community-feedback role="status" aria-live="polite"></p>
             </form>
           </article>
 
           <div class="feed-filter" aria-label="Feed filters">
             <span class="feed-filter__label">Filter by:</span>
             <button type="button" class="feed-filter__option is-active" data-filter="latest">Latest</button>
-            <button type="button" class="feed-filter__option" data-filter="popular">Popular</button>
+            <button type="button" class="feed-filter__option" data-filter="helpful">Most Helpful</button>
+            <button type="button" class="feed-filter__option" data-filter="my-tags">My Tags</button>
             <button type="button" class="feed-filter__option" data-filter="#Accessibility">#Accessibility</button>
           </div>
 
@@ -86,16 +94,41 @@
               </p>
             </div>
             <p class="widget-card__note" data-user-streak>Post today to start your streak.</p>
+            <p class="widget-card__note" data-user-goal>Today goal: publish one learning insight.</p>
+            <p class="widget-card__note" data-rank-trend>Weekly rank change: --</p>
           </section>
 
           <section class="widget-card" aria-labelledby="leaderboard-title">
-            <h2 id="leaderboard-title">Weekly Top Learners</h2>
-            <ol class="leaderboard" data-leaderboard-list></ol>
-            <p class="widget-card__note">Ranking combines game, test, and community points.</p>
+            <h2 id="leaderboard-title">Weekly Top Learners (7 days)</h2>
+            <ol class="leaderboard" data-weekly-leaderboard-list></ol>
+            <p class="widget-card__note">Weekly ranking uses `clw:activity-recorded` points from the last 7 days.</p>
+          </section>
+
+          <section class="widget-card" aria-labelledby="alltime-title">
+            <h2 id="alltime-title">All-time Top Learners</h2>
+            <ol class="leaderboard" data-total-leaderboard-list></ol>
           </section>
         </aside>
       </div>
     </main>
+
+    <div class="community-modal-backdrop" data-guidelines-modal hidden>
+      <section class="community-modal" role="dialog" aria-modal="true" aria-labelledby="guidelines-title">
+        <div class="community-modal__head">
+          <h2 id="guidelines-title">Community Guidelines</h2>
+          <button type="button" class="community-modal__close" data-close-guidelines aria-label="Close guidelines">×</button>
+        </div>
+        <ul class="community-modal__list">
+          <li>Share constructive learning reflections, not only final answers.</li>
+          <li>Use respectful language and explain why a color decision works.</li>
+          <li>Do not spam repeated posts or irrelevant links.</li>
+          <li>If you see problematic content, use Report to flag it.</li>
+        </ul>
+        <div class="community-modal__actions">
+          <button type="button" class="community-hero__cta" data-close-guidelines>Got it</button>
+        </div>
+      </section>
+    </div>
 
     <footer class="site-footer" role="contentinfo">
       <div id="site-footer"></div>

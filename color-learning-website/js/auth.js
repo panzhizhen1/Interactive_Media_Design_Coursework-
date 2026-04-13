@@ -9,7 +9,8 @@
 
   var STORAGE = {
     currentUser: "clw_current_user",
-    accounts: "clw_accounts_v1"
+    accounts: "clw_accounts_v1",
+    activityLog: "clw_activity_log_v1"
   };
   var DEMO_ACCOUNTS = {
     studentA: { password: "StudentA123!", displayName: "Student A" },
@@ -68,6 +69,14 @@
 
   function writeAccounts(data) {
     writeJSON(STORAGE.accounts, data);
+  }
+
+  function appendActivityLog(entry) {
+    if (!entry || typeof entry !== "object") return;
+    var raw = readJSON(STORAGE.activityLog, []);
+    var list = Array.isArray(raw) ? raw : [];
+    list.unshift(entry);
+    writeJSON(STORAGE.activityLog, list.slice(0, 500));
   }
 
   function ensureSeedAccounts() {
@@ -203,7 +212,18 @@
     stats.postCount = Math.max(0, Number(stats.postCount || 0) + postDelta);
     stats.lastActiveDate = today;
 
-    return updateUserStats(name, stats);
+    var nextStats = updateUserStats(name, stats);
+    var detail = {
+      source: payload && payload.source ? String(payload.source) : "community",
+      username: name,
+      pointsDelta: pointsDelta,
+      type: payload && payload.type ? String(payload.type) : "post",
+      refId: payload && payload.refId ? String(payload.refId) : "",
+      createdAt: new Date().toISOString()
+    };
+    appendActivityLog(detail);
+    document.dispatchEvent(new CustomEvent("clw:activity-recorded", { detail: detail }));
+    return nextStats;
   }
 
   function createAccount(usernameInput, passwordInput, displayNameInput) {

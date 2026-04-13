@@ -19,6 +19,13 @@ main.community-page {
   margin: 0 auto var(--space-lg);
 }
 
+.community-hero__actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .community-hero__cta,
 .btn-post {
   border: 1px solid var(--color-primary);
@@ -34,6 +41,11 @@ main.community-page {
 
 .community-hero__cta {
   padding: 0.5rem 1.2rem;
+}
+
+.community-hero__cta--ghost {
+  background: #ffffff;
+  color: var(--color-primary);
 }
 
 .community-hero__cta:hover,
@@ -111,6 +123,21 @@ main.community-page {
   outline: 2px solid #93c5fd;
   outline-offset: 1px;
   border-color: var(--color-primary);
+}
+
+.composer-card__meta {
+  margin-top: 0.45rem;
+  display: flex;
+  gap: 0.7rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.composer-card__counter,
+.composer-card__origin {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
 
 .composer-card__tags {
@@ -310,6 +337,8 @@ input[type="color"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .like-btn {
@@ -335,6 +364,73 @@ input[type="color"] {
   color: #b45309;
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.post-action-btn {
+  border: 1px solid #d6e2f2;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #365175;
+  font-size: 0.73rem;
+  padding: 0.15rem 0.55rem;
+  cursor: pointer;
+}
+
+.post-action-btn.is-active {
+  border-color: #0ea5e9;
+  background: #e0f2fe;
+  color: #0c4a6e;
+}
+
+.post-meta {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.post-origin {
+  font-size: 0.72rem;
+  color: #334155;
+  background: #eef2ff;
+  border: 1px solid #dbe4ff;
+  border-radius: 999px;
+  padding: 0.08rem 0.48rem;
+}
+
+.post-origin strong {
+  font-weight: 700;
+}
+
+.post-card.is-featured {
+  border-color: #f59e0b;
+  box-shadow: 0 3px 16px rgba(245, 158, 11, 0.24);
+}
+
+.post-card.is-hidden {
+  opacity: 0.75;
+}
+
+.post-empty {
+  display: grid;
+  gap: 0.65rem;
+  text-align: left;
+}
+
+.post-empty h3 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.post-empty p {
+  margin: 0;
+  color: var(--color-text-muted);
 }
 
 .widget-card {
@@ -398,6 +494,68 @@ input[type="color"] {
   color: #1d4ed8;
 }
 
+.leaderboard li .trend-up {
+  color: #15803d;
+}
+
+.leaderboard li .trend-down {
+  color: #b91c1c;
+}
+
+.community-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 20;
+  padding: 1rem;
+}
+
+.community-modal {
+  width: min(34rem, 96vw);
+  background: #ffffff;
+  border-radius: 0.9rem;
+  border: 1px solid #d6e1f2;
+  box-shadow: 0 16px 40px rgba(2, 8, 23, 0.24);
+  padding: 1rem;
+}
+
+.community-modal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.community-modal__head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.community-modal__close {
+  border: 1px solid #d3dce9;
+  background: #fff;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.community-modal__list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  color: #334155;
+}
+
+.community-modal__actions {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -419,6 +577,10 @@ input[type="color"] {
   .btn-post {
     width: 100%;
     justify-self: stretch;
+  }
+
+  .community-hero__actions {
+    width: 100%;
   }
 
   .composer-card,
