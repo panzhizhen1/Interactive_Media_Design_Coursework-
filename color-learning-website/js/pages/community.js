@@ -1,24 +1,26 @@
 /**
- * Community page V1:
+ * Community page:
  * - Create post + localStorage persistence
- * - Feed filters (latest / popular / tag)
- * - Personal progress card
- * - Leaderboard compatible with game/test data stores
+ * - Prevent unlimited likes by tracking who liked each post
+ * - Use shared auth stats when available; fall back to local community data
+ * - Stay compatible with optional game/test result stores
  */
 (function () {
   "use strict";
 
   var STORAGE = {
     currentUser: "clw_current_user",
-    posts: "clw_posts_v1",
-    userStats: "clw_user_stats_v1",
-    leaderboard: "clw_leaderboard_v1",
+    accounts: "clw_accounts_v1",
+    posts: "clw_posts_v2",
+    legacyPosts: "clw_posts_v1",
+    leaderboard: "clw_leaderboard_v2",
     gameResults: "clw_game_results_v1",
     testResults: "clw_test_results_v1"
   };
   var POINTS_PER_POST = 5;
   var DEFAULT_FILTER = "latest";
   var DEFAULT_TAG = "#Accessibility";
+  var DEFAULT_COLOR = "#2b78e4";
 
   var seedPosts = [
     {
@@ -28,6 +30,7 @@
       tag: "#Accessibility",
       colorHex: "#2b78e4",
       likes: 12,
+      likedBy: [],
       pointsAwarded: 5,
       createdAt: "2026-04-09T06:00:00.000Z"
     },
@@ -38,6 +41,7 @@
       tag: "#RGB_HSV",
       colorHex: "#1e4fb0",
       likes: 8,
+      likedBy: [],
       pointsAwarded: 5,
       createdAt: "2026-04-09T03:30:00.000Z"
     }
@@ -75,7 +79,19 @@
     }
   }
 
+  function getAuthApi() {
+    return window.CLWAuth || null;
+  }
+
+  function isLoggedIn() {
+    return !!(getAuthApi() && getAuthApi().isLoggedIn && getAuthApi().isLoggedIn());
+  }
+
   function getCurrentUsername() {
+    var auth = getAuthApi();
+    if (auth && auth.getCurrentUsername) {
+      return auth.getCurrentUsername();
+    }
     var user = readJSON(STORAGE.currentUser, null);
     if (user && typeof user.username === "string" && user.username.trim()) {
       return user.username.trim();
@@ -83,11 +99,43 @@
     return "Guest";
   }
 
+  function getAccountsStore() {
+    var raw = readJSON(STORAGE.accounts, { users: {} });
+    if (!raw || typeof raw !== "object" || !raw.users || typeof raw.users !== "object") {
+      return { users: {} };
+    }
+    return raw;
+  }
+
+  function normalizePost(post) {
+    return {
+      id: String(post && post.id ? post.id : createId()),
+      author: String(post && post.author ? post.author : "Guest"),
+      content: String(post && post.content ? post.content : "").trim(),
+      tag: String(post && post.tag ? post.tag : DEFAULT_TAG),
+      colorHex: normalizeHex(post && post.colorHex ? post.colorHex : DEFAULT_COLOR),
+      likes: Math.max(0, Number(post && post.likes ? post.likes : 0)),
+      likedBy: Array.isArray(post && post.likedBy)
+        ? Array.from(
+            new Set(
+              post.likedBy
+                .map(function (item) {
+                  return typeof item === "string" ? item.trim() : "";
+                })
+                .filter(Boolean)
+            )
+          )
+        : [],
+      pointsAwarded: Math.max(0, Number(post && post.pointsAwarded ? post.pointsAwarded : POINTS_PER_POST)),
+      createdAt: post && post.createdAt ? post.createdAt : new Date().toISOString()
+    };
+  }
+
   function normalizeHex(value) {
-    if (!value) return "#2b78e4";
-    var hex = value.trim().toLowerCase();
+    if (!value) return DEFAULT_COLOR;
+    var hex = String(value).trim().toLowerCase();
     if (!hex.startsWith("#")) hex = "#" + hex;
-    if (!/^#[0-9a-f]{6}$/.test(hex)) return "#2b78e4";
+    if (!/^#[0-9a-f]{6}$/.test(hex)) return DEFAULT_COLOR;
     return hex;
   }
 
@@ -121,11 +169,13 @@
     var arr = posts.slice();
     if (state.filter === "popular") {
       arr.sort(function (a, b) {
-        return (b.likes || 0) - (a.likes || 0);
+        var likeDelta = (b.likes || 0) - (a.likes || 0);
+        if (likeDelta !== 0) return likeDelta;
+        return Date.parse(b.createdAt) - Date.parse(a.createdAt);
       });
       return arr;
     }
-    if (state.filter.startsWith("#")) {
+    if (state.filter.charAt(0) === "#") {
       arr = arr.filter(function (item) {
         return item.tag === state.filter;
       });
@@ -138,13 +188,23 @@
 
   function readPosts() {
     var saved = readJSON(STORAGE.posts, null);
-    if (Array.isArray(saved) && saved.length > 0) return saved;
-    writeJSON(STORAGE.posts, seedPosts);
-    return seedPosts.slice();
+    if (!Array.isArray(saved)) {
+      saved = readJSON(STORAGE.legacyPosts, null);
+    }
+    if (!Array.isArray(saved) || !saved.length) {
+      saved = seedPosts.slice();
+    }
+    saved = saved
+      .map(normalizePost)
+      .filter(function (post) {
+        return !!post.content;
+      });
+    writeJSON(STORAGE.posts, saved);
+    return saved;
   }
 
   function writePosts(posts) {
-    state.posts = posts.slice();
+    state.posts = posts.map(normalizePost);
     writeJSON(STORAGE.posts, state.posts);
   }
 
@@ -193,7 +253,7 @@
     return streak;
   }
 
-  function computeUserStats(posts) {
+  function computeCommunityStats(posts) {
     var users = {};
     posts.forEach(function (post) {
       if (!post || !post.author) return;
@@ -224,50 +284,92 @@
       delete row.dates;
     });
 
-    writeJSON(STORAGE.userStats, { users: users });
     return users;
   }
 
-  function getSavedStatsMap() {
-    var raw = readJSON(STORAGE.userStats, { users: {} });
-    if (!raw || typeof raw !== "object" || !raw.users || typeof raw.users !== "object") {
-      return {};
-    }
-    return raw.users;
+  function getUnifiedUserStats(username, communityStatsMap) {
+    var auth = getAuthApi();
+    var authStats = auth && auth.getUserStats ? auth.getUserStats(username) : null;
+    var communityStats = (communityStatsMap && communityStatsMap[username]) || {
+      postCount: 0,
+      communityPoints: 0,
+      streakDays: 0
+    };
+    var externalPoints = collectExternalPoints(username);
+
+    return {
+      postCount: Math.max(Number(communityStats.postCount || 0), Number(authStats && authStats.postCount ? authStats.postCount : 0)),
+      points: Math.max(
+        Number(authStats && authStats.points ? authStats.points : 0),
+        Number(communityStats.communityPoints || 0) + externalPoints
+      ),
+      streakDays: Math.max(Number(communityStats.streakDays || 0), Number(authStats && authStats.streakDays ? authStats.streakDays : 0))
+    };
   }
 
-  function buildLeaderboard(usersMap) {
-    var scoreboard = Object.assign({}, baseLeaderboard);
-
-    Object.keys(usersMap).forEach(function (username) {
-      var stats = usersMap[username];
-      var base = scoreboard[username] || 0;
-      var communityPoints = Number(stats.communityPoints || 0);
-      var externalPoints = collectExternalPoints(username);
-      scoreboard[username] = base + communityPoints + externalPoints;
+  function getLeaderboardRows(communityStatsMap) {
+    var accounts = getAccountsStore();
+    var usernames = {};
+    Object.keys(baseLeaderboard).forEach(function (username) {
+      usernames[username] = true;
     });
-
+    Object.keys(accounts.users).forEach(function (username) {
+      usernames[username] = true;
+    });
+    Object.keys(communityStatsMap).forEach(function (username) {
+      usernames[username] = true;
+    });
     readExternalResults(STORAGE.gameResults)
       .concat(readExternalResults(STORAGE.testResults))
       .forEach(function (result) {
-        if (!result || !result.username || usersMap[result.username]) return;
-        var prev = scoreboard[result.username] || 0;
-        var delta = Number(result.pointsDelta || result.score || 0);
-        if (!Number.isNaN(delta)) {
-          scoreboard[result.username] = prev + delta;
-        }
+        if (result && result.username) usernames[result.username] = true;
       });
 
-    var rows = Object.keys(scoreboard).map(function (username) {
+    var rows = Object.keys(usernames).map(function (username) {
+      var unified = getUnifiedUserStats(username, communityStatsMap);
       return {
         username: username,
-        totalPoints: scoreboard[username]
+        totalPoints: Number(baseLeaderboard[username] || 0) + Number(unified.points || 0)
       };
     });
+
     rows.sort(function (a, b) {
-      return b.totalPoints - a.totalPoints;
+      if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+      return a.username.localeCompare(b.username);
     });
     return rows.slice(0, 6);
+  }
+
+  function getActorId() {
+    return isLoggedIn() ? getCurrentUsername() : "";
+  }
+
+  function hasLiked(post) {
+    var actorId = getActorId();
+    if (!actorId || !post || !Array.isArray(post.likedBy)) return false;
+    return post.likedBy.indexOf(actorId) >= 0;
+  }
+
+  function setFeedback(message, type) {
+    var el = document.querySelector("[data-community-feedback]");
+    if (!el) return;
+    el.textContent = message || "";
+    el.classList.remove("is-error", "is-success");
+    if (type === "error" || type === "success") {
+      el.classList.add("is-" + type);
+    }
+  }
+
+  function updateComposerState() {
+    var button = document.querySelector(".btn-post");
+    if (!button) return;
+    button.disabled = !isLoggedIn();
+    button.textContent = isLoggedIn() ? "Post and Earn 5 points" : "Sign in to Post";
+    if (!isLoggedIn()) {
+      setFeedback("Sign in from the avatar menu before posting.", "error");
+    } else if (!document.querySelector("[data-community-feedback]").textContent) {
+      setFeedback("", "");
+    }
   }
 
   function renderPosts() {
@@ -288,6 +390,8 @@
         var likes = Number(post.likes || 0);
         var points = Number(post.pointsAwarded || POINTS_PER_POST);
         var initial = escapeHtml((post.author || "?").slice(0, 1).toUpperCase());
+        var liked = hasLiked(post);
+        var likeLabel = liked ? "Liked" : "Like";
         return (
           '<article class="post-card">' +
           '<header class="post-header">' +
@@ -317,9 +421,15 @@
           hex +
           "</div>" +
           '<footer class="post-footer">' +
-          '<button type="button" class="like-btn" data-like-id="' +
+          '<button type="button" class="like-btn' +
+          (liked ? " is-liked" : "") +
+          '" data-like-id="' +
           post.id +
-          '">Like ' +
+          '" aria-pressed="' +
+          (liked ? "true" : "false") +
+          '">' +
+          likeLabel +
+          " " +
           likes +
           "</button>" +
           '<span class="post-points">Rewarded +' +
@@ -332,35 +442,30 @@
       .join("");
   }
 
-  function renderStats() {
+  function renderStats(communityStatsMap) {
     var user = getCurrentUsername();
-    var usersMap = getSavedStatsMap();
     var pointsEl = document.querySelector("[data-user-points]");
     var postsEl = document.querySelector("[data-user-posts]");
     var streakEl = document.querySelector("[data-user-streak]");
     if (!pointsEl || !postsEl || !streakEl) return;
 
-    var stats = usersMap[user] || {
-      postCount: 0,
-      communityPoints: 0,
-      streakDays: 0
-    };
-    var totalPoints = Number(stats.communityPoints || 0) + collectExternalPoints(user);
-    pointsEl.textContent = String(totalPoints);
+    var stats = getUnifiedUserStats(user, communityStatsMap);
+    pointsEl.textContent = String(stats.points || 0);
     postsEl.textContent = String(stats.postCount || 0);
 
-    if (!stats.streakDays) {
+    if (!isLoggedIn()) {
+      streakEl.textContent = "Sign in to track your own progress across pages.";
+    } else if (!stats.streakDays) {
       streakEl.textContent = "Post today to start your streak.";
     } else {
       streakEl.textContent = "Keep it up: " + stats.streakDays + "-day streak active.";
     }
   }
 
-  function renderLeaderboard() {
-    var usersMap = getSavedStatsMap();
+  function renderLeaderboard(communityStatsMap) {
     var listEl = document.querySelector("[data-leaderboard-list]");
     if (!listEl) return;
-    var top = buildLeaderboard(usersMap);
+    var top = getLeaderboardRows(communityStatsMap);
     writeJSON(STORAGE.leaderboard, top);
     listEl.innerHTML = top
       .map(function (row) {
@@ -370,10 +475,11 @@
   }
 
   function refreshAll() {
-    var usersMap = computeUserStats(state.posts);
+    var communityStatsMap = computeCommunityStats(state.posts);
     renderPosts();
-    renderStats(usersMap);
-    renderLeaderboard();
+    renderStats(communityStatsMap);
+    renderLeaderboard(communityStatsMap);
+    updateComposerState();
   }
 
   function setFilter(filterValue) {
@@ -408,44 +514,85 @@
 
   function handleSubmit(event) {
     event.preventDefault();
+    if (!isLoggedIn()) {
+      setFeedback("Sign in from the avatar menu before posting.", "error");
+      return;
+    }
+
     var form = event.currentTarget;
     var input = form.querySelector("[data-post-content]");
     var colorPicker = form.querySelector("[data-color-picker]");
     if (!input || !colorPicker) return;
     var text = input.value.trim();
-    if (!text) return;
+    if (text.length < 8) {
+      setFeedback("Write at least 8 characters so each post contains a meaningful note.", "error");
+      return;
+    }
 
     var username = getCurrentUsername();
-    var post = {
+    var post = normalizePost({
       id: createId(),
       author: username,
       content: text,
       tag: state.selectedTag,
       colorHex: normalizeHex(colorPicker.value),
       likes: 0,
+      likedBy: [],
       pointsAwarded: POINTS_PER_POST,
       createdAt: new Date().toISOString()
-    };
+    });
 
     state.posts.unshift(post);
     writePosts(state.posts);
-    refreshAll();
+
+    var auth = getAuthApi();
+    if (auth && auth.recordActivity) {
+      auth.recordActivity(username, {
+        pointsDelta: POINTS_PER_POST,
+        postDelta: 1
+      });
+    }
+
     input.value = "";
+    syncHexInputs(false);
+    setFeedback("Post published. You earned 5 points.", "success");
+    refreshAll();
 
     document.dispatchEvent(new CustomEvent("clw:post-created", { detail: { post: post } }));
-    document.dispatchEvent(new CustomEvent("clw:stats-updated", { detail: { username: username } }));
   }
 
   function handleLikeClick(event) {
     var btn = event.target.closest("[data-like-id]");
     if (!btn) return;
+    if (!isLoggedIn()) {
+      setFeedback("Sign in to like posts and save your reaction.", "error");
+      return;
+    }
+
     var postId = btn.getAttribute("data-like-id");
-    if (!postId) return;
+    var actorId = getActorId();
+    if (!postId || !actorId) return;
+
     state.posts = state.posts.map(function (post) {
       if (post.id !== postId) return post;
-      return Object.assign({}, post, { likes: Number(post.likes || 0) + 1 });
+      var likedBy = Array.isArray(post.likedBy) ? post.likedBy.slice() : [];
+      var idx = likedBy.indexOf(actorId);
+      var likes = Number(post.likes || 0);
+      if (idx >= 0) {
+        likedBy.splice(idx, 1);
+        likes = Math.max(0, likes - 1);
+      } else {
+        likedBy.push(actorId);
+        likes += 1;
+      }
+      return Object.assign({}, post, {
+        likes: likes,
+        likedBy: likedBy
+      });
     });
+
     writePosts(state.posts);
+    setFeedback("", "");
     renderPosts();
   }
 
@@ -498,8 +645,13 @@
     var postList = document.querySelector("[data-post-list]");
     if (postList) postList.addEventListener("click", handleLikeClick);
 
-    document.addEventListener("clw:game-finished", renderLeaderboard);
-    document.addEventListener("clw:test-finished", renderLeaderboard);
+    document.addEventListener("clw:auth-changed", function () {
+      setFeedback("", "");
+      refreshAll();
+    });
+    document.addEventListener("clw:user-data-updated", refreshAll);
+    document.addEventListener("clw:game-finished", refreshAll);
+    document.addEventListener("clw:test-finished", refreshAll);
   }
 
   function init() {

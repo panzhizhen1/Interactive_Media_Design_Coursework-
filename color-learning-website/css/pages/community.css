@@ -42,6 +42,15 @@ main.community-page {
   transform: translateY(-1px);
 }
 
+.community-hero__cta:focus-visible,
+.btn-post:focus-visible,
+.like-btn:focus-visible,
+.feed-filter__option:focus-visible,
+.tag-pill:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
 .community-layout {
   display: grid;
   gap: var(--space-xl);
@@ -171,6 +180,27 @@ input[type="color"] {
   padding: 0.52rem 1rem;
 }
 
+.btn-post:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.composer-card__feedback {
+  min-height: 1.25rem;
+  margin: 0.75rem 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.composer-card__feedback.is-error {
+  color: #b91c1c;
+}
+
+.composer-card__feedback.is-success {
+  color: #166534;
+}
+
 .feed-filter {
   display: flex;
   align-items: center;
@@ -289,6 +319,16 @@ input[type="color"] {
   cursor: pointer;
   font-size: 0.86rem;
   padding: 0.2rem;
+}
+
+.like-btn.is-liked {
+  color: #be123c;
+  font-weight: 700;
+}
+
+.like-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .post-points {
