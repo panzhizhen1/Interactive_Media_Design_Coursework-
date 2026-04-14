@@ -28,6 +28,18 @@
       swatch: "#ffb3c6",
       stops: ["#fb6f92", "#ff8fab", "#ffb3c6", "#ffc2d1", "#ffe5ec"],
       primaryHover: "#d94d72"
+    },
+    pastel: {
+      id: "pastel",
+      swatch: "#bbd0ff",
+      stops: ["#bbd0ff", "#b8c0ff", "#c8b6ff", "#e7c6ff", "#ffd6ff"],
+      primaryHover: "#9fabe8"
+    },
+    amber: {
+      id: "amber",
+      swatch: "#ff9505",
+      stops: ["#cc5803", "#e2711d", "#ff9505", "#ffb627", "#ffc971"],
+      primaryHover: "#d67a04"
     }
   };
 

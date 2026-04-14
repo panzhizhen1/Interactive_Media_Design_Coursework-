@@ -65,13 +65,50 @@
                   style="background-color: #ffb3c6"
                   aria-label="Rose pink theme"
                 ></button>
+                <button
+                  type="button"
+                  class="theme-picker__theme-option"
+                  data-theme-option="pastel"
+                  style="background-color: #bbd0ff"
+                  aria-label="Pastel purple theme"
+                ></button>
+                <button
+                  type="button"
+                  class="theme-picker__theme-option"
+                  data-theme-option="amber"
+                  style="background-color: #ff9505"
+                  aria-label="Amber orange theme"
+                ></button>
+              </div>
+              <div class="theme-picker__wheel-wrap" data-theme-wheel-wrap hidden>
+                <canvas
+                  class="theme-picker__wheel-canvas"
+                  data-theme-wheel-canvas
+                  width="180"
+                  height="180"
+                  aria-label="Color wheel"
+                ></canvas>
+                <canvas
+                  class="theme-picker__value-canvas"
+                  data-theme-value-canvas
+                  width="180"
+                  height="20"
+                  aria-label="Brightness slider"
+                ></canvas>
+                <input
+                  id="theme-color-wheel"
+                  class="theme-picker__wheel"
+                  data-theme-wheel
+                  type="color"
+                  value="#00b4d8"
+                  aria-label="Choose color from wheel"
+                />
               </div>
               <div class="theme-picker__mode-wrap">
                 <label class="theme-picker__mode-label" for="theme-color-mode">mode</label>
                 <select id="theme-color-mode" class="theme-picker__mode" data-theme-mode aria-label="Color selection mode">
                   <option value="default" selected>default</option>
-                  <option value="rgb" disabled>RGB</option>
-                  <option value="hsv" disabled>HSV</option>
+                  <option value="wheel">wheel</option>
                 </select>
               </div>
             </div>
