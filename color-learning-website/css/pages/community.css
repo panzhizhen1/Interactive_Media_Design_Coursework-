@@ -512,6 +512,10 @@ input[type="color"] {
   padding: 1rem;
 }
 
+.community-modal-backdrop[hidden] {
+  display: none !important;
+}
+
 .community-modal {
   width: min(34rem, 96vw);
   background: #ffffff;
