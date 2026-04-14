@@ -18,6 +18,13 @@
       <section class="game-intro">
         <h1 class="page-title">Painting Game</h1>
         <p class="lead">Pick a black-line drawing, choose a color model (RGB / HSV / CMYK), and click a closed region to fill it like a paint bucket.</p>
+        <label class="mode-picker" for="game-mode">
+          <span>Mode</span>
+          <select id="game-mode">
+            <option value="standard" selected>Standard mode</option>
+            <option value="challenge">Challenge mode</option>
+          </select>
+        </label>
       </section>
 
       <section id="gallery-view" class="gallery-view" aria-label="Drawing selection area">
@@ -44,6 +51,30 @@
             <h2 class="drawing-card__title">Car</h2>
             <canvas id="preview-3" width="280" height="200" aria-label="Car line-art preview"></canvas>
             <button type="button" class="enter-btn" data-open-drawing="3">Open this drawing</button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">Tree</h2>
+            <canvas id="preview-4" width="280" height="200" aria-label="Tree line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="4">Open this drawing</button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">Cat</h2>
+            <canvas id="preview-5" width="280" height="200" aria-label="Cat line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="5">Open this drawing</button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">Sailboat</h2>
+            <canvas id="preview-6" width="280" height="200" aria-label="Sailboat line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="6">Open this drawing</button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title">Mushroom</h2>
+            <canvas id="preview-7" width="280" height="200" aria-label="Mushroom line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="7">Open this drawing</button>
           </article>
         </div>
       </section>
@@ -154,6 +185,39 @@
           <button type="button" id="tool-eraser" class="tool-btn">Region Eraser</button>
           <button type="button" id="reset-drawing" class="tool-btn tool-btn--warn">Reset Current Drawing</button>
           <button type="button" id="save-image" class="tool-btn tool-btn--success">Save as Image</button>
+        </div>
+
+        <div id="challenge-panel" class="challenge-panel" hidden>
+          <h3>Challenge sample</h3>
+          <p>Try to match the sample colors. Submit when you finish.</p>
+          <canvas id="challenge-sample-canvas" width="300" height="206" aria-label="Challenge sample preview"></canvas>
+          <button type="button" id="submit-challenge" class="tool-btn">Submit challenge</button>
+          <p id="challenge-score" class="challenge-score" aria-live="polite">Score: —</p>
+        </div>
+
+        <div class="editor-stats" aria-live="polite">
+          <div class="fill-progress-block">
+            <div class="fill-progress-header">
+              <span class="fill-progress-title">Fill progress</span>
+              <span class="fill-progress-numbers" id="fill-progress-label">0% · 0 / 0 px</span>
+            </div>
+            <div
+              class="fill-progress-track"
+              id="fill-progress-track"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Painting fill progress"
+            >
+              <div class="fill-progress-fill" id="fill-progress-fill"></div>
+            </div>
+          </div>
+          <div class="session-stats">
+            <span id="session-time">Session time: 0:00</span>
+            <span id="completion-time" class="completion-time" hidden>Completed in: —</span>
+            <span id="color-adjust-count">Color adjustments: 0</span>
+          </div>
         </div>
 
         <p class="hint">How to use: choose a color model, then use slider or number input, choose a tool, and click a closed region.</p>
