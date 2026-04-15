@@ -68,3 +68,4 @@ Each member owns exactly **one** of the **5 main pages/sections**. The page owne
 - Define basic community guidelines (what can be shared) and keep the UI friendly and motivating.
 
 ## Assigned TA: Jun Gu
+### hint: Remember to merge all the code changes together and push them to the main branch.
