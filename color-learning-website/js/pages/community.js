@@ -71,7 +71,8 @@
     filter: DEFAULT_FILTER,
     selectedTag: DEFAULT_TAG,
     submitLockUntil: 0,
-    likeLocks: {}
+    likeLocks: {},
+    toastTimer: 0
   };
 
   function readJSON(key, fallback) {
@@ -126,13 +127,47 @@
     return hex;
   }
 
+  function normalizePaletteList(list, fallbackHex) {
+    var rows = Array.isArray(list) ? list : [];
+    var dedup = [];
+    rows.forEach(function (item) {
+      var hex = normalizeHex(item);
+      if (dedup.indexOf(hex) < 0) dedup.push(hex);
+    });
+    if (!dedup.length) dedup.push(normalizeHex(fallbackHex || DEFAULT_COLOR));
+    return dedup.slice(0, 8);
+  }
+
+  function sanitizeImageDataUrl(value) {
+    if (!value) return "";
+    var text = String(value);
+    return text.indexOf("data:image/") === 0 ? text : "";
+  }
+
+  function parsePaletteInput(text, fallbackHex) {
+    if (!text) return normalizePaletteList([], fallbackHex);
+    var parts = String(text).split(",");
+    return normalizePaletteList(parts, fallbackHex);
+  }
+
+  function paletteToInputText(list) {
+    return normalizePaletteList(list, DEFAULT_COLOR).join(", ");
+  }
+
   function normalizePost(post) {
+    var colorHex = normalizeHex(post && post.colorHex ? post.colorHex : DEFAULT_COLOR);
+    var paletteHexes = normalizePaletteList(
+      post && post.paletteHexes ? post.paletteHexes : [colorHex],
+      colorHex
+    );
     return {
       id: String(post && post.id ? post.id : createId()),
       author: String(post && post.author ? post.author : "Guest"),
       content: String(post && post.content ? post.content : "").trim().slice(0, MAX_POST_LENGTH),
       tag: String(post && post.tag ? post.tag : DEFAULT_TAG),
-      colorHex: normalizeHex(post && post.colorHex ? post.colorHex : DEFAULT_COLOR),
+      colorHex: colorHex,
+      paletteHexes: paletteHexes,
+      imageDataUrl: sanitizeImageDataUrl(post && post.imageDataUrl ? post.imageDataUrl : ""),
       likes: Math.max(0, Number(post && post.likes ? post.likes : 0)),
       likedBy: Array.isArray(post && post.likedBy)
         ? Array.from(new Set(post.likedBy.map(function (item) { return typeof item === "string" ? item.trim() : ""; }).filter(Boolean)))
@@ -248,10 +283,13 @@
   function readDraft() {
     var raw = readJSON(STORAGE.draft, null);
     if (!raw || typeof raw !== "object") return null;
+    var colorHex = normalizeHex(raw.colorHex || DEFAULT_COLOR);
     return {
       content: String(raw.content || ""),
       tag: String(raw.tag || DEFAULT_TAG),
-      colorHex: normalizeHex(raw.colorHex || DEFAULT_COLOR),
+      colorHex: colorHex,
+      paletteHexes: normalizePaletteList(raw.paletteHexes || [colorHex], colorHex),
+      imageDataUrl: sanitizeImageDataUrl(raw.imageDataUrl || ""),
       origin: raw.origin ? String(raw.origin) : "",
       originMeta: raw.originMeta && typeof raw.originMeta === "object" ? raw.originMeta : {},
       updatedAt: raw.updatedAt || ""
@@ -267,6 +305,8 @@
       content: String(draft.content || "").slice(0, MAX_POST_LENGTH),
       tag: String(draft.tag || DEFAULT_TAG),
       colorHex: normalizeHex(draft.colorHex || DEFAULT_COLOR),
+      paletteHexes: normalizePaletteList(draft.paletteHexes || [draft.colorHex || DEFAULT_COLOR], draft.colorHex || DEFAULT_COLOR),
+      imageDataUrl: sanitizeImageDataUrl(draft.imageDataUrl || ""),
       origin: draft.origin ? String(draft.origin) : "community",
       originMeta: draft.originMeta && typeof draft.originMeta === "object" ? draft.originMeta : {},
       updatedAt: new Date().toISOString()
@@ -364,6 +404,38 @@
     el.classList.remove("is-error", "is-success");
     el.textContent = message || "";
     if (kind === "error" || kind === "success") el.classList.add("is-" + kind);
+    showToast(message, kind);
+  }
+
+  function hideToast() {
+    var toast = document.querySelector("[data-community-toast]");
+    if (!toast) return;
+    if (state.toastTimer) {
+      clearTimeout(state.toastTimer);
+      state.toastTimer = 0;
+    }
+    toast.hidden = true;
+    toast.classList.remove("is-error", "is-success");
+  }
+
+  function showToast(message, kind) {
+    var toast = document.querySelector("[data-community-toast]");
+    var text = document.querySelector("[data-community-toast-message]");
+    if (!toast || !text) return;
+
+    if (!message) {
+      hideToast();
+      return;
+    }
+
+    if (state.toastTimer) clearTimeout(state.toastTimer);
+    toast.classList.remove("is-error", "is-success");
+    if (kind === "error" || kind === "success") toast.classList.add("is-" + kind);
+    text.textContent = message;
+    toast.hidden = false;
+    state.toastTimer = setTimeout(function () {
+      hideToast();
+    }, 3000);
   }
 
   function updateCharCounter() {
@@ -384,6 +456,20 @@
     var title = draft.origin.charAt(0).toUpperCase() + draft.origin.slice(1);
     el.hidden = false;
     el.textContent = "Draft imported from " + title + ".";
+  }
+
+  function setComposerImagePreview(imageDataUrl) {
+    var wrap = document.querySelector("[data-image-preview-wrap]");
+    var img = document.querySelector("[data-image-preview]");
+    if (!wrap || !img) return;
+    var safe = sanitizeImageDataUrl(imageDataUrl);
+    if (!safe) {
+      wrap.hidden = true;
+      img.src = "";
+      return;
+    }
+    img.src = safe;
+    wrap.hidden = false;
   }
 
   function updateComposerState() {
@@ -416,6 +502,39 @@
     }
     return extra ? label + " · " + extra : label;
   }
+
+  function renderOriginMetaHtml(post) {
+    if (!post || !post.originMeta) return "";
+    if (post.origin === "test") {
+      var chapter = post.originMeta.chapter ? escapeHtml(String(post.originMeta.chapter)) : "Test";
+      var score = Number(post.originMeta.score || 0);
+      var maxScore = Number(post.originMeta.maxScore || 0);
+      var accuracy = Number(post.originMeta.accuracy || 0);
+      return '<div class="post-origin-meta"><strong>Test Result:</strong> ' + chapter + " · Score " + score + "/" + maxScore + " · Accuracy " + accuracy + "%</div>";
+    }
+    if (post.origin === "game" && post.originMeta.drawingName) {
+      return '<div class="post-origin-meta"><strong>Game Artwork:</strong> ' + escapeHtml(String(post.originMeta.drawingName)) + "</div>";
+    }
+    return "";
+  }
+
+  function renderPaletteHtml(post) {
+    var palette = normalizePaletteList(post && post.paletteHexes ? post.paletteHexes : [post.colorHex], post.colorHex);
+    return (
+      '<div class="post-palette">' +
+      palette.map(function (hex) {
+        return '<span class="post-palette__chip" style="background:' + hex + '" title="' + hex + '"></span>';
+      }).join("") +
+      "</div>"
+    );
+  }
+
+  function renderImageHtml(post) {
+    var image = sanitizeImageDataUrl(post && post.imageDataUrl ? post.imageDataUrl : "");
+    if (!image) return "";
+    return '<figure class="post-image"><img src="' + image + '" alt="Shared attachment for this post"></figure>';
+  }
+
   function renderPosts() {
     var container = document.querySelector("[data-post-list]");
     if (!container) return;
@@ -445,6 +564,9 @@
         var originText = escapeHtml(formatOrigin(post));
         var colorText = getContrastText(hex);
         var initial = escapeHtml((post.author || "?").slice(0, 1).toUpperCase());
+        var paletteHtml = renderPaletteHtml(post);
+        var imageHtml = renderImageHtml(post);
+        var originMetaHtml = renderOriginMetaHtml(post);
         return (
           '<article class="post-card' + (post.featured ? ' is-featured' : '') + (hidden ? ' is-hidden' : '') + '">' +
           '<header class="post-header">' +
@@ -461,6 +583,9 @@
           '<span class="post-time">' + timeAgo(post.createdAt) + '</span>' +
           '</header>' +
           '<p class="post-content">' + (hidden ? 'This post is hidden for your account.' : content) + '</p>' +
+          originMetaHtml +
+          imageHtml +
+          paletteHtml +
           '<div class="post-color" style="background:' + hex + ';color:' + colorText + '">Attached color ' + hex + '</div>' +
           '<footer class="post-footer">' +
           '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? 'Liked ' : 'Like ') + likes + '</button>' +
@@ -605,8 +730,20 @@
   function persistComposerDraft() {
     var input = document.querySelector("[data-post-content]");
     var colorPicker = document.querySelector("[data-color-picker]");
-    if (!input || !colorPicker) return;
-    writeDraft({ content: input.value, tag: state.selectedTag, colorHex: colorPicker.value, origin: "community", originMeta: {} });
+    var paletteInput = document.querySelector("[data-palette-input]");
+    if (!input || !colorPicker || !paletteInput) return;
+    var existing = readDraft();
+    var keepImported = existing && existing.origin && existing.origin !== "community";
+    var paletteHexes = parsePaletteInput(paletteInput.value, colorPicker.value);
+    writeDraft({
+      content: input.value,
+      tag: state.selectedTag,
+      colorHex: colorPicker.value,
+      paletteHexes: paletteHexes,
+      imageDataUrl: existing && existing.imageDataUrl ? existing.imageDataUrl : "",
+      origin: keepImported ? existing.origin : "community",
+      originMeta: keepImported ? (existing.originMeta || {}) : {}
+    });
   }
 
   function applyDraftToComposer() {
@@ -615,15 +752,18 @@
     var input = document.querySelector("[data-post-content]");
     var colorPicker = document.querySelector("[data-color-picker]");
     var hexInput = document.querySelector("[data-color-hex]");
+    var paletteInput = document.querySelector("[data-palette-input]");
     if (input) input.value = String(draft.content || "").slice(0, MAX_POST_LENGTH);
     if (colorPicker) colorPicker.value = normalizeHex(draft.colorHex);
     if (hexInput) hexInput.value = normalizeHex(draft.colorHex);
+    if (paletteInput) paletteInput.value = paletteToInputText(draft.paletteHexes || [draft.colorHex]);
+    setComposerImagePreview(draft.imageDataUrl || "");
     setActiveTag(draft.tag || DEFAULT_TAG);
     updateDraftOriginLabel(draft);
     updateCharCounter();
   }
 
-  function buildPostFromForm(text, colorHex) {
+  function buildPostFromForm(text, colorHex, paletteHexes, imageDataUrl) {
     var draft = readDraft();
     var origin = draft && draft.origin ? draft.origin : "community";
     var originMeta = draft && draft.originMeta ? draft.originMeta : {};
@@ -633,6 +773,8 @@
       content: text,
       tag: state.selectedTag,
       colorHex: colorHex,
+      paletteHexes: paletteHexes,
+      imageDataUrl: imageDataUrl,
       likes: 0,
       likedBy: [],
       pointsAwarded: POINTS_PER_POST,
@@ -657,7 +799,8 @@
     var form = event.currentTarget;
     var input = form.querySelector("[data-post-content]");
     var colorPicker = form.querySelector("[data-color-picker]");
-    if (!input || !colorPicker) return;
+    var paletteInput = form.querySelector("[data-palette-input]");
+    if (!input || !colorPicker || !paletteInput) return;
     var text = input.value.trim();
     if (text.length < MIN_POST_LENGTH) {
       setFeedback("Write at least " + MIN_POST_LENGTH + " characters so each post has real learning value.", "error");
@@ -665,7 +808,11 @@
       return;
     }
 
-    var post = buildPostFromForm(text, normalizeHex(colorPicker.value));
+    var colorHex = normalizeHex(colorPicker.value);
+    var paletteHexes = parsePaletteInput(paletteInput.value, colorHex);
+    var draft = readDraft();
+    var imageDataUrl = draft && draft.imageDataUrl ? sanitizeImageDataUrl(draft.imageDataUrl) : "";
+    var post = buildPostFromForm(text, colorHex, paletteHexes, imageDataUrl);
     state.posts.unshift(post);
     writePosts(state.posts);
     writeDraft(null);
@@ -683,7 +830,11 @@
     }
 
     input.value = "";
+    paletteInput.value = paletteToInputText([DEFAULT_COLOR]);
+    var imageInput = form.querySelector("[data-image-input]");
+    if (imageInput) imageInput.value = "";
     syncHexInputs(false);
+    setComposerImagePreview("");
     updateDraftOriginLabel(null);
     setFeedback("Post published. You earned 5 points.", "success");
     refreshAll();
@@ -840,6 +991,9 @@
     var colorPicker = document.querySelector("[data-color-picker]");
     var hexInput = document.querySelector("[data-color-hex]");
     var contentInput = document.querySelector("[data-post-content]");
+    var paletteInput = document.querySelector("[data-palette-input]");
+    var imageInput = document.querySelector("[data-image-input]");
+    var imageClearBtn = document.querySelector("[data-image-clear]");
 
     if (colorPicker) {
       colorPicker.addEventListener("input", function () {
@@ -866,6 +1020,62 @@
         persistComposerDraft();
       });
     }
+    if (paletteInput) {
+      paletteInput.addEventListener("blur", persistComposerDraft);
+      paletteInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          persistComposerDraft();
+        }
+      });
+    }
+    if (imageInput) {
+      imageInput.addEventListener("change", function (event) {
+        var file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+        if (!file) return;
+        if (!/^image\//.test(file.type)) {
+          setFeedback("Please select a valid image file.", "error");
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+          var dataUrl = sanitizeImageDataUrl(reader.result);
+          if (!dataUrl) {
+            setFeedback("Could not read this image.", "error");
+            return;
+          }
+          var draft = readDraft() || {};
+          writeDraft({
+            content: document.querySelector("[data-post-content]") ? document.querySelector("[data-post-content]").value : "",
+            tag: state.selectedTag,
+            colorHex: document.querySelector("[data-color-picker]") ? document.querySelector("[data-color-picker]").value : DEFAULT_COLOR,
+            paletteHexes: parsePaletteInput(document.querySelector("[data-palette-input]") ? document.querySelector("[data-palette-input]").value : "", DEFAULT_COLOR),
+            imageDataUrl: dataUrl,
+            origin: draft.origin || "community",
+            originMeta: draft.originMeta || {}
+          });
+          setComposerImagePreview(dataUrl);
+          setFeedback("Image attached to your post.", "success");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    if (imageClearBtn) {
+      imageClearBtn.addEventListener("click", function () {
+        if (imageInput) imageInput.value = "";
+        var draft = readDraft() || {};
+        writeDraft({
+          content: document.querySelector("[data-post-content]") ? document.querySelector("[data-post-content]").value : "",
+          tag: state.selectedTag,
+          colorHex: document.querySelector("[data-color-picker]") ? document.querySelector("[data-color-picker]").value : DEFAULT_COLOR,
+          paletteHexes: parsePaletteInput(document.querySelector("[data-palette-input]") ? document.querySelector("[data-palette-input]").value : "", DEFAULT_COLOR),
+          imageDataUrl: "",
+          origin: draft.origin || "community",
+          originMeta: draft.originMeta || {}
+        });
+        setComposerImagePreview("");
+      });
+    }
 
     var postList = document.querySelector("[data-post-list]");
     if (postList) {
@@ -879,6 +1089,8 @@
 
     var openGuideBtn = document.querySelector("[data-open-guidelines]");
     if (openGuideBtn) openGuideBtn.addEventListener("click", openGuidelines);
+    var toastCloseBtn = document.querySelector("[data-community-toast-close]");
+    if (toastCloseBtn) toastCloseBtn.addEventListener("click", hideToast);
     document.querySelectorAll("[data-close-guidelines]").forEach(function (btn) {
       btn.addEventListener("click", closeGuidelines);
     });
@@ -913,6 +1125,8 @@
     setActiveTag(DEFAULT_TAG);
     setFilter(DEFAULT_FILTER);
     syncHexInputs(false);
+    var paletteInput = document.querySelector("[data-palette-input]");
+    if (paletteInput && !paletteInput.value.trim()) paletteInput.value = paletteToInputText([DEFAULT_COLOR]);
     bindEvents();
     applyDraftToComposer();
     refreshAll();

@@ -109,6 +109,16 @@
           <div class="learning-content__inner">
             <h1 class="learning-content__title" id="content-title">Welcome to Color Learning</h1>
             <p class="learning-content__description" id="content-description">Select a topic from the sidebar to begin your journey into the fascinating world of colors.</p>
+            <section class="learning-share-card" aria-label="Share a learning note">
+              <h2 class="learning-share-card__title">Send Note to Community</h2>
+              <p class="learning-share-card__desc">Write one takeaway from this section and continue the discussion in Community.</p>
+              <label class="sr-only" for="learning-community-note">Learning note</label>
+              <textarea id="learning-community-note" class="learning-share-card__textarea" data-learning-note placeholder="Example: In this section I learned that ..."></textarea>
+              <div class="learning-share-card__actions">
+                <button type="button" class="learning-share-card__btn" data-learning-share>Send to Community Draft</button>
+                <p class="learning-share-card__status" role="status" aria-live="polite" data-learning-share-status></p>
+              </div>
+            </section>
           </div>
         </section>
       </div>

@@ -12,6 +12,10 @@ import { contentData } from './learn/learning-content.js';
   const menuLinks = document.querySelectorAll('.learning-menu__link');
   const contentTitle = document.getElementById('content-title');
   const contentDescription = document.getElementById('content-description');
+  const shareNoteInput = document.querySelector('[data-learning-note]');
+  const shareBtn = document.querySelector('[data-learning-share]');
+  const shareStatus = document.querySelector('[data-learning-share-status]');
+  const COMMUNITY_DRAFT_KEY = 'clw_community_draft_v1';
 
   // Initialize
   function init() {
@@ -20,6 +24,64 @@ import { contentData } from './learn/learning-content.js';
     setupNavigationLinks();
     handleInitialRoute();
     setupHashChangeListener();
+    setupCommunityShare();
+  }
+
+  function setShareStatus(message) {
+    if (!shareStatus) return;
+    shareStatus.textContent = message || '';
+  }
+
+  function setupCommunityShare() {
+    if (!shareBtn || !shareNoteInput) return;
+    shareBtn.addEventListener('click', function() {
+      const note = String(shareNoteInput.value || '').trim();
+      if (note.length < 8) {
+        setShareStatus('Write at least 8 characters before sharing.');
+        shareNoteInput.focus();
+        return;
+      }
+
+      const sectionKey = window.location.hash ? window.location.hash.substring(1) : 'overview';
+      const sectionTitle = contentTitle ? contentTitle.textContent : 'Learning note';
+      const draft = {
+        content: note,
+        tag: '#Theory',
+        colorHex: '#2b78e4',
+        paletteHexes: ['#2b78e4', '#93c5fd', '#0f172a'],
+        origin: 'learning',
+        originMeta: {
+          section: sectionTitle,
+          sectionKey: sectionKey
+        },
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem(COMMUNITY_DRAFT_KEY, JSON.stringify(draft));
+      } catch (error) {
+        setShareStatus('Failed to save draft locally. Please try again.');
+        return;
+      }
+
+      const auth = window.CLWAuth || null;
+      if (auth && auth.recordActivity && auth.getCurrentUsername) {
+        const username = auth.getCurrentUsername();
+        if (username) {
+          auth.recordActivity(username, {
+            pointsDelta: 2,
+            postDelta: 0,
+            source: 'learning',
+            type: 'note_share',
+            refId: sectionKey || 'overview'
+          });
+        }
+      }
+
+      document.dispatchEvent(new CustomEvent('clw:community-draft-updated', { detail: { origin: 'learning', section: sectionTitle } }));
+      setShareStatus('Draft sent. Redirecting to Community...');
+      window.location.href = 'community.html';
+    });
   }
 
   // Setup sidebar toggle for mobile

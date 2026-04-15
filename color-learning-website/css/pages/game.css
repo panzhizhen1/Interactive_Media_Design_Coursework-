@@ -218,6 +218,21 @@
   color: #1f5eff;
 }
 
+.tool-btn--community {
+  background: #4c2dbb;
+}
+
+.tool-btn--community:hover {
+  background: #3f239c;
+}
+
+.game-status {
+  margin: 0;
+  min-height: 1.2rem;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
 .hint {
   margin: 0;
   color: #465271;
