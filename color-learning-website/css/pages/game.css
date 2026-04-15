@@ -8,6 +8,21 @@
   margin-bottom: 0;
 }
 
+.mode-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+  font-weight: 700;
+}
+
+.mode-picker select {
+  border: 1px solid #a8b5d9;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  background: #fff;
+}
+
 .drawing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -156,27 +171,51 @@
 }
 
 .tool-btn {
-  background: #3559b8;
+  border: 2px solid #1f5eff;
+  background: #fff;
+  color: #1f5eff;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tool-btn:hover {
+  background: #edf2ff;
 }
 
 .tool-btn.is-active {
-  background: #0a7a2a;
+  background: #1f5eff;
+  color: #fff;
 }
 
-.tool-btn--warn {
-  background: #b85800;
+.challenge-panel {
+  border: 2px solid #c8d8f5;
+  border-radius: 12px;
+  background: #f8faff;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
-.tool-btn--warn:hover {
-  background: #9d4b00;
+.challenge-panel[hidden] {
+  display: none !important;
 }
 
-.tool-btn--success {
-  background: #0d8b59;
+.challenge-panel h3,
+.challenge-panel p {
+  margin: 0;
 }
 
-.tool-btn--success:hover {
-  background: #086c45;
+#challenge-sample-canvas {
+  border: 2px solid #111;
+  border-radius: 10px;
+  background: #fff;
+  width: min(100%, 300px);
+  height: auto;
+}
+
+.challenge-score {
+  font-weight: 700;
+  color: #1f5eff;
 }
 
 .tool-btn--community {
@@ -199,10 +238,80 @@
   color: #465271;
 }
 
+.editor-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 2px solid #c8d8f5;
+  border-radius: 12px;
+  background: #f4f7ff;
+}
+
+.fill-progress-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.fill-progress-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.fill-progress-title {
+  font-weight: 800;
+  color: #1a2744;
+}
+
+.fill-progress-numbers {
+  font-variant-numeric: tabular-nums;
+  color: #3559b8;
+  font-weight: 700;
+}
+
+.fill-progress-track {
+  height: 14px;
+  border-radius: 999px;
+  background: #dfe6f7;
+  border: 1px solid #a8b5d9;
+  overflow: hidden;
+}
+
+.fill-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3d9e6b, #1f5eff);
+  transition: width 0.25s ease;
+}
+
+.session-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.25rem;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: #2f3d5c;
+}
+
+.session-stats span {
+  font-weight: 600;
+}
+
+.completion-time {
+  color: #0d6b47;
+}
+
 #editor-canvas {
-  width: 100%;
+  display: block;
+  width: min(100%, calc(70vh * 900 / 620));
   height: auto;
   max-height: 70vh;
+  margin-inline: auto;
   border: 2px solid #111;
   border-radius: 12px;
   background: #fff;

@@ -35,6 +35,13 @@ main.page-home {
   line-height: 1.02;
   color: hsl(0 100% 50%);
   text-align: right;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.home-hero__word {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .home-hero__letter {
@@ -44,10 +51,6 @@ main.page-home {
   transform-origin: center 78%;
   transition: transform 180ms ease;
   will-change: transform;
-}
-
-.home-hero__letter--space {
-  width: 0.36em;
 }
 
 .home-hero__letter.is-active {
@@ -101,6 +104,13 @@ a.home-card {
   min-height: clamp(9rem, 17vw, 12rem);
 }
 
+@media (max-width: 40rem) {
+  .home-hero__tagline {
+    font-size: clamp(1.6rem, 7.2vw, 3.1rem);
+    line-height: 1.08;
+  }
+}
+
 a.home-card:hover {
   border-color: var(--color-primary);
   box-shadow: 0 8px 24px rgba(3, 4, 94, 0.12);
@@ -129,18 +139,19 @@ a.home-card:focus-visible {
 .theme-picker {
   margin-top: 0;
   flex: 1;
-  padding: var(--space-lg) var(--space-xl);
+  padding: clamp(1.25rem, 2.2vw, 1.75rem) clamp(1.5rem, 2.8vw, 2.25rem);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: 0 2px 0 rgba(3, 4, 94, 0.06);
+  color: var(--color-primary-hover);
 }
 
 .theme-picker__title {
-  margin: 0 0 var(--space-lg);
-  font-size: var(--text-lg);
+  margin: 0 0 var(--space-xl);
+  font-size: clamp(1.3rem, 1.9vw, 1.8rem);
   font-weight: 600;
-  color: var(--color-text);
+  color: inherit;
   text-align: center;
 }
 
@@ -149,7 +160,7 @@ a.home-card:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--space-lg) var(--space-xl);
+  gap: var(--space-xl) clamp(1.5rem, 2.8vw, 2.4rem);
 }
 
 .theme-picker__swatches {
@@ -158,6 +169,11 @@ a.home-card:focus-visible {
   align-items: center;
   justify-content: center;
   gap: var(--space-lg);
+}
+
+.theme-picker__swatches[hidden],
+.theme-picker__wheel-wrap[hidden] {
+  display: none;
 }
 
 .theme-picker__theme-option {
@@ -189,33 +205,101 @@ a.home-card:focus-visible {
 .theme-picker__mode-wrap {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   align-items: stretch;
 }
 
 .theme-picker__mode-label {
-  font-size: var(--text-xs, 0.75rem);
-  color: var(--color-text-muted);
+  font-size: clamp(0.9rem, 1.1vw, 1rem);
+  color: inherit;
   text-transform: lowercase;
 }
 
 .theme-picker__mode {
-  padding: 0.45rem 2rem 0.45rem 0.75rem;
-  border: 2px solid var(--color-text);
+  padding: 0.65rem 2.3rem 0.65rem 0.95rem;
+  border: 2px solid currentColor;
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--text-sm);
+  color: inherit;
+  font-size: clamp(0.98rem, 1.2vw, 1.08rem);
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%230f172a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.65rem center;
-  min-width: 7.5rem;
+  background-position: right 0.85rem center;
+  min-width: 9.5rem;
 }
 
 .theme-picker__mode option:disabled {
   color: #94a3b8;
+}
+
+.theme-picker__wheel-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 0.6rem;
+}
+
+.theme-picker__wheel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+  clip-path: inset(50%);
+}
+
+.theme-picker__wheel-canvas {
+  width: min(12.2rem, 70vw);
+  height: auto;
+  max-width: 100%;
+  border-radius: 50%;
+  cursor: crosshair;
+  touch-action: none;
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.15));
+}
+
+.theme-picker__value-canvas {
+  width: min(12.2rem, 70vw);
+  height: 0.9rem;
+  max-width: 100%;
+  border-radius: 999px;
+  cursor: ew-resize;
+  touch-action: none;
+  border: 1px solid rgba(15, 23, 42, 0.24);
+}
+
+.theme-picker--wheel .theme-picker__title {
+  font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+  margin-bottom: var(--space-md);
+}
+
+.theme-picker--wheel .theme-picker__row {
+  gap: var(--space-md);
+}
+
+.theme-picker--wheel .theme-picker__mode-label {
+  font-size: clamp(0.78rem, 0.95vw, 0.88rem);
+}
+
+.theme-picker--wheel .theme-picker__mode {
+  min-width: 7.5rem;
+  font-size: clamp(0.9rem, 1.05vw, 0.98rem);
+  padding: 0.5rem 2rem 0.5rem 0.8rem;
+}
+
+@media (max-width: 40rem) {
+  .theme-picker--wheel .theme-picker__wheel-canvas {
+    width: min(10rem, 62vw);
+  }
+
+  .theme-picker--wheel .theme-picker__value-canvas {
+    width: min(10rem, 62vw);
+  }
 }
