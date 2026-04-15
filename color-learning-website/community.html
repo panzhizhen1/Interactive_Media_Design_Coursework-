@@ -65,7 +65,27 @@
                 </div>
                 <button type="submit" class="btn-post">Post and Earn 5 points</button>
               </div>
-              <p class="composer-card__feedback" data-community-feedback role="status" aria-live="polite"></p>
+              <div class="composer-card__extras">
+                <label class="color-control" for="attach-palette">
+                  <span>Attach Palette (multiple HEX)</span>
+                  <input
+                    id="attach-palette"
+                    class="palette-input"
+                    type="text"
+                    data-palette-input
+                    placeholder="#2b78e4, #5aa1ff, #0f172a"
+                  />
+                </label>
+                <label class="color-control" for="attach-image">
+                  <span>Attach Image (from game or upload)</span>
+                  <input id="attach-image" type="file" accept="image/*" data-image-input />
+                </label>
+              </div>
+              <div class="composer-card__image-preview" data-image-preview-wrap hidden>
+                <img src="" alt="Selected post attachment preview" data-image-preview />
+                <button type="button" class="post-action-btn" data-image-clear>Remove image</button>
+              </div>
+              <p class="composer-card__feedback sr-only" data-community-feedback role="status" aria-live="polite"></p>
             </form>
           </article>
 
@@ -77,6 +97,10 @@
             <button type="button" class="feed-filter__option" data-filter="#Accessibility">#Accessibility</button>
           </div>
 
+          <div class="post-preview-head">
+            <h2 class="post-preview-head__title">Post Preview (Latest 3)</h2>
+            <button type="button" class="post-preview-head__btn" data-open-post-window>View Full Posts</button>
+          </div>
           <section class="post-list" aria-live="polite" data-post-list></section>
         </section>
 
@@ -128,6 +152,28 @@
           <button type="button" class="community-hero__cta" data-close-guidelines>Got it</button>
         </div>
       </section>
+    </div>
+
+    <div class="community-toast" data-community-toast hidden>
+      <p class="community-toast__message" data-community-toast-message></p>
+      <button type="button" class="community-toast__close" data-community-toast-close aria-label="Close message">×</button>
+    </div>
+
+    <div class="community-window-backdrop" data-post-window hidden>
+      <section class="community-window" role="dialog" aria-modal="true" aria-labelledby="post-window-title">
+        <div class="community-window__head">
+          <h2 id="post-window-title">All Community Posts</h2>
+          <button type="button" class="community-modal__close" data-close-post-window aria-label="Close posts window">×</button>
+        </div>
+        <section class="post-list post-list--window" data-post-window-list></section>
+      </section>
+    </div>
+
+    <div class="community-lightbox" data-image-lightbox hidden>
+      <div class="community-lightbox__inner">
+        <button type="button" class="community-modal__close" data-close-image-lightbox aria-label="Close image preview">×</button>
+        <img src="" alt="Expanded post preview" data-lightbox-image />
+      </div>
     </div>
 
     <footer class="site-footer" role="contentinfo">

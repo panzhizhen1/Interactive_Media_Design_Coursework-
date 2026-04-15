@@ -529,6 +529,50 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function getAuthApi() {
+    return window.CLWAuth || null;
+  }
+
+  function getCurrentUsername() {
+    var auth = getAuthApi();
+    return auth && auth.getCurrentUsername ? auth.getCurrentUsername() : "";
+  }
+
+  function shareResultToCommunity(resultId) {
+    if (!resultId) return;
+    var result = null;
+    for (var i = 0; i < state.history.length; i += 1) {
+      if (state.history[i].id === resultId) {
+        result = state.history[i];
+        break;
+      }
+    }
+    if (!result) return;
+    var accuracyPercent = Math.round(Number(result.accuracy || 0) * 100);
+    var draft = {
+      content: "Reflection from Test: I scored " + result.score + "/" + result.maxScore + " in " + result.chapterName + " (" + result.levelName + "). My next focus is " + (result.reviewTopics && result.reviewTopics.length ? result.reviewTopics[0] : "reviewing weak topics") + ".",
+      tag: "#Theory",
+      colorHex: "#2b78e4",
+      paletteHexes: ["#2b78e4", "#60a5fa", "#0f172a"],
+      origin: "test",
+      originMeta: {
+        chapter: result.chapterName,
+        level: result.levelName,
+        score: Number(result.score || 0),
+        maxScore: Number(result.maxScore || 0),
+        accuracy: accuracyPercent
+      },
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem("clw_community_draft_v1", JSON.stringify(draft));
+    } catch (_error) {
+      return;
+    }
+    document.dispatchEvent(new CustomEvent("clw:community-draft-updated", { detail: { origin: "test", resultId: resultId } }));
+    window.location.href = "community.html";
+  }
+
   function bindEvents() {
     rootEl.addEventListener("click", handleClick);
     rootEl.addEventListener("change", handleChange);
@@ -548,6 +592,7 @@
     var jumpButton = target.closest("[data-quiz-jump]");
     var flagBtn = target.closest("[data-flag-question]");
     var unflagBtn = target.closest("[data-unflag-question]");
+    var shareCommunityBtn = target.closest("[data-share-community]");
 
     if (chapterButton) {
       state.selection.chapter = chapterButton.getAttribute("data-chapter-select");
@@ -604,6 +649,11 @@
     if (unflagBtn) {
       event.preventDefault();
       unflagQuestion(unflagBtn.getAttribute("data-unflag-question"));
+      return;
+    }
+    if (shareCommunityBtn) {
+      event.preventDefault();
+      shareResultToCommunity(shareCommunityBtn.getAttribute("data-share-community"));
       return;
     }
     var practiceBtn = target.closest("[data-practice-question]");
@@ -1009,6 +1059,7 @@
           renderLinkButton("Retry This Quiz", buildUrl("test-quiz.html", { chapter: result.chapter, level: result.level, unit: result.unit, fresh: "1" }), "test-link-btn--primary") +
           renderLinkButton("Try Next Quiz", nextLevel ? buildUrl("test.html", { chapter: result.chapter, level: nextLevel.id }) : buildUrl("test.html", { chapter: result.chapter, level: result.level }), "test-link-btn--soft") +
           renderLinkButton("Review Recommended Topics", "learning.html", "test-link-btn--soft") +
+          '<button type="button" class="test-link-btn test-link-btn--soft" data-share-community="' + result.id + '">Share Reflection to Community</button>' +
         '</div>' +
       '</div>';
   }
@@ -1409,6 +1460,17 @@
     state.lastResult = result;
     updateProgress(result);
     updateRewards(result);
+    var auth = getAuthApi();
+    var username = getCurrentUsername();
+    if (auth && auth.recordActivity && username) {
+      auth.recordActivity(username, {
+        pointsDelta: Number(result.score || 0),
+        postDelta: 0,
+        source: "test",
+        type: "quiz_complete",
+        refId: result.id
+      });
+    }
     state.currentQuiz = null;
     saveState();
     window.location.href = buildUrl("test-results.html", { chapter: result.chapter, level: result.level, resultId: result.id });

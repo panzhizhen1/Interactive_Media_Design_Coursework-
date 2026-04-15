@@ -52,9 +52,12 @@ const colorPreview=document.getElementById('color-preview');
 const backBtn=document.getElementById('back-to-gallery');
 const resetBtn=document.getElementById('reset-drawing');
 const saveBtn=document.getElementById('save-image');
+const shareBtn=document.getElementById('share-community');
+const gameStatus=document.getElementById('game-status');
 const fillToolBtn=document.getElementById('tool-fill');
 const eraserToolBtn=document.getElementById('tool-eraser');
 const colorModelSelect=document.getElementById('color-model');
+const COMMUNITY_DRAFT_KEY='clw_community_draft_v1';
 
 const rgbInputs={r:document.getElementById('rgb-r'),g:document.getElementById('rgb-g'),b:document.getElementById('rgb-b'),rn:document.getElementById('rgb-r-number'),gn:document.getElementById('rgb-g-number'),bn:document.getElementById('rgb-b-number')};
 const hsvInputs={h:document.getElementById('hsv-h'),s:document.getElementById('hsv-s'),v:document.getElementById('hsv-v'),hn:document.getElementById('hsv-h-number'),sn:document.getElementById('hsv-s-number'),vn:document.getElementById('hsv-v-number')};
@@ -62,6 +65,7 @@ const cmykInputs={c:document.getElementById('cmyk-c'),m:document.getElementById(
 const modelGroups={rgb:document.getElementById('controls-rgb'),hsv:document.getElementById('controls-hsv'),cmyk:document.getElementById('controls-cmyk')};
 
 let activeDrawingIndex=0;let activeTool='fill';
+let gameActivitySent={};
 
 function setSketchStyle(ctx,scale=1){ctx.lineWidth=Math.max(4*scale,1);ctx.strokeStyle='#000';ctx.lineCap='round';ctx.lineJoin='round';}
 function drawPreview(index){const canvas=document.getElementById(`preview-${index}`);if(!canvas)return;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);setSketchStyle(ctx,.5);drawings[index].draw(ctx,canvas.width,canvas.height);}
@@ -71,6 +75,28 @@ function clampRange(v,min,max){return Math.min(max,Math.max(min,Number(v)||0));}
 function hsvToRgb(h,s,v){const hh=((h%360)+360)%360,sat=s/100,val=v/100,c=val*sat,x=c*(1-Math.abs((hh/60)%2-1)),m=val-c;let r1=0,g1=0,b1=0;if(hh<60){r1=c;g1=x;}else if(hh<120){r1=x;g1=c;}else if(hh<180){g1=c;b1=x;}else if(hh<240){g1=x;b1=c;}else if(hh<300){r1=x;b1=c;}else{r1=c;b1=x;}return{r:Math.round((r1+m)*255),g:Math.round((g1+m)*255),b:Math.round((b1+m)*255)};}
 function cmykToRgb(c,m,y,k){const cc=c/100,mm=m/100,yy=y/100,kk=k/100;return{r:Math.round(255*(1-cc)*(1-kk)),g:Math.round(255*(1-mm)*(1-kk)),b:Math.round(255*(1-yy)*(1-kk))};}
 function getCurrentRgb(){const model=colorModelSelect.value;if(model==='hsv')return hsvToRgb(Number(hsvInputs.h.value),Number(hsvInputs.s.value),Number(hsvInputs.v.value));if(model==='cmyk')return cmykToRgb(Number(cmykInputs.c.value),Number(cmykInputs.m.value),Number(cmykInputs.y.value),Number(cmykInputs.k.value));return{r:Number(rgbInputs.r.value),g:Number(rgbInputs.g.value),b:Number(rgbInputs.b.value)};}
+function toHex(value){return Number(value).toString(16).padStart(2,'0');}
+function getCurrentHex(){const rgb=getCurrentRgb();return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;}
+function setStatus(message){if(gameStatus)gameStatus.textContent=message||'';}
+function getAuthApi(){return window.CLWAuth||null;}
+function getCurrentUsername(){const auth=getAuthApi();return auth&&auth.getCurrentUsername?auth.getCurrentUsername():'';}
+function ensureActivityRecorded(){
+const auth=getAuthApi();const username=getCurrentUsername();const drawing=drawings[activeDrawingIndex];
+if(!auth||!auth.recordActivity||!username||!drawing||gameActivitySent[drawing.name])return;
+gameActivitySent[drawing.name]=true;
+auth.recordActivity(username,{pointsDelta:4,postDelta:0,source:'game',type:'game_complete',refId:`drawing_${drawing.name.toLowerCase()}`});
+}
+function shareToCommunity(){
+const drawing=drawings[activeDrawingIndex];if(!drawing)return;
+const hex=getCurrentHex();
+const snapshot=editorCanvas.toDataURL('image/png');
+const draft={content:`I completed ${drawing.name} in the paint game. This palette choice focuses on contrast and readability.`,tag:'#Palettes',colorHex:hex,paletteHexes:[hex],imageDataUrl:snapshot,origin:'game',originMeta:{drawingName:drawing.name,paletteHex:hex,colorModel:colorModelSelect.value},updatedAt:new Date().toISOString()};
+try{localStorage.setItem(COMMUNITY_DRAFT_KEY,JSON.stringify(draft));}catch(_){}
+document.dispatchEvent(new CustomEvent('clw:community-draft-updated',{detail:{origin:'game',drawingName:drawing.name,paletteHex:hex,imageDataUrl:snapshot}}));
+ensureActivityRecorded();
+setStatus('Draft sent to Community. Redirecting...');
+window.location.href='community.html';
+}
 function updateColorPreview(){const {r,g,b}=getCurrentRgb();colorPreview.style.background=`rgb(${r}, ${g}, ${b})`;}
 
 function bindPair(rangeInput,numberInput){const min=Number(rangeInput.min),max=Number(rangeInput.max);rangeInput.addEventListener('input',()=>{numberInput.value=rangeInput.value;updateColorPreview();});numberInput.addEventListener('input',()=>{numberInput.value=String(clampRange(numberInput.value,min,max));rangeInput.value=numberInput.value;updateColorPreview();});}
@@ -82,14 +108,14 @@ function canFillPixel(data,index,target){const isBlackLine=data[index]<35&&data[
 function floodFill(startX,startY,fillColor){const width=editorCanvas.width,height=editorCanvas.height;if(startX<0||startY<0||startX>=width||startY>=height)return;const imageData=editorCtx.getImageData(0,0,width,height),data=imageData.data,startIdx=(startY*width+startX)*4,target=[data[startIdx],data[startIdx+1],data[startIdx+2],data[startIdx+3]];if(target[0]===fillColor[0]&&target[1]===fillColor[1]&&target[2]===fillColor[2]&&target[3]===255)return;if(target[0]<35&&target[1]<35&&target[2]<35)return;const stack=[[startX,startY]];while(stack.length){const p=stack.pop();if(!p)continue;const [x,y]=p,idx=(y*width+x)*4;if(!canFillPixel(data,idx,target))continue;data[idx]=fillColor[0];data[idx+1]=fillColor[1];data[idx+2]=fillColor[2];data[idx+3]=255;if(x>0)stack.push([x-1,y]);if(x<width-1)stack.push([x+1,y]);if(y>0)stack.push([x,y-1]);if(y<height-1)stack.push([x,y+1]);}editorCtx.putImageData(imageData,0,0);}
 
 function setActiveTool(tool){activeTool=tool;fillToolBtn.classList.toggle('is-active',tool==='fill');eraserToolBtn.classList.toggle('is-active',tool==='eraser');}
-function openEditor(index){activeDrawingIndex=index;editorTitle.textContent=`Painting Workspace: ${drawings[index].name}`;galleryView.hidden=true;editorView.hidden=false;setActiveTool('fill');drawEditor(index);}
+function openEditor(index){activeDrawingIndex=index;editorTitle.textContent=`Painting Workspace: ${drawings[index].name}`;galleryView.hidden=true;editorView.hidden=false;setActiveTool('fill');drawEditor(index);setStatus('');}
 function showGallery(){editorView.hidden=true;galleryView.hidden=false;}
 function bindGalleryButtons(){document.querySelectorAll('[data-open-drawing]').forEach((button)=>{button.addEventListener('click',()=>{openEditor(Number(button.getAttribute('data-open-drawing')));});});}
 function toCanvasCoords(event){const rect=editorCanvas.getBoundingClientRect(),scaleX=editorCanvas.width/rect.width,scaleY=editorCanvas.height/rect.height;return{x:Math.floor((event.clientX-rect.left)*scaleX),y:Math.floor((event.clientY-rect.top)*scaleY)};}
 function bindEditorCanvas(){editorCanvas.addEventListener('click',(event)=>{const {x,y}=toCanvasCoords(event);if(activeTool==='eraser'){floodFill(x,y,[255,255,255]);return;}const {r,g,b}=getCurrentRgb();floodFill(x,y,[r,g,b]);});}
 function resetCurrentDrawing(){drawEditor(activeDrawingIndex);} 
-function saveCurrentCanvas(){const link=document.createElement('a');const safeName=drawings[activeDrawingIndex].name.toLowerCase();link.download=`${safeName}-painting.png`;link.href=editorCanvas.toDataURL('image/png');link.click();}
-function bindToolActions(){fillToolBtn.addEventListener('click',()=>setActiveTool('fill'));eraserToolBtn.addEventListener('click',()=>setActiveTool('eraser'));resetBtn.addEventListener('click',resetCurrentDrawing);saveBtn.addEventListener('click',saveCurrentCanvas);}
+function saveCurrentCanvas(){const link=document.createElement('a');const safeName=drawings[activeDrawingIndex].name.toLowerCase();link.download=`${safeName}-painting.png`;link.href=editorCanvas.toDataURL('image/png');link.click();ensureActivityRecorded();setStatus('Image saved. You can now share this work to Community.');}
+function bindToolActions(){fillToolBtn.addEventListener('click',()=>setActiveTool('fill'));eraserToolBtn.addEventListener('click',()=>setActiveTool('eraser'));resetBtn.addEventListener('click',resetCurrentDrawing);saveBtn.addEventListener('click',saveCurrentCanvas);if(shareBtn)shareBtn.addEventListener('click',shareToCommunity);}
 
 function init(){drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindEditorCanvas();bindToolActions();backBtn.addEventListener('click',showGallery);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();showGallery();}
 init();
