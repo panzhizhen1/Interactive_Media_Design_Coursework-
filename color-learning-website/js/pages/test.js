@@ -4,6 +4,12 @@
   var STORAGE_KEY = "clw_test_module_state_v2";
   var LEVEL_ORDER = ["easy", "medium", "hard"];
   var LEVEL_POINTS = { easy: 4, medium: 6, hard: 8 };
+  var SFX_BASE = "assets/sound%20effects/";
+  var SFX_STAR = SFX_BASE + "star.mp3";
+  var SFX_BADGE = SFX_BASE + "badge.mp3";
+  var SFX_HINT = SFX_BASE + "hint.mp3";
+  var SFX_CORRECT = SFX_BASE + "correct_answer.mp3";
+  var SFX_WRONG = SFX_BASE + "wrong_answer.mp3";
 
   var CHAPTERS = [
     {
@@ -91,7 +97,20 @@
     overview: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>',
     analysis: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>',
     flag: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>',
-    flagFilled: '<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+    flagFilled: '<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>',
+    /* ── Title-row icons (flat, no backdrop circle) ── */
+    snapshotTitle: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="13" width="4" height="8" rx="1.5" fill="#818cf8"/><rect x="10" y="8" width="4" height="13" rx="1.5" fill="#6366f1"/><rect x="17" y="3" width="4" height="18" rx="1.5" fill="#4338ca"/></svg>',
+    folderTitle: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="#fb923c" d="M20 6h-8l-2-2H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>',
+    rewardsTitle: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8.5" r="6" fill="#fbbf24"/><circle cx="12" cy="8.5" r="3.5" fill="#d97706"/><circle cx="12" cy="8.5" r="1.8" fill="#fef9c3"/><path fill="#f59e0b" d="M8.5 14.5l-2 6.5 5.5-3 5.5 3-2-6.5"/></svg>',
+    bookTitle: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#2563eb" d="M4 6.5A1.5 1.5 0 015.5 5H11v14l-3.5-2L4 19V6.5z"/><path fill="#1e40af" d="M20 6.5A1.5 1.5 0 0018.5 5H13v14l3.5-2 3.5 2V6.5z"/><path stroke="#bfdbfe" stroke-width="1.2" stroke-linecap="round" fill="none" d="M6.5 8.5h3.5M6.5 11h3.5M6.5 13.5h2"/><path stroke="#93c5fd" stroke-width="1.2" stroke-linecap="round" fill="none" d="M13.5 8.5h3.5M13.5 11h3.5M13.5 13.5h2"/></svg>',
+    /* Strength — barbell (rect-only SVG, renders everywhere) */
+    strengthTitle: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none"><rect x="1.25" y="7.75" width="4.25" height="8.5" rx="1.1" fill="#c2410c"/><rect x="5.25" y="6.25" width="3.2" height="11.5" rx="0.65" fill="#ea580c"/><rect x="8.35" y="10.35" width="7.3" height="3.3" rx="1.65" fill="#7c2d12"/><rect x="15.55" y="6.25" width="3.2" height="11.5" rx="0.65" fill="#ea580c"/><rect x="18.5" y="7.75" width="4.25" height="8.5" rx="1.1" fill="#c2410c"/><rect x="4.1" y="11.35" width="15.8" height="1.3" rx="0.5" fill="#fb923c"/></svg>',
+    /* Weak Areas — compact bullseye */
+    weakTitle: '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#14b8a6" stroke-width="1.9"/><circle cx="12" cy="12" r="4.8" fill="none" stroke="#14b8a6" stroke-width="1.9"/><circle cx="12" cy="12" r="2.1" fill="#14b8a6"/></svg>',
+    /* Live-analysis stats: solid coloured disc + white symbol — matches Mistakes-button grammar */
+    correctStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#16a34a"/><path fill="none" stroke="#fff" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round" d="M7.2 12.5l2.9 2.9 6.7-6.7"/></svg>',
+    wrongStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#dc2626"/><path fill="none" stroke="#fff" stroke-width="2.35" stroke-linecap="round" d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8"/></svg>',
+    scoreStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="#6d28d9"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>'
   };
 
   if (!mainEl || !rootEl) return;
@@ -464,7 +483,8 @@
       rewards: { lifetimePoints: 56, badges: ["Contrast Scout", "Model Navigator"], streak: 4 },
       flagged: [],
       currentQuiz: null,
-      lastResult: baseResult
+      lastResult: baseResult,
+      lastQuizSubmit: null
     };
   }
 
@@ -497,6 +517,18 @@
     }
     next.currentQuiz = raw.currentQuiz || null;
     next.lastResult = raw.lastResult || next.lastResult;
+    if (raw.lastQuizSubmit && raw.lastQuizSubmit.at && raw.lastQuizSubmit.chapterId && raw.lastQuizSubmit.levelId && raw.lastQuizSubmit.unitId && raw.lastQuizSubmit.mode !== "review") {
+      next.lastQuizSubmit = {
+        at: raw.lastQuizSubmit.at,
+        chapterId: raw.lastQuizSubmit.chapterId,
+        levelId: raw.lastQuizSubmit.levelId,
+        unitId: raw.lastQuizSubmit.unitId,
+        mode: "path",
+        reviewIds: []
+      };
+    } else {
+      next.lastQuizSubmit = null;
+    }
     return next;
   }
 
@@ -717,9 +749,10 @@
     var recommended = getRecommendedTopics(chapter.id, level.id);
     var mistakeCount = getVisibleMistakes(chapter.id, level.id).length;
     var totalScore = typeof state.rewards.lifetimePoints === "number" ? state.rewards.lifetimePoints : 0;
-    var resume = getLastWorkedResume();
-    var resumeText = formatResumeShortcut(resume.chapterId, resume.levelId, resume.unitId);
-    var resumeHref = buildUrl("test.html", { chapter: resume.chapterId, level: resume.levelId });
+    var resumeText = state.lastQuizSubmit && state.lastQuizSubmit.at
+      ? formatResumeShortcut(state.lastQuizSubmit.chapterId, state.lastQuizSubmit.levelId, state.lastQuizSubmit.unitId)
+      : "\u2014";
+    var resumeHref = buildLastSubmitResumeHref(state.lastQuizSubmit);
 
     applyChapterTheme(chapter.id);
 
@@ -744,10 +777,10 @@
           '</div>' +
         "</div>" +
         '<aside class="test-sidebar test-sidebar--map">' +
-          renderSidebarCard("Progress Snapshot", '<div class="test-stat-grid">' + renderStat("Whole Chapter", snapshot.chapterUnits, "Finished units in this chapter, all difficulties added together.") + renderStat("Average Accuracy", snapshot.overallAccuracy, "Average accuracy across completed quizzes for the chapter and difficulty you are viewing (every full run counts).") + renderStatLink("Last working on", resumeText, resumeHref, "Open the map with the chapter and difficulty you were last working on.", "test-stat--full-row") + "</div>") +
+          renderSidebarCard("Progress Snapshot", '<div class="test-stat-grid">' + renderStat("Whole Chapter", snapshot.chapterUnits, "Finished units in this chapter, all difficulties added together.") + renderStat("Average Accuracy", snapshot.overallAccuracy, "Average accuracy across completed quizzes for the chapter and difficulty you are viewing (every full run counts).") + renderStatLink("Last working on", resumeText, resumeHref, "The map unit (chapter, unit, difficulty) where you last pressed Submit in a normal path quiz — not mistakes review or bookmark practice.", "test-stat--full-row") + "</div>", IC.snapshotTitle) +
           renderReviewCard(chapter.id, level.id) +
           renderRewardsCard(totalScore) +
-          renderSidebarCard("Recommended Review", '<ul class="test-note-list">' + recommended.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>") +
+          renderSidebarCard("Recommended Review", '<ul class="test-note-list">' + recommended.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>", IC.bookTitle) +
         "</aside>" +
       "</div>";
   }
@@ -881,10 +914,22 @@
       '<div class="quiz-sidecard__metric"><span>Accuracy</span><strong>' + accuracy + '</strong></div>' +
       '<div class="quiz-sidecard__meter"><div class="quiz-sidecard__meter-fill" style="width:' + Math.max(parseInt(accuracy, 10) || 0, 4) + '%"></div></div>' +
       '<div class="quiz-sidecard__statgrid">' +
-        '<div class="quiz-sidecard__stat is-correct"><span>Correct</span><strong>' + session.correctCount + '</strong></div>' +
-        '<div class="quiz-sidecard__stat is-wrong"><span>Wrong</span><strong>' + Math.max(Object.keys(session.submitted).length - session.correctCount, 0) + '</strong></div>' +
+        '<div class="quiz-sidecard__stat is-correct">' +
+          '<span class="quiz-sidecard__stat-ic" aria-hidden="true">' + IC.correctStat + '</span>' +
+          '<span class="quiz-sidecard__stat-name">Correct</span>' +
+          '<strong class="quiz-sidecard__stat-val">' + session.correctCount + '</strong>' +
+        '</div>' +
+        '<div class="quiz-sidecard__stat is-wrong">' +
+          '<span class="quiz-sidecard__stat-ic" aria-hidden="true">' + IC.wrongStat + '</span>' +
+          '<span class="quiz-sidecard__stat-name">Wrong</span>' +
+          '<strong class="quiz-sidecard__stat-val">' + Math.max(Object.keys(session.submitted).length - session.correctCount, 0) + '</strong>' +
+        '</div>' +
       '</div>' +
-      '<div class="quiz-sidecard__scorebox"><span>Current Score</span><strong>' + session.score + '</strong></div>' +
+      '<div class="quiz-sidecard__scorebox">' +
+        '<span class="quiz-sidecard__stat-ic" aria-hidden="true">' + IC.scoreStat + '</span>' +
+        '<span class="quiz-sidecard__stat-name">Current Score</span>' +
+        '<strong class="quiz-sidecard__stat-val">' + session.score + '</strong>' +
+      '</div>' +
     '</section>';
   }
 
@@ -969,7 +1014,12 @@
     }).join("");
     var badgeHtml = result.badgeAwarded
       ? '<div class="result-badge-wrap" style="animation-delay:' + (3 * 0.28 + 0.3) + 's">' +
-          '<div class="result-badge-icon"><svg viewBox="0 0 48 48" aria-hidden="true" width="52" height="52"><circle cx="24" cy="28" r="16" fill="color-mix(in srgb,var(--color-primary) 18%,white)" stroke="var(--color-primary)" stroke-width="2.5"/><polygon points="24,6 27.5,16 38,16 29.5,22.5 32.5,33 24,27 15.5,33 18.5,22.5 10,16 20.5,16" fill="var(--color-primary)" opacity="0.9" stroke-linejoin="round"/><circle cx="24" cy="28" r="10" fill="color-mix(in srgb,var(--color-primary) 12%,white)"/><text x="24" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="var(--color-primary)">★</text></svg></div>' +
+          '<div class="result-badge-icon"><svg viewBox="0 0 48 48" aria-hidden="true" width="52" height="52">' +
+            '<path d="M11.5 32.5L9 44.5L22 38.8L24 45L26 38.8L39 44.5L36.5 32.5L24 34.2Z" fill="var(--color-primary)" opacity="0.93"/>' +
+            '<circle cx="24" cy="18" r="13" fill="color-mix(in srgb,var(--color-primary) 18%,white)" stroke="var(--color-primary)" stroke-width="2.5"/>' +
+            '<circle cx="24" cy="18" r="8.5" fill="color-mix(in srgb,var(--color-primary) 12%,white)"/>' +
+            '<path d="M24 11.5l2.1 4.25h4.7L27.35 18.9l1.45 4.65L24 20.35l-4.8 3.2 1.45-4.65-3.45-2.15h4.7z" fill="var(--color-primary)"/>' +
+          '</svg></div>' +
           '<span class="result-badge-name">' + result.badgeAwarded + '</span>' +
         '</div>'
       : '';
@@ -999,10 +1049,10 @@
           '</div>' +
           '<div class="results-insights">' +
             '<div class="results-split">' +
-              renderResultsCard("Strengths", '<div class="results-list">' + result.strengths.map(function (item) { return '<div class="results-list__item"><strong>' + item + '</strong><div class="results-copy">Answered confidently enough to keep moving.</div></div>'; }).join("") + "</div>") +
-              renderResultsCard("Weak Areas", '<div class="results-list">' + result.weakAreas.map(function (item) { return '<div class="results-list__item"><strong>' + item + '</strong><div class="results-copy">Review before trying a harder route.</div></div>'; }).join("") + "</div>") +
+              renderResultsCard("Strengths", '<div class="results-list">' + result.strengths.map(function (item) { return '<div class="results-list__item"><strong>' + item + '</strong><div class="results-copy">Answered confidently enough to keep moving.</div></div>'; }).join("") + "</div>", IC.strengthTitle) +
+              renderResultsCard("Weak Areas", '<div class="results-list">' + result.weakAreas.map(function (item) { return '<div class="results-list__item"><strong>' + item + '</strong><div class="results-copy">Review before trying a harder route.</div></div>'; }).join("") + "</div>", IC.weakTitle) +
             '</div>' +
-            renderResultsCard("Recommended review topics", '<ul class="test-note-list">' + result.reviewTopics.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>") +
+            renderResultsCard("Recommended review topics", '<ul class="test-note-list">' + result.reviewTopics.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>", IC.bookTitle) +
           '</div>' +
         '</div>' +
         '<div class="results-actions-bar">' +
@@ -1011,6 +1061,25 @@
           renderLinkButton("Review Recommended Topics", "learning.html", "test-link-btn--soft") +
         '</div>' +
       '</div>';
+
+    /* ── SFX + confetti: times match CSS starPop / starFill delays (0.28s step, 0.42s pop, peak ~60%) ── */
+    var starStepMs = 280;
+    var starPopMs = 420;
+    var starPeakMs = Math.round(starPopMs * 0.6);
+    var si;
+    for (si = 1; si <= result.starsEarned; si++) {
+      (function (n) {
+        setTimeout(function () { playSfx(SFX_STAR, { layers: 3, staggerMs: 20 }); }, n * starStepMs + starPeakMs);
+      })(si);
+    }
+    if (result.badgeAwarded) {
+      var badgeDelayMs = 3 * starStepMs + 300;
+      var badgePeakMs = Math.round(550 * 0.55);
+      setTimeout(function () {
+        playSfx(SFX_BADGE);
+        launchConfetti();
+      }, badgeDelayMs + badgePeakMs);
+    }
   }
 
   function renderMistakesPage() {
@@ -1057,7 +1126,7 @@
         renderMistakesToolbar(chapterFilter, levelFilter, null) +
         (fPageItems.length
           ? '<div class="mistake-compact-grid">' + fPageItems.map(renderFlaggedCompactCard).join("") + '</div>'
-          : '<div class="mistakes-empty">No bookmarked questions yet.\u2003Use the ' + bookmarkSvg + ' button during a quiz to save questions here.</div>') +
+          : '<div class="mistakes-empty mistakes-empty--stacked"><p class="mistakes-empty__line">No bookmarked questions yet.</p><p class="mistakes-empty__line">Use the <span class="mistakes-empty__ic" aria-hidden="true">' + bookmarkSvg + '</span> button during a quiz to save questions here.</p></div>') +
         renderPagination(page, fTotalPages, chapterFilter, levelFilter, tab, "");
     } else {
       var visible = getVisibleMistakes(chapterFilter, levelFilter, statusFilter);
@@ -1277,6 +1346,17 @@
     var question = quiz.questions[quiz.currentIndex];
     if (!question || quiz.submitted[question.id] || question.type === "sort") return;
     quiz.drafts[question.id] = value;
+    if (quiz.mode === "path") {
+      state.lastQuizSubmit = {
+        at: new Date().toISOString(),
+        chapterId: quiz.chapterId,
+        levelId: quiz.levelId,
+        unitId: quiz.unitId,
+        mode: "path",
+        reviewIds: []
+      };
+    }
+
     saveState();
     renderPage();
   }
@@ -1333,6 +1413,7 @@
     }
     if (action === "hint") {
       quiz.revealedHints[question.id] = true;
+      playSfx(SFX_HINT);
       saveState();
       renderPage();
       return;
@@ -1391,9 +1472,11 @@
       quiz.currentStreak += 1;
       quiz.bestStreak = Math.max(quiz.bestStreak, quiz.currentStreak);
       if (quiz.mode === "review") markMistakeReviewed(question.id);
+      playSfx(SFX_CORRECT);
     } else {
       quiz.currentStreak = 0;
       upsertMistake(question, quiz, buildMistakeReason(question));
+      playSfx(SFX_WRONG);
     }
 
     saveState();
@@ -1522,29 +1605,11 @@
     return 0;
   }
 
-  function getLastWorkedResume() {
-    var bestTime = "";
-    var best = null;
-    CHAPTERS.forEach(function (ch) {
-      LEVEL_ORDER.forEach(function (levelId) {
-        var lp = state.progress[ch.id][levelId].lastPlayed;
-        if (lp && lp > bestTime) {
-          bestTime = lp;
-          best = { chapterId: ch.id, levelId: levelId };
-        }
-      });
-    });
-    if (best) {
-      var uid = state.progress[best.chapterId][best.levelId].currentUnit || UNIT_TEMPLATES[best.levelId][0].id;
-      return { chapterId: best.chapterId, levelId: best.levelId, unitId: uid };
+  function buildLastSubmitResumeHref(lastSubmit) {
+    if (!lastSubmit || !lastSubmit.at) {
+      return buildUrl("test.html", { chapter: state.selection.chapter, level: state.selection.level });
     }
-    if (state.history.length) {
-      var latest = state.history.reduce(function (a, b) { return a.timestamp > b.timestamp ? a : b; });
-      return { chapterId: latest.chapter, levelId: latest.level, unitId: latest.unit || getCurrentUnitId(latest.chapter, latest.level) };
-    }
-    var c = state.selection.chapter;
-    var l = state.selection.level;
-    return { chapterId: c, levelId: l, unitId: getCurrentUnitId(c, l) };
+    return buildUrl("test-quiz.html", { chapter: lastSubmit.chapterId, level: lastSubmit.levelId, unit: lastSubmit.unitId });
   }
 
   function formatResumeShortcut(chapterId, levelId, unitId) {
@@ -1806,7 +1871,12 @@
     var explanationOpen = !!mistake.showExplanation;
     return '<article class="mistake-card mistake-card--review"><div class="mistake-item__header"><div><div class="test-inline-meta"><span class="mistake-tag">' + getLevel(mistake.level).name + '</span><span class="mistake-tag">' + mistake.topic + '</span><span class="mistake-tag">' + (mistake.mastered ? "Reviewed" : "Pending") + '</span></div><h3 class="mistake-card__title">' + mistake.prompt + '</h3></div></div><div class="mistake-answer-panels"><div class="mistake-answer-panel is-wrong"><span class="mistake-answer-panel__label">Your answer</span><strong>' + getMistakeUserAnswer(mistake) + '</strong></div><div class="mistake-answer-panel is-correct"><span class="mistake-answer-panel__label">Correct answer</span><strong>' + getMistakeCorrectAnswer(mistake) + '</strong></div></div>' + (explanationOpen ? '<div class="mistake-explanation"><strong>Explanation:</strong> ' + mistake.correctConcept + '<br /><span class="test-card-copy">' + mistake.mistakeReason + '</span></div>' : "") + '<div class="mistake-item__footer"><div class="mistake-item__meta"><span>Attempts: ' + (mistake.attemptCount || 1) + '</span><span>Last attempt: ' + formatDate(mistake.lastWrongAt) + '</span></div><div class="mistake-item__controls"><button type="button" class="test-inline-btn" data-toggle-explanation="' + mistake.id + '">' + (explanationOpen ? "Hide explanation" : "View explanation") + '</button><button type="button" class="test-action test-action--primary" data-mark-mastered="' + mistake.id + '">' + (mistake.mastered ? "Mark as pending" : "Mark reviewed") + '</button></div></div></article>';
   }
-  function renderSidebarCard(title, inner) { return '<section class="test-sidebar-card"><h3 class="test-card-title">' + title + "</h3>" + inner + "</section>"; }
+  function renderSidebarCard(title, inner, iconHtml) {
+    var head = iconHtml
+      ? '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + iconHtml + '</span><span class="test-card-title__text">' + title + "</span></h3>"
+      : '<h3 class="test-card-title">' + title + "</h3>";
+    return "<section class=\"test-sidebar-card\">" + head + inner + "</section>";
+  }
   function renderSidebarLinkCard(title, inner, href) { return '<a class="test-sidebar-card test-sidebar-card--link" href="' + href + '"><h3 class="test-card-title">' + title + "</h3>" + inner + "</a>"; }
   function renderReviewCard(chapterId, levelId) {
     var mistakesUrl = buildUrl("test-mistakes.html", { chapter: chapterId, level: levelId });
@@ -1814,7 +1884,7 @@
     var mistakeSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 13.59L14.59 17 12 14.41 9.41 17 8 15.59l2.59-2.59L8 10.41 9.41 9 12 11.59 14.59 9 16 10.41l-2.59 2.59L16 15.59z"/></svg>';
     var bookmarkSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
     return '<section class="test-sidebar-card">' +
-      '<h3 class="test-card-title">Question Folder</h3>' +
+      '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + IC.folderTitle + '</span><span class="test-card-title__text">Question Folder</span></h3>' +
       '<div class="review-btn-row">' +
         '<a class="review-btn review-btn--mistakes" href="' + mistakesUrl + '">' + mistakeSvg + '<span>Mistakes</span></a>' +
         '<a class="review-btn review-btn--saved" href="' + savedUrl + '">' + bookmarkSvg + '<span>Bookmarked</span></a>' +
@@ -1826,7 +1896,7 @@
     var flameSvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8c0-5.39-2.59-10.2-6.5-13.33zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>';
     var trophySvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>';
     return '<section class="test-sidebar-card">' +
-      '<h3 class="test-card-title">Rewards</h3>' +
+      '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + IC.rewardsTitle + '</span><span class="test-card-title__text">Rewards</span></h3>' +
       '<div class="reward-grid">' +
         '<div class="reward-item">' +
           '<div class="reward-item__icon reward-item__icon--star">' + starSvg + '</div>' +
@@ -1847,7 +1917,63 @@
       (state.rewards.badges.length ? '<div class="reward-badges">' + state.rewards.badges.map(function (b) { return '<span class="test-tag">' + b + '</span>'; }).join('') + '</div>' : '') +
     '</section>';
   }
-  function renderResultsCard(title, inner) { return '<section class="results-card"><h2 class="results-card__title">' + title + "</h2>" + inner + "</section>"; }
+  function renderResultsCard(title, inner, iconHtml) {
+    var head = iconHtml
+      ? '<h2 class="results-card__title results-card__title--with-icon"><span class="results-card__title-icon">' + iconHtml + '</span><span class="results-card__title-text">' + title + "</span></h2>"
+      : '<h2 class="results-card__title">' + title + "</h2>";
+    return "<section class=\"results-card\">" + head + inner + "</section>";
+  }
+  function playSfx(src, opts) {
+    try {
+      var conf = opts || {};
+      var layers = Math.max(1, Number(conf.layers) || 1);
+      var staggerMs = Math.max(0, Number(conf.staggerMs) || 0);
+      var baseVol = typeof conf.volume === "number" ? conf.volume : 1;
+      var i;
+      for (i = 0; i < layers; i++) {
+        (function (idx) {
+          setTimeout(function () {
+            try {
+              var a = new Audio(src);
+              a.volume = Math.max(0, Math.min(1, baseVol));
+              var p = a.play();
+              if (p && typeof p.catch === "function") p.catch(function () {});
+            } catch (e) {}
+          }, idx * staggerMs);
+        })(i);
+      }
+    } catch (e) {}
+  }
+
+  /* ── Confetti: coloured pieces fall from the top of the viewport ── */
+  function launchConfetti() {
+    var wrap = document.createElement('div');
+    wrap.className = 'confetti-wrap';
+    document.body.appendChild(wrap);
+    var palette = ['#f59e0b','#3b82f6','#ef4444','#10b981','#8b5cf6',
+                   '#f97316','#06b6d4','#ec4899','#fbbf24','#34d399','#a78bfa'];
+    for (var i = 0; i < 80; i++) {
+      var p = document.createElement('div');
+      var isCircle = Math.random() > 0.55;
+      var isTall   = !isCircle && Math.random() > 0.5;
+      var w = 5 + Math.random() * 8;
+      var h = isTall ? w * 2.2 : w;
+      var dur = (1.6 + Math.random() * 2).toFixed(2);
+      var delay = (Math.random() * 1.0).toFixed(2);
+      var cw = Math.random() > 0.5;
+      p.className = 'confetti-piece ' + (cw ? 'confetti-cw' : 'confetti-ccw');
+      p.style.cssText =
+        'left:' + (Math.random() * 100) + 'vw;' +
+        'background:' + palette[Math.floor(Math.random() * palette.length)] + ';' +
+        'width:' + w + 'px;height:' + h + 'px;' +
+        'border-radius:' + (isCircle ? '50%' : '2px') + ';' +
+        'animation-duration:' + dur + 's;' +
+        'animation-delay:' + delay + 's;';
+      wrap.appendChild(p);
+    }
+    setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 5000);
+  }
+
   function renderMistakeMetric(label, value, extraClass) { return '<section class="mistakes-metric ' + (extraClass || "") + '"><span class="mistakes-metric__label">' + label + '</span><strong class="mistakes-metric__value">' + value + "</strong></section>"; }
   function renderChoiceChip(label, attrs, active) { return '<button type="button" class="test-chip' + (active ? " is-active" : "") + '" ' + attrs + ">" + label + "</button>"; }
   function renderLinkButton(label, href, extraClass) { var disabled = extraClass && extraClass.indexOf("is-disabled") !== -1; return '<a class="test-link-btn ' + (extraClass || "") + '" href="' + (disabled ? "#" : href) + '"' + (disabled ? ' aria-disabled="true"' : "") + ">" + label + "</a>"; }
@@ -2088,6 +2214,8 @@
     var correct = evaluate(question, soloState.draft);
     soloState.submitted = true;
     soloState.isCorrect = correct;
+    if (correct) playSfx(SFX_CORRECT);
+    else playSfx(SFX_WRONG);
     var now = new Date().toISOString();
 
     if (soloState.type === "mistake") {
