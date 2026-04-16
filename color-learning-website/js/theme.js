@@ -61,7 +61,7 @@
     } catch (e) {
       /* ignore */
     }
-    return "blue";
+    return "";
   }
 
   function applyTheme(themeId) {
@@ -93,12 +93,9 @@
     return nextId;
   }
 
-  currentId = readStoredThemeId();
+  var storedThemeId = readStoredThemeId();
+  currentId = storedThemeId || pickRandomThemeId();
   applyTheme(currentId);
-
-  document.addEventListener("click", function () {
-    applyTheme(pickRandomThemeId());
-  });
 
   window.CLWTheme = {
     /** @param {string} themeId */
@@ -112,7 +109,7 @@
       return THEME_REGISTRY;
     },
     applyRandomTheme: function () {
-      applyTheme(pickRandomThemeId());
+      applyTheme(currentId);
     }
   };
 })();

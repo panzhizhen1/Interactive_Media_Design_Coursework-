@@ -23,8 +23,14 @@
         <a class="home-card" href="learning.html" aria-label="Go to Learn">
           <p class="home-card__text">learn</p>
         </a>
-        <a class="home-card" href="test.html" aria-label="Go to Test">
-          <p class="home-card__text">test</p>
+        <a class="home-card home-card--test-spotlight" href="test.html" data-home-test-link aria-label="Open random test question">
+          <div class="home-test__head">
+            <p class="home-test__kicker">Color Challenge</p>
+            <p class="home-card__text home-card__text--test">🔥 Can you solve this?</p>
+          </div>
+          <p class="home-test__prompt" data-home-test-prompt>Loading a random question...</p>
+          <div class="home-test__options" data-home-test-options aria-label="Question options"></div>
+          <p class="home-test__meta" data-home-test-meta>Preparing quiz route</p>
         </a>
       </section>
 
