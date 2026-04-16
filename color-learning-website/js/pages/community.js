@@ -70,6 +70,7 @@
     posts: [],
     filter: DEFAULT_FILTER,
     selectedTag: DEFAULT_TAG,
+    selectedPostId: "",
     submitLockUntil: 0,
     likeLocks: {},
     toastTimer: 0
@@ -129,13 +130,17 @@
 
   function normalizePaletteList(list, fallbackHex) {
     var rows = Array.isArray(list) ? list : [];
-    var dedup = [];
+    var normalized = [];
     rows.forEach(function (item) {
-      var hex = normalizeHex(item);
-      if (dedup.indexOf(hex) < 0) dedup.push(hex);
+      if (item == null) return;
+      var text = String(item).trim().toLowerCase();
+      if (!text) return;
+      if (!text.startsWith("#")) text = "#" + text;
+      if (!/^#[0-9a-f]{6}$/.test(text)) return;
+      normalized.push(text);
     });
-    if (!dedup.length) dedup.push(normalizeHex(fallbackHex || DEFAULT_COLOR));
-    return dedup.slice(0, 8);
+    if (!normalized.length) normalized.push(normalizeHex(fallbackHex || DEFAULT_COLOR));
+    return normalized.slice(0, 24);
   }
 
   function sanitizeImageDataUrl(value) {
@@ -146,12 +151,153 @@
 
   function parsePaletteInput(text, fallbackHex) {
     if (!text) return normalizePaletteList([], fallbackHex);
-    var parts = String(text).split(",");
+    var raw = String(text).trim().toLowerCase();
+    if (!raw) return normalizePaletteList([], fallbackHex);
+
+    var source = raw;
+    var palettePathMatch = source.match(/coolors\.co\/palette\/([0-9a-f\-]+)/i);
+    if (palettePathMatch && palettePathMatch[1]) {
+      source = palettePathMatch[1];
+    } else if (source.indexOf("coolors.co/") >= 0) {
+      var fromCoolors = source.split("coolors.co/")[1] || "";
+      source = fromCoolors.split("?")[0].split("#")[0];
+    }
+    source = source.split("?")[0].split("#")[0];
+
+    var parts;
+    if (source.indexOf("-") >= 0 && source.indexOf(",") < 0) {
+      parts = source.split("-");
+    } else {
+      parts = source.split(/[,\s]+/);
+    }
     return normalizePaletteList(parts, fallbackHex);
   }
 
   function paletteToInputText(list) {
-    return normalizePaletteList(list, DEFAULT_COLOR).join(", ");
+    return normalizePaletteList(list, DEFAULT_COLOR)
+      .map(function (hex) { return hex.replace("#", ""); })
+      .join("-");
+  }
+
+  function readPaletteFromHiddenInput() {
+    var input = document.querySelector("[data-palette-input]");
+    if (!input) return [DEFAULT_COLOR];
+    return parsePaletteInput(input.value, DEFAULT_COLOR);
+  }
+
+  function writePaletteToHiddenInput(colors) {
+    var input = document.querySelector("[data-palette-input]");
+    if (!input) return;
+    input.value = paletteToInputText(colors);
+  }
+
+  function syncPrimaryColorInputs(colors) {
+    var palette = normalizePaletteList(colors, DEFAULT_COLOR);
+    var first = palette[0] || DEFAULT_COLOR;
+    var colorPicker = document.querySelector("[data-color-picker]");
+    var hexInput = document.querySelector("[data-color-hex]");
+    if (colorPicker) colorPicker.value = first;
+    if (hexInput) hexInput.value = first;
+  }
+
+  function setComposerPalette(colors, persist) {
+    var palette = normalizePaletteList(colors, DEFAULT_COLOR);
+    writePaletteToHiddenInput(palette);
+    syncPrimaryColorInputs(palette);
+    renderPaletteBuilder(palette);
+    if (persist) persistComposerDraft();
+  }
+
+  function renderPaletteBuilder(colors) {
+    var row = document.querySelector("[data-palette-row]");
+    if (!row) return;
+    var palette = normalizePaletteList(colors, DEFAULT_COLOR);
+    row.innerHTML =
+      '<div class="palette-strip" role="list" aria-label="Palette colors">' +
+      palette
+        .map(function (hex, index) {
+          return (
+            '<button type="button" class="palette-strip__block" role="listitem" data-palette-block="' + index + '" style="background:' + hex + '" aria-label="Edit color ' + hex + '"></button>'
+          );
+        })
+        .join("") +
+      '<button type="button" class="palette-strip__add" role="listitem" data-palette-add aria-label="Add palette color">+</button>' +
+      "</div>";
+  }
+
+  function openNativeColorPicker(initialHex, onChange) {
+    var picker = document.createElement("input");
+    picker.type = "color";
+    picker.value = normalizeHex(initialHex || DEFAULT_COLOR);
+    picker.style.position = "fixed";
+    picker.style.width = "1px";
+    picker.style.height = "1px";
+    picker.style.opacity = "0";
+    picker.style.pointerEvents = "none";
+    picker.style.left = "-9999px";
+    picker.style.top = "-9999px";
+
+    var cleaned = false;
+    function cleanup() {
+      if (cleaned) return;
+      cleaned = true;
+      if (picker.parentNode) picker.parentNode.removeChild(picker);
+    }
+
+    picker.addEventListener("input", function () {
+      onChange(normalizeHex(picker.value));
+    });
+    picker.addEventListener("change", cleanup, { once: true });
+    picker.addEventListener("blur", cleanup, { once: true });
+
+    document.body.appendChild(picker);
+    picker.click();
+  }
+
+  function extractPaletteFromImageDataUrl(dataUrl, count) {
+    return new Promise(function (resolve) {
+      var safe = sanitizeImageDataUrl(dataUrl);
+      if (!safe) {
+        resolve([]);
+        return;
+      }
+      var img = new Image();
+      img.onload = function () {
+        var canvas = document.createElement("canvas");
+        var size = 56;
+        canvas.width = size;
+        canvas.height = size;
+        var ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve([]);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, size, size);
+        var pixels = ctx.getImageData(0, 0, size, size).data;
+        var buckets = {};
+        for (var i = 0; i < pixels.length; i += 4) {
+          var r = pixels[i];
+          var g = pixels[i + 1];
+          var b = pixels[i + 2];
+          var a = pixels[i + 3];
+          if (a < 24) continue;
+          var qr = Math.round(r / 32) * 32;
+          var qg = Math.round(g / 32) * 32;
+          var qb = Math.round(b / 32) * 32;
+          var key = toHex(Math.min(255, qr)) + toHex(Math.min(255, qg)) + toHex(Math.min(255, qb));
+          buckets[key] = (buckets[key] || 0) + 1;
+        }
+        var sorted = Object.keys(buckets)
+          .sort(function (a, b) { return buckets[b] - buckets[a]; })
+          .slice(0, count || 5)
+          .map(function (key) { return normalizeHex(key); });
+        resolve(normalizePaletteList(sorted, DEFAULT_COLOR));
+      };
+      img.onerror = function () {
+        resolve([]);
+      };
+      img.src = safe;
+    });
   }
 
   function normalizePost(post) {
@@ -214,10 +360,18 @@
     };
   }
 
+  function toHex(value) {
+    return Number(value).toString(16).padStart(2, "0");
+  }
+
   function getContrastText(hex) {
     var rgb = toRgb(hex);
     var luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
     return luminance > 0.62 ? "#0f172a" : "#ffffff";
+  }
+
+  function getCommunityView() {
+    return document.body && document.body.getAttribute("data-community-view") === "all" ? "all" : "preview";
   }
 
   function readPosts() {
@@ -532,26 +686,20 @@
   function renderImageHtml(post) {
     var image = sanitizeImageDataUrl(post && post.imageDataUrl ? post.imageDataUrl : "");
     if (!image) return "";
-    return '<figure class="post-image"><img src="' + image + '" alt="Shared attachment for this post"></figure>';
+    return (
+      '<figure class="post-image">' +
+      '<button type="button" class="post-image__zoom" data-image-zoom="' + image + '">' +
+      '<img src="' + image + '" alt="Shared attachment for this post">' +
+      "</button>" +
+      "</figure>"
+    );
   }
 
-  function renderPosts() {
-    var container = document.querySelector("[data-post-list]");
-    if (!container) return;
-    var rows = sortPosts(state.posts);
-    var currentUser = getCurrentUsername();
-
-    if (!rows.length) {
-      container.innerHTML =
-        '<article class="post-card post-empty">' +
-        '<h3>Start the first learning thread</h3>' +
-        '<p>Share one insight from Learning, a result from Test, or a palette from Game.</p>' +
-        '<button type="button" class="community-hero__cta" data-scroll-composer>Use this template</button>' +
-        '</article>';
-      return;
-    }
-
-    container.innerHTML = rows
+  function buildPostCardsHtml(rows, currentUser, options) {
+    var opts = options || {};
+    var selectable = !!opts.selectable;
+    var selectedId = opts.selectedPostId || "";
+    return rows
       .map(function (post) {
         var content = escapeHtml(post.content);
         var username = escapeHtml(post.author);
@@ -567,8 +715,9 @@
         var paletteHtml = renderPaletteHtml(post);
         var imageHtml = renderImageHtml(post);
         var originMetaHtml = renderOriginMetaHtml(post);
+        var selected = selectable && selectedId === post.id;
         return (
-          '<article class="post-card' + (post.featured ? ' is-featured' : '') + (hidden ? ' is-hidden' : '') + '">' +
+          '<article class="post-card' + (post.featured ? ' is-featured' : '') + (hidden ? ' is-hidden' : '') + (selected ? ' is-selected' : '') + '"' + (selectable ? ' data-post-select="' + post.id + '"' : "") + ">" +
           '<header class="post-header">' +
           '<div class="post-user">' +
           '<span class="post-user__avatar" aria-hidden="true">' + initial + '</span>' +
@@ -600,6 +749,54 @@
         );
       })
       .join("");
+  }
+
+  function renderPostDetail(post, currentUser) {
+    var panel = document.querySelector("[data-post-detail]");
+    if (!panel) return;
+    if (!post) {
+      panel.innerHTML = "<h2>Select a post</h2><p>Choose a post on the left to preview full details here.</p>";
+      return;
+    }
+    panel.innerHTML = buildPostCardsHtml([post], currentUser, { selectable: false });
+  }
+
+  function renderPosts() {
+    var container = document.querySelector("[data-post-list]");
+    if (!container) return;
+    var view = getCommunityView();
+    var rows = sortPosts(state.posts);
+    var currentUser = getCurrentUsername();
+
+    if (!rows.length) {
+      var emptyHtml =
+        '<article class="post-card post-empty">' +
+        '<h3>Start the first learning thread</h3>' +
+        '<p>Share one insight from Learning, a result from Test, or a palette from Game.</p>' +
+        '<button type="button" class="community-hero__cta" data-scroll-composer>Use this template</button>' +
+        '</article>';
+      container.innerHTML = emptyHtml;
+      renderPostDetail(null, currentUser);
+      return;
+    }
+
+    if (view === "all") {
+      if (!state.selectedPostId || !rows.some(function (item) { return item.id === state.selectedPostId; })) {
+        state.selectedPostId = rows[0].id;
+      }
+      container.innerHTML = buildPostCardsHtml(rows, currentUser, { selectable: true, selectedPostId: state.selectedPostId });
+      var selectedPost = null;
+      for (var i = 0; i < rows.length; i += 1) {
+        if (rows[i].id === state.selectedPostId) {
+          selectedPost = rows[i];
+          break;
+        }
+      }
+      renderPostDetail(selectedPost || rows[0], currentUser);
+      return;
+    }
+
+    container.innerHTML = buildPostCardsHtml(rows.slice(0, 3), currentUser, { selectable: false });
   }
 
   function readRankSnapshot() {
@@ -718,13 +915,19 @@
     var colorPicker = document.querySelector("[data-color-picker]");
     var hexInput = document.querySelector("[data-color-hex]");
     if (!colorPicker || !hexInput) return;
+    var palette = readPaletteFromHiddenInput();
     if (fromPicker) {
-      hexInput.value = normalizeHex(colorPicker.value);
+      var picked = normalizeHex(colorPicker.value);
+      hexInput.value = picked;
+      palette[0] = picked;
+      setComposerPalette(palette, false);
       return;
     }
     var normalized = normalizeHex(hexInput.value);
     hexInput.value = normalized;
     colorPicker.value = normalized;
+    palette[0] = normalized;
+    setComposerPalette(palette, false);
   }
 
   function persistComposerDraft() {
@@ -750,13 +953,11 @@
     var draft = readDraft();
     if (!draft) return;
     var input = document.querySelector("[data-post-content]");
-    var colorPicker = document.querySelector("[data-color-picker]");
-    var hexInput = document.querySelector("[data-color-hex]");
-    var paletteInput = document.querySelector("[data-palette-input]");
-    if (input) input.value = String(draft.content || "").slice(0, MAX_POST_LENGTH);
-    if (colorPicker) colorPicker.value = normalizeHex(draft.colorHex);
-    if (hexInput) hexInput.value = normalizeHex(draft.colorHex);
-    if (paletteInput) paletteInput.value = paletteToInputText(draft.paletteHexes || [draft.colorHex]);
+    var draftContent = String(draft.content || "").slice(0, MAX_POST_LENGTH);
+    if (input) input.value = draftContent;
+    var hasMeaningfulDraft = !!(draftContent.trim() || draft.imageDataUrl);
+    if (hasMeaningfulDraft) setComposerPalette(draft.paletteHexes || [draft.colorHex], false);
+    else setComposerPalette([normalizeHex(draft.colorHex || DEFAULT_COLOR)], false);
     setComposerImagePreview(draft.imageDataUrl || "");
     setActiveTag(draft.tag || DEFAULT_TAG);
     updateDraftOriginLabel(draft);
@@ -830,10 +1031,9 @@
     }
 
     input.value = "";
-    paletteInput.value = paletteToInputText([DEFAULT_COLOR]);
+    setComposerPalette([DEFAULT_COLOR], false);
     var imageInput = form.querySelector("[data-image-input]");
     if (imageInput) imageInput.value = "";
-    syncHexInputs(false);
     setComposerImagePreview("");
     updateDraftOriginLabel(null);
     setFeedback("Post published. You earned 5 points.", "success");
@@ -936,6 +1136,23 @@
     if (modal) modal.hidden = true;
   }
 
+  function openImageLightbox(src) {
+    var modal = document.querySelector("[data-image-lightbox]");
+    var img = document.querySelector("[data-lightbox-image]");
+    if (!modal || !img) return;
+    var safe = sanitizeImageDataUrl(src);
+    if (!safe) return;
+    img.src = safe;
+    modal.hidden = false;
+  }
+
+  function closeImageLightbox() {
+    var modal = document.querySelector("[data-image-lightbox]");
+    var img = document.querySelector("[data-lightbox-image]");
+    if (img) img.src = "";
+    if (modal) modal.hidden = true;
+  }
+
   function bindTagKeyboardNavigation() {
     var tags = getTagButtons();
     tags.forEach(function (btn, index) {
@@ -994,6 +1211,8 @@
     var paletteInput = document.querySelector("[data-palette-input]");
     var imageInput = document.querySelector("[data-image-input]");
     var imageClearBtn = document.querySelector("[data-image-clear]");
+    var paletteRow = document.querySelector("[data-palette-row]");
+    var paletteFromImageBtn = document.querySelector("[data-palette-from-image]");
 
     if (colorPicker) {
       colorPicker.addEventListener("input", function () {
@@ -1020,13 +1239,45 @@
         persistComposerDraft();
       });
     }
-    if (paletteInput) {
-      paletteInput.addEventListener("blur", persistComposerDraft);
-      paletteInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          persistComposerDraft();
+    if (paletteInput) paletteInput.addEventListener("change", persistComposerDraft);
+    if (paletteFromImageBtn) {
+      paletteFromImageBtn.addEventListener("click", function () {
+        var draft = readDraft();
+        var image = draft && draft.imageDataUrl ? draft.imageDataUrl : "";
+        if (!image) {
+          setFeedback("Please attach an image first, then extract palette.", "error");
+          return;
         }
+        extractPaletteFromImageDataUrl(image, 6).then(function (colors) {
+          if (!colors.length) {
+            setFeedback("Could not extract palette from this image.", "error");
+            return;
+          }
+          var merged = readPaletteFromHiddenInput().concat(colors);
+          setComposerPalette(merged, true);
+          setFeedback("Palette extracted from image.", "success");
+        });
+      });
+    }
+    if (paletteRow) {
+      paletteRow.addEventListener("click", function (event) {
+        var addBtn = event.target.closest("[data-palette-add]");
+        if (addBtn) {
+          var nextPalette = readPaletteFromHiddenInput();
+          var seed = nextPalette.length ? nextPalette[nextPalette.length - 1] : DEFAULT_COLOR;
+          nextPalette.push(seed);
+          setComposerPalette(nextPalette, true);
+          return;
+        }
+        var blockBtn = event.target.closest("[data-palette-block]");
+        if (!blockBtn) return;
+        var idx = Number(blockBtn.getAttribute("data-palette-block"));
+        if (!Number.isFinite(idx)) return;
+        var palette = readPaletteFromHiddenInput();
+        openNativeColorPicker(palette[idx], function (nextHex) {
+          palette[idx] = nextHex;
+          setComposerPalette(palette, true);
+        });
       });
     }
     if (imageInput) {
@@ -1077,15 +1328,30 @@
       });
     }
 
-    var postList = document.querySelector("[data-post-list]");
-    if (postList) {
-      postList.addEventListener("click", function (event) {
+    function bindPostListClicks(node) {
+      if (!node) return;
+      node.addEventListener("click", function (event) {
         if (handleLikeClick(event)) return;
         if (handlePostAction(event)) return;
         var tagFilterBtn = event.target.closest("[data-filter-tag]");
-        if (tagFilterBtn) setFilter(tagFilterBtn.getAttribute("data-filter-tag"));
+        if (tagFilterBtn) {
+          setFilter(tagFilterBtn.getAttribute("data-filter-tag"));
+          return;
+        }
+        var zoomBtn = event.target.closest("[data-image-zoom]");
+        if (zoomBtn) {
+          openImageLightbox(zoomBtn.getAttribute("data-image-zoom"));
+          return;
+        }
+        var selectBtn = event.target.closest("[data-post-select]");
+        if (selectBtn) {
+          state.selectedPostId = selectBtn.getAttribute("data-post-select") || "";
+          renderPosts();
+        }
       });
     }
+    bindPostListClicks(document.querySelector("[data-post-list]"));
+    bindPostListClicks(document.querySelector("[data-post-detail]"));
 
     var openGuideBtn = document.querySelector("[data-open-guidelines]");
     if (openGuideBtn) openGuideBtn.addEventListener("click", openGuidelines);
@@ -1094,14 +1360,26 @@
     document.querySelectorAll("[data-close-guidelines]").forEach(function (btn) {
       btn.addEventListener("click", closeGuidelines);
     });
+    document.querySelectorAll("[data-close-image-lightbox]").forEach(function (btn) {
+      btn.addEventListener("click", closeImageLightbox);
+    });
     var modal = document.querySelector("[data-guidelines-modal]");
     if (modal) {
       modal.addEventListener("click", function (event) {
         if (event.target === modal) closeGuidelines();
       });
     }
+    var lightbox = document.querySelector("[data-image-lightbox]");
+    if (lightbox) {
+      lightbox.addEventListener("click", function (event) {
+        if (event.target === lightbox) closeImageLightbox();
+      });
+    }
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") closeGuidelines();
+      if (event.key === "Escape") {
+        closeGuidelines();
+        closeImageLightbox();
+      }
     });
 
     document.addEventListener("clw:auth-changed", function () {
@@ -1124,9 +1402,7 @@
     state.posts = readPosts();
     setActiveTag(DEFAULT_TAG);
     setFilter(DEFAULT_FILTER);
-    syncHexInputs(false);
-    var paletteInput = document.querySelector("[data-palette-input]");
-    if (paletteInput && !paletteInput.value.trim()) paletteInput.value = paletteToInputText([DEFAULT_COLOR]);
+    setComposerPalette([DEFAULT_COLOR], false);
     bindEvents();
     applyDraftToComposer();
     refreshAll();

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/pages/community.css" />
   </head>
-  <body>
+  <body data-community-view="preview">
     <header class="site-header" role="banner">
       <div id="site-navbar" aria-live="polite"></div>
     </header>
@@ -56,26 +56,19 @@
               </div>
 
               <div class="composer-card__controls">
-                <div class="color-control">
-                  <label for="attach-color">Attach Color</label>
-                  <div class="color-control__inputs">
-                    <input id="attach-color-hex" class="hex-input" type="text" value="#2b78e4" maxlength="7" data-color-hex />
-                    <input id="attach-color" type="color" value="#2b78e4" data-color-picker />
+                <div class="palette-builder" data-palette-builder>
+                  <p class="palette-builder__label">Palette Builder</p>
+                  <div class="palette-builder__row" data-palette-row></div>
+                  <div class="palette-builder__actions">
+                    <button type="button" class="palette-builder__extract" data-palette-from-image>Extract Palette from Image</button>
                   </div>
+                  <input id="attach-color-hex" class="hex-input" type="hidden" value="#2b78e4" maxlength="7" data-color-hex />
+                  <input id="attach-color" type="color" value="#2b78e4" data-color-picker hidden />
+                  <input type="hidden" data-palette-input value="2b78e4" />
                 </div>
                 <button type="submit" class="btn-post">Post and Earn 5 points</button>
               </div>
               <div class="composer-card__extras">
-                <label class="color-control" for="attach-palette">
-                  <span>Attach Palette (multiple HEX)</span>
-                  <input
-                    id="attach-palette"
-                    class="palette-input"
-                    type="text"
-                    data-palette-input
-                    placeholder="#2b78e4, #5aa1ff, #0f172a"
-                  />
-                </label>
                 <label class="color-control" for="attach-image">
                   <span>Attach Image (from game or upload)</span>
                   <input id="attach-image" type="file" accept="image/*" data-image-input />
@@ -99,7 +92,7 @@
 
           <div class="post-preview-head">
             <h2 class="post-preview-head__title">Post Preview (Latest 3)</h2>
-            <button type="button" class="post-preview-head__btn" data-open-post-window>View Full Posts</button>
+            <a class="post-preview-head__btn" href="community-posts.html">View Full Posts</a>
           </div>
           <section class="post-list" aria-live="polite" data-post-list></section>
         </section>
@@ -157,16 +150,6 @@
     <div class="community-toast" data-community-toast hidden>
       <p class="community-toast__message" data-community-toast-message></p>
       <button type="button" class="community-toast__close" data-community-toast-close aria-label="Close message">×</button>
-    </div>
-
-    <div class="community-window-backdrop" data-post-window hidden>
-      <section class="community-window" role="dialog" aria-modal="true" aria-labelledby="post-window-title">
-        <div class="community-window__head">
-          <h2 id="post-window-title">All Community Posts</h2>
-          <button type="button" class="community-modal__close" data-close-post-window aria-label="Close posts window">×</button>
-        </div>
-        <section class="post-list post-list--window" data-post-window-list></section>
-      </section>
     </div>
 
     <div class="community-lightbox" data-image-lightbox hidden>
