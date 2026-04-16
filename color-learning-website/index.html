@@ -28,92 +28,20 @@
         </a>
       </section>
 
-      <section class="home-row home-row--3" aria-label="Game, community, and site colors">
-        <a class="home-card" href="game.html" aria-label="Go to Game">
-          <p class="home-card__text">game</p>
+      <section class="home-row home-row--3" aria-label="Game and community">
+        <a class="home-card home-card--game-spotlight" href="game.html" data-home-game-link aria-label="Start your color challenge in Game">
+          <p class="home-card__text home-card__text--game">Start your color challenge!</p>
+          <canvas
+            class="home-game-preview"
+            data-home-game-preview
+            width="280"
+            height="200"
+            aria-label="Random game drawing preview"
+          ></canvas>
         </a>
         <a class="home-card" href="community.html" aria-label="Go to Community">
           <p class="home-card__text">community</p>
         </a>
-        <div class="home-col-theme">
-          <section class="theme-picker" aria-labelledby="theme-picker-heading" data-theme-picker>
-            <p id="theme-picker-heading" class="theme-picker__title">Choose your favorite color for the website!</p>
-            <div class="theme-picker__row">
-              <div
-                class="theme-picker__swatches"
-                role="radiogroup"
-                aria-label="Site color theme"
-              >
-                <button
-                  type="button"
-                  class="theme-picker__theme-option"
-                  data-theme-option="blue"
-                  style="background-color: #00b4d8"
-                  aria-label="Ocean blue theme"
-                ></button>
-                <button
-                  type="button"
-                  class="theme-picker__theme-option"
-                  data-theme-option="teal"
-                  style="background-color: #68d8d6"
-                  aria-label="Mint teal theme"
-                ></button>
-                <button
-                  type="button"
-                  class="theme-picker__theme-option"
-                  data-theme-option="rose"
-                  style="background-color: #ffb3c6"
-                  aria-label="Rose pink theme"
-                ></button>
-                <button
-                  type="button"
-                  class="theme-picker__theme-option"
-                  data-theme-option="pastel"
-                  style="background-color: #bbd0ff"
-                  aria-label="Pastel purple theme"
-                ></button>
-                <button
-                  type="button"
-                  class="theme-picker__theme-option"
-                  data-theme-option="amber"
-                  style="background-color: #ff9505"
-                  aria-label="Amber orange theme"
-                ></button>
-              </div>
-              <div class="theme-picker__wheel-wrap" data-theme-wheel-wrap hidden>
-                <canvas
-                  class="theme-picker__wheel-canvas"
-                  data-theme-wheel-canvas
-                  width="180"
-                  height="180"
-                  aria-label="Color wheel"
-                ></canvas>
-                <canvas
-                  class="theme-picker__value-canvas"
-                  data-theme-value-canvas
-                  width="180"
-                  height="20"
-                  aria-label="Brightness slider"
-                ></canvas>
-                <input
-                  id="theme-color-wheel"
-                  class="theme-picker__wheel"
-                  data-theme-wheel
-                  type="color"
-                  value="#00b4d8"
-                  aria-label="Choose color from wheel"
-                />
-              </div>
-              <div class="theme-picker__mode-wrap">
-                <label class="theme-picker__mode-label" for="theme-color-mode">mode</label>
-                <select id="theme-color-mode" class="theme-picker__mode" data-theme-mode aria-label="Color selection mode">
-                  <option value="default" selected>default</option>
-                  <option value="wheel">wheel</option>
-                </select>
-              </div>
-            </div>
-          </section>
-        </div>
       </section>
     </main>
 

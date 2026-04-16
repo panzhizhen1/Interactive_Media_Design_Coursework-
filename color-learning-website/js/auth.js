@@ -291,7 +291,7 @@
     avatar.classList.add("user-avatar--placeholder");
     avatar.classList.remove("user-avatar--active");
     avatar.textContent = "";
-    trigger.setAttribute("title", "Sign in or sign up");
+    trigger.setAttribute("title", "Log in or sign up");
     trigger.setAttribute("aria-label", "Account");
     trigger.setAttribute("aria-expanded", "false");
   }
@@ -308,10 +308,10 @@
     backdrop.innerHTML = [
       '<div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">',
       '  <div class="auth-mode-switch" role="tablist" aria-label="Auth mode">',
-      '    <button type="button" class="auth-mode-switch__btn is-active" data-auth-mode-btn="signin">Sign in</button>',
+      '    <button type="button" class="auth-mode-switch__btn is-active" data-auth-mode-btn="signin">Log in</button>',
       '    <button type="button" class="auth-mode-switch__btn" data-auth-mode-btn="signup">Sign up</button>',
       "  </div>",
-      '  <h2 class="auth-modal__title" id="auth-title">Sign in</h2>',
+      '  <h2 class="auth-modal__title" id="auth-title">Log in</h2>',
       '  <p class="auth-modal__desc" data-auth-desc>Use your local account to unlock member features.</p>',
       '  <form data-auth-form>',
       '    <div class="auth-modal__field">',
@@ -334,7 +334,7 @@
       '    <p class="auth-message" data-auth-message></p>',
       '    <div class="auth-modal__actions">',
       '      <button type="button" class="auth-modal__btn" data-auth-cancel>Cancel</button>',
-      '      <button type="submit" class="auth-modal__btn auth-modal__btn--primary" data-auth-submit>Sign in</button>',
+      '      <button type="submit" class="auth-modal__btn auth-modal__btn--primary" data-auth-submit>Log in</button>',
       "    </div>",
       "  </form>",
       "</div>"
@@ -365,7 +365,7 @@
       signupFields.forEach(function (el) {
         el.hidden = !signup;
       });
-      if (title) title.textContent = signup ? "Create local account" : "Sign in";
+      if (title) title.textContent = signup ? "Create local account" : "Log in";
       if (desc) {
         desc.textContent = signup
           ? "Your account and stats are saved in this browser only."
@@ -376,7 +376,7 @@
           ? "Tip: username can use letters, numbers, underscore."
           : "Demo accounts: studentA / studentB / studentC";
       }
-      submitBtn.textContent = signup ? "Create account" : "Sign in";
+      submitBtn.textContent = signup ? "Create account" : "Log in";
       message.textContent = "";
     }
 
