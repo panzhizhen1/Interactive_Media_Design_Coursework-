@@ -476,7 +476,7 @@
     var button = document.querySelector(".btn-post");
     if (!button) return;
     button.disabled = !isLoggedIn();
-    button.textContent = isLoggedIn() ? "Post and Earn 5 points" : "Sign in to Post";
+    button.textContent = isLoggedIn() ? "Post and Earn 5 points" : "Log in to Post";
   }
 
   function getActorId() {
@@ -631,8 +631,8 @@
     postsEl.textContent = String(postCount);
 
     if (!isLoggedIn()) {
-      streakEl.textContent = "Sign in to sync your progress across pages.";
-      goalEl.textContent = "Today goal: sign in and post one learning insight.";
+      streakEl.textContent = "Log in to sync your progress across pages.";
+      goalEl.textContent = "Today goal: log in and post one learning insight.";
       rankEl.textContent = "Weekly rank change: --";
       return;
     }
@@ -792,7 +792,7 @@
       return;
     }
     if (!isLoggedIn()) {
-      setFeedback("Sign in from the avatar menu before posting.", "error");
+      setFeedback("Log in from the avatar menu before posting.", "error");
       return;
     }
 
@@ -845,7 +845,7 @@
     var btn = event.target.closest("[data-like-id]");
     if (!btn) return false;
     if (!isLoggedIn()) {
-      setFeedback("Sign in to like posts and save your reaction.", "error");
+      setFeedback("Log in to like posts and save your reaction.", "error");
       return true;
     }
 
@@ -904,7 +904,7 @@
     var postId = actionBtn.getAttribute("data-post-id");
     if (!postId) return true;
     if (!isLoggedIn()) {
-      setFeedback("Sign in to use moderation actions.", "error");
+      setFeedback("Log in to use moderation actions.", "error");
       return true;
     }
 

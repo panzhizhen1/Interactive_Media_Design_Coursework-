@@ -101,72 +101,6 @@
     };
   }
 
-  function hsvToRgb(h, s, v) {
-    var hue = ((h % 360) + 360) % 360;
-    var sat = Math.max(0, Math.min(100, s)) / 100;
-    var val = Math.max(0, Math.min(100, v)) / 100;
-
-    var c = val * sat;
-    var x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
-    var m = val - c;
-    var r = 0;
-    var g = 0;
-    var b = 0;
-
-    if (hue < 60) {
-      r = c;
-      g = x;
-    } else if (hue < 120) {
-      r = x;
-      g = c;
-    } else if (hue < 180) {
-      g = c;
-      b = x;
-    } else if (hue < 240) {
-      g = x;
-      b = c;
-    } else if (hue < 300) {
-      r = x;
-      b = c;
-    } else {
-      r = c;
-      b = x;
-    }
-
-    return {
-      r: (r + m) * 255,
-      g: (g + m) * 255,
-      b: (b + m) * 255
-    };
-  }
-
-  function rgbToHsv(rgb) {
-    var r = rgb.r / 255;
-    var g = rgb.g / 255;
-    var b = rgb.b / 255;
-    var max = Math.max(r, g, b);
-    var min = Math.min(r, g, b);
-    var delta = max - min;
-    var hue = 0;
-
-    if (delta !== 0) {
-      if (max === r) {
-        hue = ((g - b) / delta + (g < b ? 6 : 0)) * 60;
-      } else if (max === g) {
-        hue = ((b - r) / delta + 2) * 60;
-      } else {
-        hue = ((r - g) / delta + 4) * 60;
-      }
-    }
-
-    var sat = max === 0 ? 0 : delta / max;
-    return {
-      h: hue % 360,
-      s: sat * 100,
-      v: max * 100
-    };
-  }
-
   function rgbToHue(rgb) {
     var r = rgb.r / 255;
     var g = rgb.g / 255;
@@ -239,118 +173,58 @@
     writeStoredValue(MODE_STORAGE_KEY, mode);
   }
 
-  function setupWheelPicker(wheelCanvas, valueCanvas, wheelInput, onColorChange) {
-    if (!wheelCanvas || !valueCanvas || !wheelInput || typeof onColorChange !== "function") return;
+  function setupWheelPicker(wheelCanvas, wheelInput, onColorChange) {
+    if (!wheelCanvas || !wheelInput || typeof onColorChange !== "function") return;
     var wheelCtx = wheelCanvas.getContext("2d");
-    var valueCtx = valueCanvas.getContext("2d");
-    if (!wheelCtx || !valueCtx) return;
+    if (!wheelCtx) return;
 
-    var parsed = parseHexColor(wheelInput.value) || { r: 0, g: 180, b: 216 };
-    var hsv = rgbToHsv(parsed);
-    var wheelImage = null;
-
-    function buildWheelImage() {
-      var w = wheelCanvas.width;
-      var h = wheelCanvas.height;
-      var centerX = w / 2;
-      var centerY = h / 2;
-      var radius = Math.min(w, h) / 2 - 3;
-      var image = wheelCtx.createImageData(w, h);
-      var data = image.data;
-
-      for (var y = 0; y < h; y += 1) {
-        for (var x = 0; x < w; x += 1) {
-          var dx = x - centerX;
-          var dy = y - centerY;
-          var dist = Math.sqrt(dx * dx + dy * dy);
-          var idx = (y * w + x) * 4;
-          if (dist > radius) {
-            data[idx + 3] = 0;
-            continue;
-          }
-
-          var sat = Math.max(0, Math.min(1, dist / radius));
-          var angle = Math.atan2(dy, dx);
-          var hue = ((angle * 180) / Math.PI + 90 + 360) % 360;
-          var rgb = hsvToRgb(hue, sat * 100, 100);
-          data[idx] = Math.round(rgb.r);
-          data[idx + 1] = Math.round(rgb.g);
-          data[idx + 2] = Math.round(rgb.b);
-          data[idx + 3] = 255;
-        }
-      }
-      wheelImage = image;
+    function getHueFromInput() {
+      return rgbToHue(parseHexColor(wheelInput.value) || { r: 0, g: 180, b: 216 });
     }
 
     function renderWheel() {
-      if (!wheelImage) buildWheelImage();
       var size = Math.min(wheelCanvas.width, wheelCanvas.height);
       var center = size / 2;
-      var radius = center - 3;
-      var markerRadius = (hsv.s / 100) * radius;
-      var markerAngle = (hsv.h * Math.PI) / 180 - Math.PI / 2;
-      var markerX = center + Math.cos(markerAngle) * markerRadius;
-      var markerY = center + Math.sin(markerAngle) * markerRadius;
+      var outerRadius = center - 3;
+      var innerRadius = outerRadius * 0.58;
+      var hue = getHueFromInput();
 
       wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
-      wheelCtx.putImageData(wheelImage, 0, 0);
+      var gradient = wheelCtx.createConicGradient(-Math.PI / 2, center, center);
+      gradient.addColorStop(0, "#ff0044");
+      gradient.addColorStop(1 / 6, "#ff8c00");
+      gradient.addColorStop(2 / 6, "#ffd500");
+      gradient.addColorStop(3 / 6, "#27c93f");
+      gradient.addColorStop(4 / 6, "#00a5ff");
+      gradient.addColorStop(5 / 6, "#7a35ff");
+      gradient.addColorStop(1, "#ff0044");
 
-      if (hsv.v < 100) {
-        wheelCtx.fillStyle = "rgba(0,0,0," + String(1 - hsv.v / 100) + ")";
-        wheelCtx.beginPath();
-        wheelCtx.arc(center, center, radius, 0, Math.PI * 2);
-        wheelCtx.fill();
-      }
+      wheelCtx.fillStyle = gradient;
+      wheelCtx.beginPath();
+      wheelCtx.arc(center, center, outerRadius, 0, Math.PI * 2);
+      wheelCtx.arc(center, center, innerRadius, 0, Math.PI * 2, true);
+      wheelCtx.fill("evenodd");
 
-      wheelCtx.strokeStyle = "rgba(15, 23, 42, 0.28)";
+      wheelCtx.strokeStyle = "rgba(15, 23, 42, 0.2)";
       wheelCtx.lineWidth = 2;
       wheelCtx.beginPath();
-      wheelCtx.arc(center, center, radius + 1, 0, Math.PI * 2);
+      wheelCtx.arc(center, center, outerRadius + 1, 0, Math.PI * 2);
       wheelCtx.stroke();
 
+      var markerAngle = (hue * Math.PI) / 180 - Math.PI / 2;
+      var markerRadius = (outerRadius + innerRadius) / 2;
+      var markerX = center + Math.cos(markerAngle) * markerRadius;
+      var markerY = center + Math.sin(markerAngle) * markerRadius;
       wheelCtx.beginPath();
       wheelCtx.fillStyle = "#ffffff";
-      wheelCtx.strokeStyle = "rgba(15, 23, 42, 0.9)";
+      wheelCtx.strokeStyle = "rgba(15, 23, 42, 0.85)";
       wheelCtx.lineWidth = 2;
       wheelCtx.arc(markerX, markerY, 6, 0, Math.PI * 2);
       wheelCtx.fill();
       wheelCtx.stroke();
     }
 
-    function renderValueBar() {
-      var w = valueCanvas.width;
-      var h = valueCanvas.height;
-      var markerX = (hsv.v / 100) * w;
-      var fullColor = hsvToRgb(hsv.h, hsv.s, 100);
-      var gradient = valueCtx.createLinearGradient(0, 0, w, 0);
-      gradient.addColorStop(0, "#000000");
-      gradient.addColorStop(1, rgbToHex(fullColor.r, fullColor.g, fullColor.b));
-
-      valueCtx.clearRect(0, 0, w, h);
-      valueCtx.fillStyle = gradient;
-      valueCtx.fillRect(0, 0, w, h);
-
-      valueCtx.strokeStyle = "rgba(15, 23, 42, 0.35)";
-      valueCtx.lineWidth = 1;
-      valueCtx.strokeRect(0.5, 0.5, w - 1, h - 1);
-
-      valueCtx.beginPath();
-      valueCtx.fillStyle = "#ffffff";
-      valueCtx.strokeStyle = "rgba(15, 23, 42, 0.9)";
-      valueCtx.lineWidth = 2;
-      valueCtx.arc(markerX, h / 2, 6, 0, Math.PI * 2);
-      valueCtx.fill();
-      valueCtx.stroke();
-    }
-
-    function emitChange() {
-      var rgb = hsvToRgb(hsv.h, hsv.s, hsv.v);
-      var hex = rgbToHex(rgb.r, rgb.g, rgb.b);
-      wheelInput.value = hex;
-      onColorChange(hex);
-    }
-
-    function updateFromWheelPointer(clientX, clientY) {
+    function updateFromPointer(clientX, clientY) {
       var rect = wheelCanvas.getBoundingClientRect();
       var scaleX = wheelCanvas.width / rect.width;
       var scaleY = wheelCanvas.height / rect.height;
@@ -360,80 +234,101 @@
       var centerY = wheelCanvas.height / 2;
       var dx = x - centerX;
       var dy = y - centerY;
-      var radius = centerX - 3;
       var distance = Math.sqrt(dx * dx + dy * dy);
-      var clampedDistance = Math.min(radius, Math.max(0, distance));
+      var outerRadius = centerX - 3;
+      var innerRadius = outerRadius * 0.58;
+      if (distance < innerRadius || distance > outerRadius) return;
+
       var angle = Math.atan2(dy, dx);
-
-      hsv.h = ((angle * 180) / Math.PI + 90 + 360) % 360;
-      hsv.s = (clampedDistance / radius) * 100;
-      emitChange();
+      var hue = ((angle * 180) / Math.PI + 90 + 360) % 360;
+      var rgb = hslToRgb(hue, 95, 50);
+      var hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+      wheelInput.value = hex;
+      onColorChange(hex);
       renderWheel();
-      renderValueBar();
     }
 
-    function updateFromValuePointer(clientX) {
-      var rect = valueCanvas.getBoundingClientRect();
-      var x = clientX - rect.left;
-      var ratio = Math.max(0, Math.min(1, x / rect.width));
-      hsv.v = ratio * 100;
-      emitChange();
-      renderWheel();
-      renderValueBar();
-    }
-
-    function applyInputColor() {
-      var next = parseHexColor(wheelInput.value);
-      if (!next) return;
-      hsv = rgbToHsv(next);
-      renderWheel();
-      renderValueBar();
-    }
-
-    var wheelDragging = false;
+    var dragging = false;
     wheelCanvas.addEventListener("pointerdown", function (event) {
-      wheelDragging = true;
+      dragging = true;
       wheelCanvas.setPointerCapture(event.pointerId);
-      updateFromWheelPointer(event.clientX, event.clientY);
+      updateFromPointer(event.clientX, event.clientY);
     });
     wheelCanvas.addEventListener("pointermove", function (event) {
-      if (!wheelDragging) return;
-      updateFromWheelPointer(event.clientX, event.clientY);
+      if (!dragging) return;
+      updateFromPointer(event.clientX, event.clientY);
     });
     wheelCanvas.addEventListener("pointerup", function (event) {
-      wheelDragging = false;
+      dragging = false;
       wheelCanvas.releasePointerCapture(event.pointerId);
     });
     wheelCanvas.addEventListener("pointercancel", function () {
-      wheelDragging = false;
+      dragging = false;
     });
 
-    var valueDragging = false;
-    valueCanvas.addEventListener("pointerdown", function (event) {
-      valueDragging = true;
-      valueCanvas.setPointerCapture(event.pointerId);
-      updateFromValuePointer(event.clientX);
-    });
-    valueCanvas.addEventListener("pointermove", function (event) {
-      if (!valueDragging) return;
-      updateFromValuePointer(event.clientX);
-    });
-    valueCanvas.addEventListener("pointerup", function (event) {
-      valueDragging = false;
-      valueCanvas.releasePointerCapture(event.pointerId);
-    });
-    valueCanvas.addEventListener("pointercancel", function () {
-      valueDragging = false;
-    });
-
-    wheelInput.addEventListener("input", applyInputColor);
-    applyInputColor();
+    wheelInput.addEventListener("input", renderWheel);
+    renderWheel();
   }
 
   function clearTaglineEffect(letters) {
     letters.forEach(function (letter) {
       letter.classList.remove("is-active");
     });
+  }
+
+  function setSketchStyle(ctx, scale) {
+    var ratio = typeof scale === "number" ? scale : 1;
+    ctx.lineWidth = Math.max(4 * ratio, 1);
+    ctx.strokeStyle = "#000";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  }
+
+  function loadGameDrawingsLibrary() {
+    return fetch("js/pages/game.js")
+      .then(function (res) {
+        if (!res.ok) throw new Error("Failed to load game library");
+        return res.text();
+      })
+      .then(function (source) {
+        var startToken = "const drawings=";
+        var endToken = "\n\nconst galleryView";
+        var startIndex = source.indexOf(startToken);
+        var endIndex = source.indexOf(endToken, startIndex);
+        if (startIndex < 0 || endIndex < 0) throw new Error("Could not parse drawings library");
+        var expression = source.slice(startIndex + startToken.length, endIndex).trim();
+        if (expression.endsWith(";")) expression = expression.slice(0, -1);
+        return new Function("return " + expression + ";")();
+      });
+  }
+
+  function setupHomeGameSpotlight() {
+    var previewCanvas = document.querySelector("[data-home-game-preview]");
+    var previewLink = document.querySelector("[data-home-game-link]");
+    if (!previewCanvas || !previewLink) return;
+
+    var ctx = previewCanvas.getContext("2d");
+    if (!ctx) return;
+
+    loadGameDrawingsLibrary()
+      .then(function (drawings) {
+        if (!Array.isArray(drawings) || !drawings.length) return;
+        var randomIndex = Math.floor(Math.random() * drawings.length);
+        var drawing = drawings[randomIndex];
+        if (!drawing || typeof drawing.draw !== "function") return;
+
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        setSketchStyle(ctx, 0.5);
+        drawing.draw(ctx, previewCanvas.width, previewCanvas.height);
+
+        previewLink.href = "game.html?openDrawing=" + String(randomIndex);
+        previewLink.setAttribute("aria-label", "Start your color challenge with " + drawing.name);
+      })
+      .catch(function () {
+        previewLink.href = "game.html";
+      });
   }
 
   function setupHeroTagline() {
@@ -510,13 +405,13 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     setupHeroTagline();
+    setupHomeGameSpotlight();
 
     var section = document.querySelector("[data-theme-picker]");
     if (!section || !window.CLWTheme) return;
     var modeSelect = section.querySelector("[data-theme-mode]");
     var wheelInput = section.querySelector("[data-theme-wheel]");
     var wheelCanvas = section.querySelector("[data-theme-wheel-canvas]");
-    var valueCanvas = section.querySelector("[data-theme-value-canvas]");
 
     section.querySelectorAll("[data-theme-option]").forEach(function (btn) {
       btn.setAttribute("role", "radio");
@@ -528,7 +423,7 @@
     }
 
     var storedMode = readStoredValue(MODE_STORAGE_KEY, "default");
-    setupWheelPicker(wheelCanvas, valueCanvas, wheelInput, function (hex) {
+    setupWheelPicker(wheelCanvas, wheelInput, function (hex) {
       writeStoredValue(WHEEL_COLOR_STORAGE_KEY, hex);
       if (modeSelect && modeSelect.value === "wheel") {
         applyWheelTheme(hex);

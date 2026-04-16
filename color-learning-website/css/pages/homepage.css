@@ -74,7 +74,7 @@ main.page-home {
 
 @media (min-width: 48rem) {
   .home-row--3 {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .home-row--2 {
@@ -127,6 +127,28 @@ a.home-card:focus-visible {
   font-size: var(--text-lg);
   font-weight: 600;
   color: inherit;
+}
+
+.home-card--game-spotlight {
+  grid-template-rows: auto 1fr;
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.home-card__text--game {
+  font-size: clamp(1rem, 1.35vw, 1.25rem);
+  text-align: center;
+}
+
+.home-game-preview {
+  width: min(100%, 17rem);
+  max-height: 12rem;
+  justify-self: center;
+  align-self: center;
+  border-radius: var(--radius-md);
+  border: 2px solid rgba(15, 23, 42, 0.14);
+  background: #fff;
+  display: block;
 }
 
 .home-col-theme {
@@ -238,11 +260,9 @@ a.home-card:focus-visible {
 
 .theme-picker__wheel-wrap {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 0.6rem;
 }
 
 .theme-picker__wheel {
@@ -263,16 +283,6 @@ a.home-card:focus-visible {
   cursor: crosshair;
   touch-action: none;
   filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.15));
-}
-
-.theme-picker__value-canvas {
-  width: min(12.2rem, 70vw);
-  height: 0.9rem;
-  max-width: 100%;
-  border-radius: 999px;
-  cursor: ew-resize;
-  touch-action: none;
-  border: 1px solid rgba(15, 23, 42, 0.24);
 }
 
 .theme-picker--wheel .theme-picker__title {
@@ -296,10 +306,6 @@ a.home-card:focus-visible {
 
 @media (max-width: 40rem) {
   .theme-picker--wheel .theme-picker__wheel-canvas {
-    width: min(10rem, 62vw);
-  }
-
-  .theme-picker--wheel .theme-picker__value-canvas {
     width: min(10rem, 62vw);
   }
 }
