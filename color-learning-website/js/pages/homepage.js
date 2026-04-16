@@ -331,6 +331,204 @@
       });
   }
 
+  function extractFunctionSource(source, functionName) {
+    var marker = "function " + functionName + "(";
+    var startIndex = source.indexOf(marker);
+    if (startIndex < 0) throw new Error("Missing function: " + functionName);
+    var bodyStart = source.indexOf("{", startIndex);
+    if (bodyStart < 0) throw new Error("Malformed function: " + functionName);
+
+    var depth = 0;
+    var inSingle = false;
+    var inDouble = false;
+    var inTemplate = false;
+    var escaped = false;
+
+    for (var i = bodyStart; i < source.length; i += 1) {
+      var ch = source[i];
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (!inDouble && !inTemplate && ch === "'" && source[i - 1] !== "\\") inSingle = !inSingle;
+      else if (!inSingle && !inTemplate && ch === '"' && source[i - 1] !== "\\") inDouble = !inDouble;
+      else if (!inSingle && !inDouble && ch === "`" && source[i - 1] !== "\\") inTemplate = !inTemplate;
+      if (inSingle || inDouble || inTemplate) continue;
+
+      if (ch === "{") depth += 1;
+      else if (ch === "}") {
+        depth -= 1;
+        if (depth === 0) return source.slice(startIndex, i + 1);
+      }
+    }
+    throw new Error("Unclosed function: " + functionName);
+  }
+
+  function extractVarSource(source, varName) {
+    var marker = "var " + varName + " =";
+    var startIndex = source.indexOf(marker);
+    if (startIndex < 0) throw new Error("Missing var: " + varName);
+
+    var depthCurly = 0;
+    var depthSquare = 0;
+    var depthRound = 0;
+    var inSingle = false;
+    var inDouble = false;
+    var inTemplate = false;
+    var escaped = false;
+
+    for (var i = startIndex; i < source.length; i += 1) {
+      var ch = source[i];
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (!inDouble && !inTemplate && ch === "'" && source[i - 1] !== "\\") inSingle = !inSingle;
+      else if (!inSingle && !inTemplate && ch === '"' && source[i - 1] !== "\\") inDouble = !inDouble;
+      else if (!inSingle && !inDouble && ch === "`" && source[i - 1] !== "\\") inTemplate = !inTemplate;
+      if (inSingle || inDouble || inTemplate) continue;
+
+      if (ch === "{") depthCurly += 1;
+      else if (ch === "}") depthCurly -= 1;
+      else if (ch === "[") depthSquare += 1;
+      else if (ch === "]") depthSquare -= 1;
+      else if (ch === "(") depthRound += 1;
+      else if (ch === ")") depthRound -= 1;
+      else if (ch === ";" && depthCurly === 0 && depthSquare === 0 && depthRound === 0) {
+        return source.slice(startIndex, i + 1);
+      }
+    }
+    throw new Error("Unclosed var: " + varName);
+  }
+
+  function loadTestQuestionCatalog() {
+    return fetch("js/pages/test.js")
+      .then(function (res) {
+        if (!res.ok) throw new Error("Failed to load test module");
+        return res.text();
+      })
+      .then(function (source) {
+        var parts = [
+          '"use strict";',
+          extractVarSource(source, "CHAPTERS"),
+          extractVarSource(source, "UNIT_TEMPLATES"),
+          extractFunctionSource(source, "clone"),
+          extractFunctionSource(source, "getChapter"),
+          extractFunctionSource(source, "getUnitFocus"),
+          extractFunctionSource(source, "makeSet"),
+          extractFunctionSource(source, "previewText"),
+          extractFunctionSource(source, "previewBg"),
+          extractFunctionSource(source, "previewImage"),
+          extractFunctionSource(source, "buildQuestionData"),
+          extractFunctionSource(source, "makeQuestion"),
+          extractFunctionSource(source, "getUnitQuestions"),
+          "var QUESTION_DATA = buildQuestionData();",
+          "var levels = Object.keys(UNIT_TEMPLATES);",
+          "function getOptionTexts(question) {",
+          "  var opts = Array.isArray(question && question.options) ? question.options : [];",
+          "  if (!opts.length) return [];",
+          "  if (question.type === 'image') {",
+          "    return opts.map(function (item) { return item && item.label ? String(item.label) : String(item && item.id ? item.id : 'Option'); });",
+          "  }",
+          "  return opts.map(function (item) { return String(item); });",
+          "}",
+          "var catalog = [];",
+          "CHAPTERS.forEach(function (chapter) {",
+          "  levels.forEach(function (levelId) {",
+          "    (UNIT_TEMPLATES[levelId] || []).forEach(function (unit) {",
+          "      var unitId = unit.id;",
+          "      var questions = getUnitQuestions(chapter.id, levelId, unitId) || [];",
+          "      questions.forEach(function (question, qIndex) {",
+          "        catalog.push({",
+          "          chapterId: chapter.id,",
+          "          chapterName: chapter.name,",
+          "          levelId: levelId,",
+          "          unitId: unitId,",
+          "          questionIndex: qIndex,",
+          "          prompt: question.prompt || '',",
+          "          topic: question.topic || '',",
+          "          id: question.id || '',",
+          "          optionTexts: getOptionTexts(question)",
+          "        });",
+          "      });",
+          "    });",
+          "  });",
+          "});",
+          "return catalog;"
+        ];
+        return new Function(parts.join("\n"))();
+      });
+  }
+
+  function escapeHtmlText(text) {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function toTitleCase(text) {
+    if (!text) return "";
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  function setupHomeTestSpotlight() {
+    var linkEl = document.querySelector("[data-home-test-link]");
+    var promptEl = document.querySelector("[data-home-test-prompt]");
+    var optionsEl = document.querySelector("[data-home-test-options]");
+    var metaEl = document.querySelector("[data-home-test-meta]");
+    if (!linkEl || !promptEl || !metaEl || !optionsEl) return;
+
+    loadTestQuestionCatalog()
+      .then(function (catalog) {
+        if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty question catalog");
+        var picked = catalog[Math.floor(Math.random() * catalog.length)];
+        if (!picked || !picked.prompt) throw new Error("Invalid question item");
+
+        promptEl.textContent = picked.prompt;
+        var optionRows = Array.isArray(picked.optionTexts) ? picked.optionTexts : [];
+        if (optionRows.length) {
+          optionsEl.innerHTML = optionRows
+            .map(function (text, index) {
+              return (
+                '<p class="home-test__option">' +
+                '<span class="home-test__option-key">' + String.fromCharCode(65 + (index % 26)) + "</span>" +
+                "<span>" + escapeHtmlText(text) + "</span>" +
+                "</p>"
+              );
+            })
+            .join("");
+        } else {
+          optionsEl.innerHTML = '<p class="home-test__option"><span class="home-test__option-key">i</span><span>Open to view options</span></p>';
+        }
+        metaEl.textContent =
+          picked.chapterName + " · " + toTitleCase(picked.levelId) + " · " + picked.unitId.replace("unit-", "Unit ");
+
+        linkEl.href =
+          "test-quiz.html?chapter=" + encodeURIComponent(picked.chapterId) +
+          "&level=" + encodeURIComponent(picked.levelId) +
+          "&unit=" + encodeURIComponent(picked.unitId) +
+          "&fresh=1&hq=" + encodeURIComponent(String(picked.questionIndex));
+        linkEl.setAttribute("aria-label", "Open test question: " + picked.prompt);
+      })
+      .catch(function () {
+        promptEl.textContent = "Tap to jump into a random color challenge question.";
+        optionsEl.innerHTML = '<p class="home-test__option"><span class="home-test__option-key">i</span><span>Options will appear after loading.</span></p>';
+        metaEl.textContent = "Test module";
+        linkEl.href = "test-quiz.html?fresh=1";
+      });
+  }
+
   function setupHeroTagline() {
     var tagline = document.querySelector(".home-hero__tagline");
     if (!tagline) return;
@@ -406,6 +604,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     setupHeroTagline();
     setupHomeGameSpotlight();
+    setupHomeTestSpotlight();
 
     var section = document.querySelector("[data-theme-picker]");
     if (!section || !window.CLWTheme) return;

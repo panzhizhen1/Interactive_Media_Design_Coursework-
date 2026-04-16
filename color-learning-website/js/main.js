@@ -49,6 +49,29 @@
         if (drawingBtn) drawingBtn.click();
       }
     }
+    if (pageName === "test-quiz.html") {
+      var hq = new URLSearchParams(window.location.search).get("hq");
+      if (/^\d+$/.test(hq || "")) {
+        var questionIndex = Number(hq);
+        var attempts = 0;
+        var timer = setInterval(function () {
+          attempts += 1;
+          var jumpBtn = document.querySelector('[data-quiz-jump="' + questionIndex + '"]');
+          if (jumpBtn) {
+            jumpBtn.click();
+            clearInterval(timer);
+            if (window.history && window.history.replaceState) {
+              var nextParams = new URLSearchParams(window.location.search);
+              nextParams.delete("hq");
+              var nextQuery = nextParams.toString();
+              window.history.replaceState(null, "", window.location.pathname + (nextQuery ? "?" + nextQuery : ""));
+            }
+            return;
+          }
+          if (attempts >= 50) clearInterval(timer);
+        }, 80);
+      }
+    }
 
     document.dispatchEvent(new CustomEvent("site:components-ready"));
   });
