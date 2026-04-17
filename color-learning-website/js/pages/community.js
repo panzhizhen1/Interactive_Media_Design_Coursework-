@@ -217,12 +217,41 @@
       palette
         .map(function (hex, index) {
           return (
-            '<button type="button" class="palette-strip__block" role="listitem" data-palette-block="' + index + '" style="background:' + hex + '" aria-label="Edit color ' + hex + '"></button>'
+            '<div class="palette-strip__cell" role="listitem" data-palette-cell="' + index + '">' +
+              '<button type="button" class="palette-strip__block" data-palette-block="' + index + '" style="background:' + hex + '" aria-label="Edit color ' + hex + '"></button>' +
+              '<div class="palette-strip__actions">' +
+                '<button type="button" class="palette-strip__action" data-palette-copy="' + index + '" aria-label="Copy color ' + hex + '">Copy</button>' +
+                '<button type="button" class="palette-strip__action palette-strip__action--danger" data-palette-delete="' + index + '" aria-label="Delete color ' + hex + '">Delete</button>' +
+              "</div>" +
+            "</div>"
           );
         })
         .join("") +
       '<button type="button" class="palette-strip__add" role="listitem" data-palette-add aria-label="Add palette color">+</button>' +
       "</div>";
+  }
+
+  function copyText(text) {
+    var content = String(text || "");
+    if (!content) return Promise.resolve(false);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(content).then(function () { return true; }).catch(function () { return false; });
+    }
+    var input = document.createElement("textarea");
+    input.value = content;
+    input.setAttribute("readonly", "readonly");
+    input.style.position = "fixed";
+    input.style.left = "-9999px";
+    document.body.appendChild(input);
+    input.select();
+    var ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch (error) {
+      ok = false;
+    }
+    document.body.removeChild(input);
+    return Promise.resolve(ok);
   }
 
   function openNativeColorPicker(initialHex, onChange) {
@@ -1267,6 +1296,30 @@
           var seed = nextPalette.length ? nextPalette[nextPalette.length - 1] : DEFAULT_COLOR;
           nextPalette.push(seed);
           setComposerPalette(nextPalette, true);
+          return;
+        }
+        var copyBtn = event.target.closest("[data-palette-copy]");
+        if (copyBtn) {
+          var copyIdx = Number(copyBtn.getAttribute("data-palette-copy"));
+          if (!Number.isFinite(copyIdx)) return;
+          var copyPalette = readPaletteFromHiddenInput();
+          copyText(copyPalette[copyIdx]).then(function (ok) {
+            setFeedback(ok ? "Color copied." : "Copy failed. Please try again.", ok ? "success" : "error");
+          });
+          return;
+        }
+        var deleteBtn = event.target.closest("[data-palette-delete]");
+        if (deleteBtn) {
+          var deleteIdx = Number(deleteBtn.getAttribute("data-palette-delete"));
+          if (!Number.isFinite(deleteIdx)) return;
+          var deletePalette = readPaletteFromHiddenInput();
+          if (deletePalette.length <= 1) {
+            setFeedback("At least one color is required.", "error");
+            return;
+          }
+          deletePalette.splice(deleteIdx, 1);
+          setComposerPalette(deletePalette, true);
+          setFeedback("Color removed.", "success");
           return;
         }
         var blockBtn = event.target.closest("[data-palette-block]");

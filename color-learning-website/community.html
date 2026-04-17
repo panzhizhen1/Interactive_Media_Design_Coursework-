@@ -32,7 +32,7 @@
               Learning Prompt: How does this color choice impact users with color vision deficiency?
             </p>
 
-            <form data-post-form>
+            <form id="post-form" data-post-form>
               <label class="sr-only" for="post-content">Post content</label>
               <textarea
                 id="post-content"
@@ -57,7 +57,6 @@
 
               <div class="composer-card__controls">
                 <div class="palette-builder" data-palette-builder>
-                  <p class="palette-builder__label">Palette Builder</p>
                   <div class="palette-builder__row" data-palette-row></div>
                   <div class="palette-builder__actions">
                     <button type="button" class="palette-builder__extract" data-palette-from-image>Extract Palette from Image</button>
@@ -66,7 +65,6 @@
                   <input id="attach-color" type="color" value="#2b78e4" data-color-picker hidden />
                   <input type="hidden" data-palette-input value="2b78e4" />
                 </div>
-                <button type="submit" class="btn-post">Post and Earn 5 points</button>
               </div>
               <div class="composer-card__extras">
                 <label class="color-control" for="attach-image">
@@ -95,6 +93,9 @@
             <a class="post-preview-head__btn" href="community-posts.html">View Full Posts</a>
           </div>
           <section class="post-list" aria-live="polite" data-post-list></section>
+          <div class="feed-submit-wrap">
+            <button type="submit" form="post-form" class="btn-post feed-submit-btn">Post and Earn 5 points</button>
+          </div>
         </section>
 
         <aside class="community-side" aria-label="Community insights">
