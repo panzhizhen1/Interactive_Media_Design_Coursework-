@@ -1,6 +1,9 @@
 // Learning page scripts
 
 import { contentData } from './learn/learning-content.js';
+import { ColorPicker } from './learn/interaction-color-picker.js';
+import { VisualExample } from './learn/ineraction-visual-example.js';
+import { InteractionTools } from './learn/interaction-tools.js';
 
 (function() {
   'use strict';
@@ -16,6 +19,11 @@ import { contentData } from './learn/learning-content.js';
   const shareBtn = document.querySelector('[data-learning-share]');
   const shareStatus = document.querySelector('[data-learning-share-status]');
   const COMMUNITY_DRAFT_KEY = 'clw_community_draft_v1';
+  
+  // Interaction module instances
+  let colorPickerInstance = null;
+  let visualExampleInstance = null;
+  let interactionToolsInstance = null;
 
   // Initialize
   function init() {
@@ -192,11 +200,43 @@ import { contentData } from './learn/learning-content.js';
     } else if (content.sections) {
       // Rich content pages with sections
       renderRichContentPage(content);
+      
+      // Initialize interaction modules when their sections are loaded
+      initializeInteractionModules(section);
     } else {
       // Simple content pages
       contentTitle.textContent = content.title;
       contentDescription.innerHTML = `<p>${content.description}</p>`;
     }
+  }
+  
+  // Initialize interaction modules based on current section
+  function initializeInteractionModules(section) {
+    // Use setTimeout to ensure DOM is fully rendered
+    setTimeout(() => {
+      switch(section) {
+        case 'interaction-color-picker':
+          if (!colorPickerInstance && document.getElementById('color-picker-container')) {
+            colorPickerInstance = new ColorPicker();
+            console.log('Color Picker initialized');
+          }
+          break;
+          
+        case 'interaction-visual-example':
+          if (!visualExampleInstance && document.getElementById('visual-gallery')) {
+            visualExampleInstance = new VisualExample();
+            console.log('Visual Example initialized');
+          }
+          break;
+          
+        case 'interaction-interactive-tools':
+          if (!interactionToolsInstance && document.getElementById('color-converter-tool')) {
+            interactionToolsInstance = new InteractionTools();
+            console.log('Interaction Tools initialized');
+          }
+          break;
+      }
+    }, 100);
   }
 
   // Render overview page with rich content
