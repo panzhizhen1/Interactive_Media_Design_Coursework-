@@ -1445,6 +1445,336 @@ export const contentData = {
         ]
     },
 
+    'basic-color-attributes': {
+        title: 'Color Attributes & Perception',
+            subtitle: 'Understanding Hue, Saturation, Lightness, Contrast, and Color Temperature',
+            meta: {
+            readingTime: '25-30 minutes',
+                difficulty: 'Beginner',
+                type: 'Theoretical + Interactive'
+        },
+        sections: [
+            {
+                heading: 'Learning Objectives',
+                content: `
+                <p>After completing this module, you will be able to:</p>
+                
+                <h3>Understand Core Color Attributes</h3>
+                <ul>
+                  <li>Explain the three dimensions of color: Hue, Saturation, and Lightness</li>
+                  <li>Distinguish between brightness and lightness</li>
+                  <li>Understand how contrast affects readability and visual hierarchy</li>
+                </ul>
+                
+                <h3>Master Color Temperature Concepts</h3>
+                <ul>
+                  <li>Identify warm and cool colors and their psychological effects</li>
+                  <li>Understand the Kelvin scale and its applications</li>
+                  <li>Apply color temperature knowledge in design decisions</li>
+                </ul>
+                
+                <h3>Apply Practical Skills</h3>
+                <ul>
+                  <li>Use our interactive Color Picker to explore HSL values</li>
+                  <li>Check color contrast for accessibility compliance</li>
+                  <li>Make informed choices about color temperature in projects</li>
+                </ul>
+              `
+            },
+            {
+                heading: 'Hue, Saturation, and Lightness (HSL)',
+                content: `
+                <h3>The Three Dimensions of Color</h3>
+                <p>Every color can be described using three fundamental attributes that work together to create the full spectrum of visible colors. Understanding these dimensions gives you precise control over color selection and manipulation.</p>
+                
+                <img src="assets/images/learning/hsl-color-model-3d.png" alt="3D cylindrical representation of HSL color space showing Hue as angle around cylinder, Saturation as distance from center axis, and Lightness as vertical height" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h3>Hue - The Color Identity</h3>
+                <p><strong>Hue</strong> is what we typically think of as "color" - red, blue, green, yellow, etc. It represents the position on the color wheel and is measured in degrees (0° to 360°).</p>
+                
+                <div class="info-box info-box--highlight">
+                  <h4>Key Hue Positions</h4>
+                  <ul>
+                    <li><strong>0° / 360°:</strong> Red</li>
+                    <li><strong>60°:</strong> Yellow</li>
+                    <li><strong>120°:</strong> Green</li>
+                    <li><strong>180°:</strong> Cyan</li>
+                    <li><strong>240°:</strong> Blue</li>
+                    <li><strong>300°:</strong> Magenta</li>
+                  </ul>
+                </div>
+                
+                <h3>Saturation - Color Intensity</h3>
+                <p><strong>Saturation</strong> describes the purity or intensity of a color, ranging from 0% (completely gray) to 100% (fully vivid). It determines how much a color differs from a neutral gray of the same lightness.</p>
+                
+                <img src="assets/images/learning/saturation-comparison.png" alt="Horizontal gradient bar showing same hue with saturation varying from 0% (gray) to 100% (vivid), labeled Low Saturation to High Saturation" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h4>Practical Applications</h4>
+                <ul>
+                  <li><strong>High Saturation (80-100%):</strong> Creates energy, draws attention, ideal for calls-to-action and branding</li>
+                  <li><strong>Medium Saturation (40-70%):</strong> Balanced and professional, suitable for most UI elements</li>
+                  <li><strong>Low Saturation (0-30%):</strong> Subtle and sophisticated, perfect for backgrounds and secondary elements</li>
+                </ul>
+                
+                <div class="info-box">
+                  <h4>Try It Yourself</h4>
+                  <p>Use our <a href="#interaction-color-picker">interactive Color Picker</a> to adjust the saturation slider and observe how colors change from muted to vibrant. Notice how highly saturated colors can be overwhelming in large areas, while desaturated colors create calm, professional atmospheres.</p>
+                </div>
+                
+                <h3>Lightness - Brightness Level</h3>
+                <p><strong>Lightness</strong> (also called value) represents how light or dark a color is, ranging from 0% (pure black) through 50% (pure color) to 100% (pure white).</p>
+                
+                <img src="assets/images/learning/tints-shades-tones.png" alt="Grid showing one base color with tints (adding white) in top row, shades (adding black) in middle row, and tones (adding gray) in bottom row" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h4>Tints, Shades, and Tones</h4>
+                <ul>
+                  <li><strong>Tints:</strong> Created by adding white to a base color (increasing lightness above 50%)</li>
+                  <li><strong>Shades:</strong> Created by adding black to a base color (decreasing lightness below 50%)</li>
+                  <li><strong>Tones:</strong> Created by adding gray to a base color (reducing saturation while maintaining lightness)</li>
+                </ul>
+                
+                <div class="pros-cons">
+                  <div class="pros-cons__item pros-cons__item--pros">
+                    <h4>When to Use High Lightness</h4>
+                    <ul>
+                      <li>Backgrounds and surfaces</li>
+                      <li>Creating spacious, airy designs</li>
+                      <li>Daytime or positive themes</li>
+                      <li>Improving text readability on dark text</li>
+                    </ul>
+                  </div>
+                  <div class="pros-cons__item pros-cons__item--cons">
+                    <h4>When to Use Low Lightness</h4>
+                    <ul>
+                      <li>Text and important elements</li>
+                      <li>Creating depth and drama</li>
+                      <li>Night mode or luxury themes</li>
+                      <li>Reducing eye strain in dark environments</li>
+                    </ul>
+                  </div>
+                </div>
+              `
+            },
+            {
+                heading: 'Brightness and Contrast',
+                content: `
+                <h3>Understanding Brightness vs. Lightness</h3>
+                <p>While often used interchangeably, <strong>brightness</strong> and <strong>lightness</strong> have distinct meanings in color theory:</p>
+                
+                <ul>
+                  <li><strong>Lightness (HSL):</strong> A perceptual measure from black (0%) through pure color (50%) to white (100%)</li>
+                  <li><strong>Brightness (HSB/HSV):</strong> Represents the amount of light emitted or reflected, from dark (0%) to maximum intensity (100%)</li>
+                </ul>
+                
+                <p>In practical terms, brightness is more closely related to the physical properties of light, while lightness is based on human perception.</p>
+                
+                <h3>Contrast - Creating Visual Distinction</h3>
+                <p><strong>Contrast</strong> is the difference between two colors, and it's crucial for readability, visual hierarchy, and accessibility. There are several types of contrast:</p>
+                
+                <img src="assets/images/learning/contrast-types.png" alt="Three pairs of color squares demonstrating: Value contrast (black vs white), Hue contrast (red vs green), Saturation contrast (vivid red vs muted red)" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h4>Types of Contrast</h4>
+                <ol>
+                  <li><strong>Value Contrast (Brightness Contrast)</strong>
+                    <ul>
+                      <li>Difference in lightness/darkness between colors</li>
+                      <li>Most important for text readability</li>
+                      <li>Example: Black text on white background</li>
+                    </ul>
+                  </li>
+                  <li><strong>Hue Contrast</strong>
+                    <ul>
+                      <li>Difference in color identity (position on color wheel)</li>
+                      <li>Complementary colors (opposite on wheel) create maximum hue contrast</li>
+                      <li>Example: Red and green, blue and orange</li>
+                    </ul>
+                  </li>
+                  <li><strong>Saturation Contrast</strong>
+                    <ul>
+                      <li>Difference in color intensity</li>
+                      <li>Vivid colors stand out against muted backgrounds</li>
+                      <li>Example: Bright red button on gray background</li>
+                    </ul>
+                  </li>
+                </ol>
+                
+                <h3>Contrast and Accessibility</h3>
+                <p>Proper contrast is essential for making content accessible to users with visual impairments. The Web Content Accessibility Guidelines (WCAG) define specific contrast ratio requirements:</p>
+                
+                <img src="assets/images/learning/wcag-contrast-standards.png" alt="Infographic showing WCAG contrast ratio requirements: AA level 4.5:1 for normal text, 3:1 for large text; AAA level 7:1 for normal text, 4.5:1 for large text, with checkmark icons" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <div class="tech-specs">
+                  <div class="spec-row">
+                    <span class="spec-label">AA Level (Normal Text):</span>
+                    <span class="spec-value">Minimum 4.5:1 contrast ratio</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">AA Level (Large Text):</span>
+                    <span class="spec-value">Minimum 3:1 contrast ratio</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">AAA Level (Normal Text):</span>
+                    <span class="spec-value">Minimum 7:1 contrast ratio</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">AAA Level (Large Text):</span>
+                    <span class="spec-value">Minimum 4.5:1 contrast ratio</span>
+                  </div>
+                </div>
+                
+                <img src="assets/images/learning/contrast-readability-example.png" alt="Two text samples side by side: left shows high contrast black text on white background (labeled Good Contrast), right shows low contrast light gray text on white background (labeled Poor Contrast)" style="width: 100%; max-width: 700px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <div class="info-box info-box--highlight">
+                  <h4>Best Practices for Contrast</h4>
+                  <ul>
+                    <li>Always test text contrast ratios before publishing</li>
+                    <li>Don't rely solely on color to convey information</li>
+                    <li>Consider users with color vision deficiencies</li>
+                    <li>Use higher contrast for important content and calls-to-action</li>
+                    <li>Maintain consistent contrast levels throughout your design</li>
+                  </ul>
+                </div>
+                
+                <div class="info-box">
+                  <h4>Practice: Check Your Colors</h4>
+                  <p>Use our <a href="#interaction-interactive-tools">Accessibility Checker tool</a> to test color combinations and ensure they meet WCAG standards. Enter your foreground and background colors to get instant feedback on contrast ratios and compliance levels.</p>
+                </div>
+              `
+            },
+            {
+                heading: 'Color Temperature',
+                content: `
+                <h3>Warm and Cool Colors</h3>
+                <p><strong>Color temperature</strong> refers to the perceived warmth or coolness of a color. This concept originates from the color of light emitted by heated objects and has profound effects on mood, perception, and design effectiveness.</p>
+                
+                <img src="assets/images/learning/color-temperature-kelvin-scale.png" alt="Horizontal Kelvin scale from 2000K to 10000K showing color temperature progression: candlelight (2000K, orange), sunrise (3000K, warm yellow), daylight (5500K, neutral white), overcast sky (7000K, cool blue), clear sky (10000K, deep blue)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h3>The Kelvin Scale</h3>
+                <p>Color temperature is measured in <strong>Kelvin (K)</strong>, a scientific unit that describes the color characteristics of light sources:</p>
+                
+                <div class="tech-specs">
+                  <div class="spec-row">
+                    <span class="spec-label">2000K - 3000K:</span>
+                    <span class="spec-value">Warm (orange/yellow) - Candlelight, incandescent bulbs</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">3500K - 4500K:</span>
+                    <span class="spec-value">Neutral Warm - Morning/evening sunlight</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">5000K - 6500K:</span>
+                    <span class="spec-value">Neutral - Daylight, standard white point (D65)</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">7000K - 10000K:</span>
+                    <span class="spec-value">Cool (blue) - Overcast sky, shade</span>
+                  </div>
+                </div>
+                
+                <h3>Psychological Effects</h3>
+                <img src="assets/images/learning/warm-cool-emotions.png" alt="Split image: left side shows warm colors (red, orange, yellow) with words like energy, warmth, passion; right side shows cool colors (blue, green, purple) with words like calm, trust, professionalism" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <div class="pros-cons">
+                  <div class="pros-cons__item pros-cons__item--pros">
+                    <h4>Warm Colors (Red, Orange, Yellow)</h4>
+                    <ul>
+                      <li>Evoke feelings of energy, excitement, and warmth</li>
+                      <li>Create sense of urgency and action</li>
+                      <li>Appear to advance toward the viewer</li>
+                      <li>Stimulate appetite and social interaction</li>
+                      <li>Common in food, entertainment, and clearance sales</li>
+                    </ul>
+                  </div>
+                  <div class="pros-cons__item pros-cons__item--cons">
+                    <h4>Cool Colors (Blue, Green, Purple)</h4>
+                    <ul>
+                      <li>Convey calmness, trust, and professionalism</li>
+                      <li>Create sense of space and distance</li>
+                      <li>Appear to recede from the viewer</li>
+                      <li>Promote focus and concentration</li>
+                      <li>Popular in technology, healthcare, and finance</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <h3>Applications in Design</h3>
+                
+                <h4>Brand Identity</h4>
+                <img src="assets/images/learning/brand-color-temperature.png" alt="Logo examples: fast food brands using warm colors (McDonald's, Burger King) on left, tech companies using cool colors (IBM, Intel, Facebook) on right" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <ul>
+                  <li><strong>Fast Food & Retail:</strong> Warm colors stimulate appetite and create urgency (McDonald's, KFC, Target)</li>
+                  <li><strong>Technology & Finance:</strong> Cool colors convey trust and reliability (IBM, PayPal, Intel)</li>
+                  <li><strong>Healthcare:</strong> Cool blues and greens promote healing and calm (hospital brands, wellness apps)</li>
+                  <li><strong>Luxury Brands:</strong> Often use neutral or cool tones for sophistication (Tiffany blue, Mercedes silver)</li>
+                </ul>
+                
+                <h4>Photography and White Balance</h4>
+                <img src="assets/images/learning/white-balance-comparison.png" alt="Same indoor scene shown three times: left with warm white balance (orange tint, 3000K), center with neutral white balance (natural, 5500K), right with cool white balance (blue tint, 7000K)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <p><strong>White balance</strong> is the process of adjusting colors in photography to ensure that white objects appear truly white, compensating for the color temperature of the light source:</p>
+                
+                <ul>
+                  <li><strong>Auto White Balance (AWB):</strong> Camera attempts to detect and correct color temperature automatically</li>
+                  <li><strong>Preset Modes:</strong> Daylight, Cloudy, Tungsten, Fluorescent, Flash</li>
+                  <li><strong>Custom White Balance:</strong> Manual calibration using a gray card for perfect accuracy</li>
+                  <li><strong>Creative Use:</strong> Intentionally warming or cooling images for mood and atmosphere</li>
+                </ul>
+                
+                <div class="info-box info-box--additive">
+                  <h4>Interior Design Tip</h4>
+                  <p>Use warm lighting (2700K-3000K) in living spaces for comfort and relaxation. Choose cooler lighting (4000K-5000K) in kitchens, bathrooms, and offices for alertness and task performance. Many modern LED bulbs offer adjustable color temperature to match different activities and times of day.</p>
+                </div>
+                
+                <h3>Cultural Considerations</h3>
+                <p>Color temperature associations can vary across cultures:</p>
+                
+                <ul>
+                  <li><strong>Western Cultures:</strong> White = purity, cleanliness; Black = mourning, formality</li>
+                  <li><strong>Eastern Cultures:</strong> White = mourning in some contexts; Red = luck, prosperity</li>
+                  <li><strong>Middle Eastern:</strong> Green = paradise, Islam; Blue = protection</li>
+                  <li><strong>Global Design:</strong> Consider your audience when choosing color temperature for international projects</li>
+                </ul>
+                
+                <div class="info-box">
+                  <h4>Experiment with Color Temperature</h4>
+                  <p>Visit our <a href="#interaction-color-picker">Color Picker</a> and try creating color schemes with different temperature profiles. Notice how shifting from warm oranges to cool blues completely changes the mood of your palette. Practice identifying the temperature of colors in websites and apps you use daily.</p>
+                </div>
+              `
+            },
+            {
+                heading: 'Summary and Key Takeaways',
+                content: `
+                <h3>Core Concepts to Remember</h3>
+                <ol>
+                  <li><strong>HSL Model:</strong> Hue (color identity), Saturation (intensity), Lightness (brightness level) are the three fundamental attributes of color</li>
+                  <li><strong>Saturation Control:</strong> High saturation creates energy; low saturation creates sophistication</li>
+                  <li><strong>Contrast is Critical:</strong> Proper contrast ensures readability and accessibility (minimum 4.5:1 for normal text)</li>
+                  <li><strong>Temperature Matters:</strong> Warm colors energize; cool colors calm</li>
+                  <li><strong>Context is Key:</strong> Choose color attributes based on purpose, audience, and cultural considerations</li>
+                </ol>
+                
+                <h3>Practical Skills Acquired</h3>
+                <ul>
+                  <li>Manipulating HSL values for precise color control</li>
+                  <li>Evaluating and improving color contrast for accessibility</li>
+                  <li>Applying color temperature principles in design decisions</li>
+                  <li>Using interactive tools to test and refine color choices</li>
+                </ul>
+                
+                <div class="next-steps">
+                  <h3>Next Steps</h3>
+                  <div class="action-buttons">
+                    <a href="#interaction-color-picker" class="btn btn-primary">Practice with Color Picker</a>
+                    <a href="#interaction-interactive-tools" class="btn btn-secondary">Check Accessibility</a>
+                    <a href="#encoding-bit-depth" class="btn btn-outline">Continue to Bit Depth</a>
+                  </div>
+                </div>
+              `
+            }
+        ]
+    },
+
     'encoding-bit-depth': {
         title: 'Bit Depth and Colour Precision',
         subtitle: 'Understanding Digital Colour Representation and Image Quality',
@@ -5715,19 +6045,1069 @@ export const contentData = {
     },
 
     'interaction-color-picker': {
-        title: 'Color Picker',
-        description: 'Interactive color picker tools coming soon. Experiment with different color selection methods and visualize color relationships in real-time.'
+        title: 'Interactive Color Picker',
+        subtitle: 'Explore Color Spaces Through Interactive Selection and Analysis',
+        meta: {
+            readingTime: 'Interactive Tool',
+            difficulty: 'All Levels',
+            type: 'Interactive + Educational'
+        },
+        sections: [
+            {
+                heading: 'Introduction to Color Picker',
+                content: `
+                    <p>The Interactive Color Picker allows you to explore colors across different color models, visualize gamut boundaries, and understand color relationships in real-time.</p>
+                    
+                    <h3>What You Can Do</h3>
+                    <ul>
+                        <li>Select colors using multiple input methods (RGB, HSL, CMYK, Lab, Hex)</li>
+                        <li>Visualize color position on CIE chromaticity diagram</li>
+                        <li>Check if colors are within specific color space gamuts</li>
+                        <li>Compare colors across different color spaces</li>
+                        <li>Save and export your color selections</li>
+                    </ul>
+                    
+                    <div class="info-box info-box--highlight">
+                        <h4>Learning Tip</h4>
+                        <p>Try selecting the same visual color in different color models to see how numerical values change while appearance stays the same!</p>
+                    </div>
+                `
+            },
+            {
+                heading: 'Color Picker Tool',
+                content: `
+                    <div id="color-picker-container" class="color-picker-wrapper">
+                        <div class="color-picker-main">
+                            <div class="color-preview-section">
+                                <div class="color-preview-swatch" id="color-preview"></div>
+                                <div class="color-info-display">
+                                    <div class="color-hex-display">
+                                        <label>Hex:</label>
+                                        <input type="text" id="hex-input" value="#FFFFFF" maxlength="7" />
+                                        <button class="btn-copy" data-copy="hex" title="Copy Hex">📋</button>
+                                    </div>
+                                    <div class="color-rgb-display">
+                                        <span id="rgb-text">RGB(255, 255, 255)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="color-wheel-container">
+                                <canvas id="color-wheel" width="300" height="300"></canvas>
+                                <div class="color-wheel-cursor" id="wheel-cursor"></div>
+                            </div>
+                            
+                            <div class="color-sliders">
+                                <div class="slider-group">
+                                    <h4>RGB</h4>
+                                    <div class="slider-item">
+                                        <label>R: <span id="r-value">255</span></label>
+                                        <input type="range" id="r-slider" min="0" max="255" value="255" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>G: <span id="g-value">255</span></label>
+                                        <input type="range" id="g-slider" min="0" max="255" value="255" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>B: <span id="b-value">255</span></label>
+                                        <input type="range" id="b-slider" min="0" max="255" value="255" />
+                                    </div>
+                                </div>
+                                
+                                <div class="slider-group">
+                                    <h4>HSL</h4>
+                                    <div class="slider-item">
+                                        <label>H: <span id="h-value">0</span>°</label>
+                                        <input type="range" id="h-slider" min="0" max="360" value="0" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>S: <span id="s-value">0</span>%</label>
+                                        <input type="range" id="s-slider" min="0" max="100" value="0" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>L: <span id="l-value">100</span>%</label>
+                                        <input type="range" id="l-slider" min="0" max="100" value="100" />
+                                    </div>
+                                </div>
+                                
+                                <div class="slider-group">
+                                    <h4>CMYK</h4>
+                                    <div class="slider-item">
+                                        <label>C: <span id="c-value">0</span>%</label>
+                                        <input type="range" id="c-slider" min="0" max="100" value="0" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>M: <span id="m-value">0</span>%</label>
+                                        <input type="range" id="m-slider" min="0" max="100" value="0" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>Y: <span id="y-value">0</span>%</label>
+                                        <input type="range" id="y-slider" min="0" max="100" value="0" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>K: <span id="k-value">0</span>%</label>
+                                        <input type="range" id="k-slider" min="0" max="100" value="0" />
+                                    </div>
+                                </div>
+                                
+                                <div class="slider-group">
+                                    <h4>Lab</h4>
+                                    <div class="slider-item">
+                                        <label>L*: <span id="lab-l-value">100</span></label>
+                                        <input type="range" id="lab-l-slider" min="0" max="100" value="100" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>a*: <span id="lab-a-value">0</span></label>
+                                        <input type="range" id="lab-a-slider" min="-128" max="127" value="0" />
+                                    </div>
+                                    <div class="slider-item">
+                                        <label>b*: <span id="lab-b-value">0</span></label>
+                                        <input type="range" id="lab-b-slider" min="-128" max="127" value="0" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="color-actions">
+                                <button class="btn-action" id="eyedropper-btn">🎯 Eyedropper</button>
+                                <button class="btn-action" id="random-color-btn">🎲 Random</button>
+                                <button class="btn-action" id="reset-color-btn">↺ Reset</button>
+                            </div>
+                        </div>
+                        
+                        <div class="gamut-visualization-section">
+                            <h3>Gamut Visualization</h3>
+                            <div class="gamut-controls">
+                                <select id="gamut-space-select">
+                                    <option value="srgb">sRGB / Rec.709</option>
+                                    <option value="adobe-rgb">Adobe RGB (1998)</option>
+                                    <option value="dci-p3">DCI-P3</option>
+                                    <option value="display-p3">Display P3</option>
+                                    <option value="rec2020">Rec.2020</option>
+                                    <option value="prophoto">ProPhoto RGB</option>
+                                </select>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="show-gamut-boundary" checked />
+                                    <span class="toggle-slider"></span>
+                                    Show Gamut Boundary
+                                </label>
+                            </div>
+                            
+                            <div class="cie-diagram-container">
+                                <canvas id="cie-diagram" width="400" height="400"></canvas>
+                                <div class="cie-cursor" id="cie-cursor"></div>
+                            </div>
+                            
+                            <div class="gamut-status">
+                                <div class="status-indicator" id="gamut-status">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text">In Gamut</span>
+                                </div>
+                                <div class="distance-info">
+                                    Distance to boundary: <span id="boundary-distance">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="color-history-section">
+                        <h3>Color History</h3>
+                        <div class="color-history-grid" id="color-history">
+                            <p class="history-placeholder">Selected colors will appear here</p>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn-secondary" id="clear-history">Clear History</button>
+                            <button class="btn-secondary" id="export-colors">Export Colors</button>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'How to Use',
+                content: `
+                    <h3>Basic Usage</h3>
+                    <ol>
+                        <li><strong>Select a Color:</strong> Use any input method (sliders, hex input, or color wheel)</li>
+                        <li><strong>Observe Changes:</strong> All color model values update in real-time</li>
+                        <li><strong>Check Gamut:</strong> See if your color is within the selected color space</li>
+                        <li><strong>Save Colors:</strong> Click on the preview swatch to add to history</li>
+                    </ol>
+                    
+                    <h3>Advanced Features</h3>
+                    <ul>
+                        <li><strong>Eyedropper Tool:</strong> Pick colors from anywhere on screen (browser support required)</li>
+                        <li><strong>Gamut Comparison:</strong> Switch between color spaces to see gamut differences</li>
+                        <li><strong>Export:</strong> Save your color palette as JSON or CSV</li>
+                    </ul>
+                    
+                    <div class="next-steps">
+                        <h3>Continue Learning</h3>
+                        <div class="action-buttons">
+                            <a href="#interaction-visual-example" class="btn btn-primary">View Visual Examples</a>
+                            <a href="#interaction-interactive-tools" class="btn btn-secondary">Try Interactive Tools</a>
+                            <a href="#overview" class="btn btn-outline">Back to Overview</a>
+                        </div>
+                    </div>
+                `
+            }
+        ]
     },
+
     'interaction-visual-example': {
-        title: 'Visual Example',
-        description: 'Visual examples and demonstrations will be available here. See color theory concepts applied in practical scenarios with interactive illustrations.'
+        title: 'Visual Examples & Case Studies',
+        subtitle: 'Real-World Demonstrations of Color Management Concepts',
+        meta: {
+            readingTime: 'Interactive Gallery',
+            difficulty: 'All Levels',
+            type: 'Visual + Educational'
+        },
+        sections: [
+            {
+                heading: 'How to Use This Gallery',
+                content: `
+                    <div class="usage-guide">
+                        <div class="guide-card">
+                            <div class="guide-icon">📸</div>
+                            <h4>1. Choose a Category</h4>
+                            <p>Use the "Category" dropdown to browse examples from Photography, Design, Video, or Common Problems.</p>
+                        </div>
+                        
+                        <div class="guide-card">
+                            <div class="guide-icon">👁️</div>
+                            <h4>2. Navigate Examples</h4>
+                            <p>Use the "Previous" and "Next" buttons to browse through all examples in the selected category.</p>
+                        </div>
+                        
+                        <div class="guide-card">
+                            <div class="guide-icon">🔄</div>
+                            <h4>3. Switch View Mode</h4>
+                            <p>Toggle between "Side-by-Side" and "Slider Comparison" modes. The slider mode lets you drag a divider to compare before/after.</p>
+                        </div>
+                        
+                        <div class="guide-card">
+                            <div class="guide-icon">📝</div>
+                            <h4>4. Read the Details</h4>
+                            <p>Each example shows the Problem, Solution, Technical Details, and Best Practices. Study these to understand color management workflows.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Before/After Gallery',
+                content: `
+                    <div class="visual-gallery" id="visual-gallery">
+                        <div class="gallery-controls">
+                            <div class="control-group">
+                                <label for="gallery-category">Category:</label>
+                                <select id="gallery-category">
+                                    <option value="photography">Photography</option>
+                                    <option value="design">Design</option>
+                                    <option value="video">Video</option>
+                                    <option value="problems">Common Problems</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="view-mode">View Mode:</label>
+                                <select id="view-mode">
+                                    <option value="side-by-side">Side-by-Side</option>
+                                    <option value="slider">Slider Comparison</option>
+                                </select>
+                            </div>
+                            
+                            <div class="navigation-buttons">
+                                <button class="btn-nav" id="prev-example" disabled>← Previous</button>
+                                <span class="example-counter">Example 1 of 3</span>
+                                <button class="btn-nav" id="next-example">Next →</button>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-container view-side-by-side" id="comparison-container">
+                            <div class="before">
+                                <img src="" alt="Before" />
+                                <span class="label">Before</span>
+                            </div>
+                            <div class="after">
+                                <img src="" alt="After" />
+                                <span class="label">After</span>
+                            </div>
+                            <div class="comparison-divider" id="comparison-divider" style="display: none;"></div>
+                        </div>
+                        
+                        <div class="explanation-panel">
+                            <div class="explanation-item">
+                                <h4>🔴 The Problem</h4>
+                                <p id="problem-desc"></p>
+                            </div>
+                            <div class="explanation-item">
+                                <h4>✅ The Solution</h4>
+                                <p id="solution-desc"></p>
+                            </div>
+                            <div class="explanation-item">
+                                <h4>⚙️ Technical Details</h4>
+                                <ul id="technical-details"></ul>
+                            </div>
+                            <div class="explanation-item">
+                                <h4>💡 Best Practices</h4>
+                                <ul id="best-practices"></ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Gamut Visualization Examples',
+                content: `
+                    <div class="gamut-examples" id="gamut-examples">
+                        <div class="usage-tip">
+                            <strong>💡 How to use:</strong> Select different visualization types and sample images to see how colors behave across different color spaces. Use the checkboxes to show/hide specific color spaces.
+                        </div>
+                        
+                        <div class="visualization-controls">
+                            <div class="control-group">
+                                <label for="viz-type">Visualization Type:</label>
+                                <select id="viz-type">
+                                    <option value="triangle">Color Space Triangles</option>
+                                    <option value="volume">3D Color Volume</option>
+                                    <option value="mapping">Gamut Mapping</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="sample-image">Sample Image:</label>
+                                <select id="sample-image">
+                                    <option value="gradient">RGB Gradient</option>
+                                    <option value="portrait">Portrait Photo</option>
+                                    <option value="landscape">Landscape Photo</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="rendering-intent">Rendering Intent:</label>
+                                <select id="rendering-intent">
+                                    <option value="perceptual">Perceptual</option>
+                                    <option value="relative">Relative Colorimetric</option>
+                                    <option value="absolute">Absolute Colorimetric</option>
+                                    <option value="saturation">Saturation</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="space-toggles">
+                            <label class="space-toggle">
+                                <input type="checkbox" checked data-space="srgb" />
+                                <span class="toggle-indicator"></span>
+                                sRGB
+                            </label>
+                            <label class="space-toggle">
+                                <input type="checkbox" data-space="adobe-rgb" />
+                                <span class="toggle-indicator"></span>
+                                Adobe RGB
+                            </label>
+                            <label class="space-toggle">
+                                <input type="checkbox" data-space="dci-p3" />
+                                <span class="toggle-indicator"></span>
+                                DCI-P3
+                            </label>
+                            <label class="space-toggle">
+                                <input type="checkbox" data-space="prophoto" />
+                                <span class="toggle-indicator"></span>
+                                ProPhoto RGB
+                            </label>
+                        </div>
+                        
+                        <div class="gamut-canvas-container">
+                            <canvas id="gamut-comparison-canvas" width="500" height="400"></canvas>
+                        </div>
+                        
+                        <div class="action-buttons-row">
+                            <button class="btn-action-small" id="show-hide-gamut">Toggle Gamut Boundary</button>
+                            <button class="btn-action-small" id="highlight-oog">Highlight Out-of-Gamut</button>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Interactive Case Studies',
+                content: `
+                    <div class="case-studies" id="case-studies">
+                        <div class="usage-tip">
+                            <strong>💡 How to use:</strong> Select a scenario from the dropdown. Read the problem description, then work through the investigation checklist. Finally, review the recommended solution steps.
+                        </div>
+                        
+                        <div class="case-selector">
+                            <label for="case-study-select">Select Scenario:</label>
+                            <select id="case-study-select">
+                                <option value="photography">Photographer Client Complaint</option>
+                                <option value="brand">Brand Logo Inconsistency</option>
+                                <option value="video">HDR Video Delivery Issue</option>
+                                <option value="ecommerce">E-commerce Product Colors</option>
+                            </select>
+                        </div>
+                        
+                        <div class="case-content" id="case-content">
+                            <div class="case-section">
+                                <h4>📋 Scenario Description</h4>
+                                <p id="scenario-text"></p>
+                            </div>
+                            
+                            <div class="case-section">
+                                <h4>🔍 Investigation Checklist</h4>
+                                <p class="hint">Check each item as you verify it:</p>
+                                <ul class="checklist" id="investigation-checklist">
+                                    <li><label><input type="checkbox" /> Check monitor calibration status</label></li>
+                                    <li><label><input type="checkbox" /> Verify color profile embedding</label></li>
+                                    <li><label><input type="checkbox" /> Review color space conversions</label></li>
+                                    <li><label><input type="checkbox" /> Test on multiple devices</label></li>
+                                    <li><label><input type="checkbox" /> Validate print/digital output</label></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="case-section">
+                                <h4>✅ Recommended Solution</h4>
+                                <ol id="solution-steps"></ol>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'What You\'ll Learn',
+                content: `
+                    <h3>Learning Outcomes</h3>
+                    <div class="outcomes-grid">
+                        <div class="outcome-card">
+                            <div class="outcome-icon">🎯</div>
+                            <h4>Identify Color Problems</h4>
+                            <p>Learn to spot common color management issues in real-world scenarios like uncalibrated monitors, missing profiles, and gamut mismatches.</p>
+                        </div>
+                        
+                        <div class="outcome-card">
+                            <div class="outcome-icon">🔧</div>
+                            <h4>Apply Solutions</h4>
+                            <p>Understand step-by-step workflows to fix color problems, from calibration to profile management to soft proofing.</p>
+                        </div>
+                        
+                        <div class="outcome-card">
+                            <div class="outcome-icon">📊</div>
+                            <h4>Understand Gamuts</h4>
+                            <p>Visualize how different color spaces compare and what happens when converting between them.</p>
+                        </div>
+                        
+                        <div class="outcome-card">
+                            <div class="outcome-icon">✅</div>
+                            <h4>Follow Best Practices</h4>
+                            <p>Build habits that prevent color problems before they happen, ensuring professional-quality results.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="next-steps">
+                        <h3>Continue Learning</h3>
+                        <div class="action-buttons">
+                            <a href="#interaction-interactive-tools" class="btn btn-primary">Next: Interactive Tools →</a>
+                            <a href="#interaction-color-picker" class="btn btn-secondary">← Back to Color Picker</a>
+                        </div>
+                    </div>
+                `
+            }
+        ]
     },
+
     'interaction-interactive-tools': {
-        title: 'Interactive Tools',
-        description: 'A suite of interactive tools for hands-on learning. Practice color mixing, conversion between color models, and test your understanding with guided exercises.'
+        title: 'Interactive Color Management Tools',
+        subtitle: 'Practical Utilities for Real-World Color Problems',
+        meta: {
+            readingTime: 'Interactive Workshop',
+            difficulty: 'All Levels',
+            type: 'Tools + Applications'
+        },
+        sections: [
+            {
+                heading: 'How to Use These Tools',
+                content: `
+                    <div class="usage-guide">
+                        <div class="guide-card">
+                            <div class="guide-icon"></div>
+                            <h4>1. Color Converter</h4>
+                            <p>Convert colors between RGB, HSL, CMYK, Lab, and Hex formats instantly. Add to batch for bulk export.</p>
+                        </div>
+                        
+                        <div class="guide-card">
+                            <div class="guide-icon">📐</div>
+                            <h4>2. Gamut Mapping Simulator</h4>
+                            <p>See how colors change when converting between color spaces. Preview out-of-gamut warnings.</p>
+                        </div>
+                        
+                        <div class="guide-card">
+                            <div class="guide-icon">📏</div>
+                            <h4>3. Delta-E Calculator</h4>
+                            <p>Measure the perceptual difference between two colors. Check if they meet tolerance standards.</p>
+                        </div>
+                        
+                        <div class="guide-card">
+                            <div class="guide-icon">♿</div>
+                            <h4>4. Accessibility Checker</h4>
+                            <p>Verify WCAG compliance and simulate color blindness to ensure your designs are accessible.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Color Converter Tool',
+                content: `
+                    <div class="tool-container" id="color-converter-tool">
+                        <div class="tool-header">
+                            <h3>🎨 Color Space Converter</h3>
+                            <p class="tool-description">Enter a color in any format, instantly convert to all other formats.</p>
+                        </div>
+                        
+                        <div class="converter-input-section">
+                            <div class="input-group">
+                                <label>Input Format:</label>
+                                <select id="convert-from-space">
+                                    <option value="rgb">RGB</option>
+                                    <option value="hsl">HSL</option>
+                                    <option value="cmyk">CMYK</option>
+                                    <option value="lab">Lab</option>
+                                    <option value="hex">Hex</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-values" id="input-values">
+                                <div class="value-inputs rgb-inputs">
+                                    <input type="number" id="input-r" placeholder="R" min="0" max="255" value="255" />
+                                    <input type="number" id="input-g" placeholder="G" min="0" max="255" value="0" />
+                                    <input type="number" id="input-b" placeholder="B" min="0" max="255" value="0" />
+                                </div>
+                            </div>
+                            
+                            <button class="btn-convert" id="convert-btn">Convert →</button>
+                        </div>
+                        
+                        <div class="converter-results">
+                            <h4>Conversion Results</h4>
+                            <div class="results-grid" id="conversion-results">
+                                <div class="result-item">
+                                    <span class="result-label">RGB:</span>
+                                    <span class="result-value" id="result-rgb">255, 0, 0</span>
+                                    <button class="btn-copy-small" data-copy="result-rgb">📋</button>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">HSL:</span>
+                                    <span class="result-value" id="result-hsl">0°, 100%, 50%</span>
+                                    <button class="btn-copy-small" data-copy="result-hsl">📋</button>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">HSV:</span>
+                                    <span class="result-value" id="result-hsv">0°, 100%, 100%</span>
+                                    <button class="btn-copy-small" data-copy="result-hsv">📋</button>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">CMYK:</span>
+                                    <span class="result-value" id="result-cmyk">0%, 100%, 100%, 0%</span>
+                                    <button class="btn-copy-small" data-copy="result-cmyk">📋</button>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">Lab:</span>
+                                    <span class="result-value" id="result-lab">53.2, 80.1, 67.2</span>
+                                    <button class="btn-copy-small" data-copy="result-lab">📋</button>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">XYZ:</span>
+                                    <span class="result-value" id="result-xyz">41.24, 21.26, 1.93</span>
+                                    <button class="btn-copy-small" data-copy="result-xyz">📋</button>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">Hex:</span>
+                                    <span class="result-value" id="result-hex">#FF0000</span>
+                                    <button class="btn-copy-small" data-copy="result-hex">📋</button>
+                                </div>
+                            </div>
+                            
+                            <div class="result-actions">
+                                <button class="btn-action-small" id="copy-all-btn">📋 Copy All</button>
+                                <button class="btn-action-small" id="add-to-batch">➕ Add to Batch</button>
+                            </div>
+                        </div>
+                        
+                        <div class="batch-section" id="batch-section" style="display: none;">
+                            <h4>Batch Conversions</h4>
+                            <div class="batch-list" id="batch-list"></div>
+                            <div class="batch-actions">
+                                <button class="btn-export" id="export-csv">📄 Export CSV</button>
+                                <button class="btn-export" id="export-json">📄 Export JSON</button>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Delta-E Calculator',
+                content: `
+                    <div class="tool-container" id="delta-e-calculator">
+                        <div class="tool-header">
+                            <h3>📏 Color Difference Calculator (Delta-E)</h3>
+                            <p class="tool-description">Measure how different two colors appear to the human eye.</p>
+                        </div>
+                        
+                        <div class="delta-e-inputs">
+                            <div class="color-input-pair">
+                                <div class="color-input">
+                                    <h4>Color A</h4>
+                                    <input type="color" id="color-a-picker" value="#FF0000" />
+                                    <div class="color-values">
+                                        <input type="number" id="color-a-r" placeholder="R" value="255" />
+                                        <input type="number" id="color-a-g" placeholder="G" value="0" />
+                                        <input type="number" id="color-a-b" placeholder="B" value="0" />
+                                    </div>
+                                </div>
+                                
+                                <div class="color-input">
+                                    <h4>Color B</h4>
+                                    <input type="color" id="color-b-picker" value="#FA0A0A" />
+                                    <div class="color-values">
+                                        <input type="number" id="color-b-r" placeholder="R" value="250" />
+                                        <input type="number" id="color-b-g" placeholder="G" value="10" />
+                                        <input type="number" id="color-b-b" placeholder="B" value="10" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="delta-e-settings">
+                            <div class="setting-group">
+                                <label>Formula:</label>
+                                <select id="delta-e-formula">
+                                    <option value="de2000">Delta-E 2000 (CIEDE2000) - Most Accurate</option>
+                                    <option value="de94">Delta-E 1994</option>
+                                    <option value="de76">Delta-E 1976 (CIELAB) - Simplest</option>
+                                    <option value="cmc">CMC l:c</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label>Tolerance:</label>
+                                <input type="number" id="tolerance-value" value="2.3" step="0.1" />
+                                <span class="tolerance-note">(Industry standard: 2.3)</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn-calculate" id="calculate-delta-e">Calculate Delta-E</button>
+                        
+                        <div class="delta-e-results">
+                            <div class="result-display">
+                                <span class="result-label">Delta-E Value:</span>
+                                <span class="result-value-large" id="delta-e-value">1.8</span>
+                            </div>
+                            
+                            <div class="pass-fail-indicator" id="pass-fail">
+                                <span class="status-icon">✓</span>
+                                <span class="status-text">PASS (within tolerance)</span>
+                            </div>
+                            
+                            <div class="interpretation">
+                                <h4>Interpretation Guide</h4>
+                                <div class="delta-e-scale">
+                                    <div class="scale-item">
+                                        <span class="scale-value">&lt; 1.0</span>
+                                        <span class="scale-desc">Not perceptible</span>
+                                    </div>
+                                    <div class="scale-item">
+                                        <span class="scale-value">1.0 - 2.0</span>
+                                        <span class="scale-desc">Close observation needed</span>
+                                    </div>
+                                    <div class="scale-item">
+                                        <span class="scale-value">2.0 - 3.5</span>
+                                        <span class="scale-desc">Perceptible at glance</span>
+                                    </div>
+                                    <div class="scale-item">
+                                        <span class="scale-value">3.5 - 5.0</span>
+                                        <span class="scale-desc">Clearly noticeable</span>
+                                    </div>
+                                    <div class="scale-item">
+                                        <span class="scale-value">&gt; 5.0</span>
+                                        <span class="scale-desc">Different color</span>
+                                    </div>
+                                </div>
+                                <p id="delta-e-interpretation">The color difference is not perceptible to the human eye. This is an excellent match.</p>
+                            </div>
+                            
+                            <div class="visualization">
+                                <canvas id="delta-e-viz" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Accessibility Checker',
+                content: `
+                    <div class="tool-container" id="accessibility-checker">
+                        <div class="tool-header">
+                            <h3>♿ WCAG Accessibility Checker</h3>
+                            <p class="tool-description">Check if your color combinations meet web accessibility standards.</p>
+                        </div>
+                        
+                        <div class="accessibility-inputs">
+                            <div class="color-pair-input">
+                                <div class="color-input-with-preview">
+                                    <label>Background Color:</label>
+                                    <input type="color" id="bg-color-picker" value="#FFFFFF" />
+                                    <input type="text" id="bg-color-hex" value="#FFFFFF" maxlength="7" />
+                                    <div class="color-preview-box" id="bg-preview" style="background: #FFFFFF;"></div>
+                                </div>
+                                
+                                <div class="color-input-with-preview">
+                                    <label>Foreground (Text) Color:</label>
+                                    <input type="color" id="fg-color-picker" value="#0000FF" />
+                                    <input type="text" id="fg-color-hex" value="#0000FF" maxlength="7" />
+                                    <div class="color-preview-box" id="fg-preview" style="background: #0000FF;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sample-text-preview">
+                            <h4>Sample Text Preview</h4>
+                            <div class="preview-box" id="access-preview-box" style="background: #FFFFFF; color: #0000FF;">
+                                <p class="sample-large">Large Text (18pt+)</p>
+                                <p class="sample-normal">Normal text for readability testing</p>
+                                <p class="sample-small">Small text (14pt)</p>
+                            </div>
+                        </div>
+                        
+                        <button class="btn-check-accessibility" id="check-accessibility">Check Accessibility</button>
+                        
+                        <div class="accessibility-results">
+                            <h4>WCAG 2.1 Compliance</h4>
+                            <div class="compliance-grid">
+                                <div class="compliance-item">
+                                    <span class="compliance-level">AA Large Text</span>
+                                    <span class="compliance-status pass" id="aa-large">✓ PASS</span>
+                                    <span class="compliance-ratio" id="ratio-aa-large">7.2:1</span>
+                                </div>
+                                <div class="compliance-item">
+                                    <span class="compliance-level">AA Normal Text</span>
+                                    <span class="compliance-status pass" id="aa-normal">✓ PASS</span>
+                                    <span class="compliance-ratio" id="ratio-aa-normal">7.2:1</span>
+                                </div>
+                                <div class="compliance-item">
+                                    <span class="compliance-level">AAA Large Text</span>
+                                    <span class="compliance-status fail" id="aaa-large">✗ FAIL</span>
+                                    <span class="compliance-ratio" id="ratio-aaa-large">4.5:1</span>
+                                </div>
+                                <div class="compliance-item">
+                                    <span class="compliance-level">AAA Normal Text</span>
+                                    <span class="compliance-status fail" id="aaa-normal">✗ FAIL</span>
+                                    <span class="compliance-ratio" id="ratio-aaa-normal">4.5:1</span>
+                                </div>
+                            </div>
+                            
+                            <div class="wcag-info">
+                                <h4>WCAG Requirements</h4>
+                                <ul>
+                                    <li><strong>AA Large Text (18pt+):</strong> Requires 3:1 contrast ratio</li>
+                                    <li><strong>AA Normal Text:</strong> Requires 4.5:1 contrast ratio</li>
+                                    <li><strong>AAA Large Text:</strong> Requires 4.5:1 contrast ratio</li>
+                                    <li><strong>AAA Normal Text:</strong> Requires 7:1 contrast ratio</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="color-blindness-simulation">
+                                <h4>Color Blindness Simulation</h4>
+                                <p class="hint">Click the tabs to see how your colors appear to people with different types of color vision deficiency.</p>
+                                <div class="simulation-tabs">
+                                    <button class="sim-tab active" data-type="normal">Normal Vision</button>
+                                    <button class="sim-tab" data-type="protanopia">Protanopia</button>
+                                    <button class="sim-tab" data-type="deuteranopia">Deuteranopia</button>
+                                    <button class="sim-tab" data-type="tritanopia">Tritanopia</button>
+                                </div>
+                                <div class="simulation-preview" id="cb-simulation" style="background: #FFFFFF; color: #0000FF;">
+                                    <p>Sample text with simulated color vision</p>
+                                </div>
+                            </div>
+                            
+                            <div class="suggestions-panel">
+                                <h4>Suggestions for Improvement</h4>
+                                <ul id="accessibility-suggestions">
+                                    <li>Click "Check Accessibility" to get personalized suggestions.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Gamut Mapping Simulator',
+                content: `
+                    <div class="tool-container" id="gamut-simulator-tool">
+                        <div class="tool-header">
+                            <h3>📐 Gamut Mapping Simulator</h3>
+                            <p class="tool-description">Visualize how colors change when converting between different color spaces.</p>
+                        </div>
+                        
+                        <div class="simulator-controls">
+                            <div class="control-group">
+                                <label>Source Color Space:</label>
+                                <select id="source-space">
+                                    <option value="prophoto">ProPhoto RGB</option>
+                                    <option value="adobe-rgb">Adobe RGB</option>
+                                    <option value="dci-p3">DCI-P3</option>
+                                    <option value="srgb" selected>sRGB</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label>Destination Color Space:</label>
+                                <select id="dest-space">
+                                    <option value="srgb" selected>sRGB</option>
+                                    <option value="adobe-rgb">Adobe RGB</option>
+                                    <option value="dci-p3">DCI-P3</option>
+                                    <option value="rec2020">Rec.2020</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label>Rendering Intent:</label>
+                                <select id="sim-rendering-intent">
+                                    <option value="perceptual">Perceptual</option>
+                                    <option value="relative">Relative Colorimetric</option>
+                                    <option value="absolute">Absolute Colorimetric</option>
+                                    <option value="saturation">Saturation</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label>
+                                    <input type="checkbox" id="black-point-comp" checked />
+                                    Black Point Compensation
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="simulator-preview">
+                            <div class="preview-images">
+                                <div class="preview-source">
+                                    <h5>Source Image</h5>
+                                    <canvas id="source-canvas" width="300" height="200"></canvas>
+                                </div>
+                                <div class="preview-destination">
+                                    <h5>Destination (Simulated)</h5>
+                                    <canvas id="dest-canvas" width="300" height="200"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="view-options">
+                                <label>View Mode:</label>
+                                <select id="sim-view-mode">
+                                    <option value="side-by-side">Side by Side</option>
+                                    <option value="difference">Difference View</option>
+                                    <option value="highlight-oog">Highlight Out-of-Gamut</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="btn-run-simulation" id="run-simulation">▶ Run Simulation</button>
+                        
+                        <div class="simulator-analysis">
+                            <h4>Analysis Results</h4>
+                            <div class="analysis-metrics">
+                                <div class="metric-card">
+                                    <span class="metric-title">Gamut Coverage</span>
+                                    <span class="metric-number" id="gamut-coverage">--</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-title">Out-of-Gamut Pixels</span>
+                                    <span class="metric-number" id="oog-pixels">--</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-title">Average Delta-E</span>
+                                    <span class="metric-number" id="avg-delta-e">--</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-title">Max Delta-E</span>
+                                    <span class="metric-number" id="max-delta-e">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                heading: 'Tips & Best Practices',
+                content: `
+                    <h3>How to Get the Most Out of These Tools</h3>
+                    
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">🎯</div>
+                            <h4>Start with Color Converter</h4>
+                            <p>Use it to understand how colors are represented in different formats. Try converting your brand colors to see all the values.</p>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <div class="tip-icon">⚖️</div>
+                            <h4>Check Color Differences</h4>
+                            <p>When comparing two similar colors, use Delta-E to quantify the difference. Keep ΔE &lt; 2.3 for color-critical work.</p>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <div class="tip-icon">♿</div>
+                            <h4>Always Check Accessibility</h4>
+                            <p>Before publishing designs, verify contrast ratios. Aim for AA compliance (4.5:1) at minimum.</p>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <div class="tip-icon">🎨</div>
+                            <h4>Understand Gamut Limitations</h4>
+                            <p>Use the Gamut Simulator to see what colors will be lost when converting between color spaces.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-reference">
+                        <h4>Quick Reference</h4>
+                        <div class="reference-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Tool to Use</th>
+                                        <th>Acceptable Range</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Brand color matching</td>
+                                        <td>Delta-E Calculator</td>
+                                        <td>ΔE &lt; 2.0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Print proofing</td>
+                                        <td>Gamut Simulator</td>
+                                        <td>ΔE &lt; 3.0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Web accessibility</td>
+                                        <td>Accessibility Checker</td>
+                                        <td>Contrast ≥ 4.5:1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Color format conversion</td>
+                                        <td>Color Converter</td>
+                                        <td>N/A</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="next-steps">
+                        <h3>Continue Learning</h3>
+                        <div class="action-buttons">
+                            <a href="#interaction-visual-example" class="btn btn-secondary">← Back to Visual Examples</a>
+                            <a href="#relative-information" class="btn btn-primary">Next: Additional Resources →</a>
+                        </div>
+                    </div>
+                `
+            }
+        ]
     },
+
     'relative-information': {
-        title: 'Relative Information',
-        description: 'Additional resources, references, and further reading materials. Explore external links, recommended books, and academic papers on color science and technology.'
+        title: 'Additional Resources & References',
+        subtitle: 'Further Reading and Professional Resources',
+        meta: {
+            readingTime: '5 minutes',
+            difficulty: 'All Levels',
+            type: 'Reference'
+        },
+        sections: [
+            {
+                heading: 'Standards Organizations',
+                content: `
+                    <h3>International Color Consortium (ICC)</h3>
+                    <p>The ICC develops and promotes standards for color management across platforms and devices.</p>
+                    <ul>
+                        <li>Website: <a href="https://www.color.org" target="_blank">www.color.org</a></li>
+                        <li>ICC Profile Specification</li>
+                        <li>Best practices documentation</li>
+                    </ul>
+                    
+                    <h3>CIE (International Commission on Illumination)</h3>
+                    <p>The international authority on light, lighting, color, and colour spaces.</p>
+                    <ul>
+                        <li>Website: <a href="https://cie.co.at" target="_blank">cie.co.at</a></li>
+                        <li>CIE 1931 color space definition</li>
+                        <li>Delta-E calculation standards</li>
+                    </ul>
+                `
+            },
+            {
+                heading: 'Professional Tools & Software',
+                content: `
+                    <h3>Calibration Hardware</h3>
+                    <ul>
+                        <li><strong>X-Rite i1Display Pro:</strong> Professional monitor calibrator</li>
+                        <li><strong>Datacolor SpyderX:</strong> Accurate display calibration</li>
+                        <li><strong>X-Rite i1Profiler:</strong> Printer profiling solution</li>
+                    </ul>
+                    
+                    <h3>Software Solutions</h3>
+                    <ul>
+                        <li><strong>Adobe Creative Cloud:</strong> Industry-standard design tools with color management</li>
+                        <li><strong>DaVinci Resolve:</strong> Professional video grading with HDR support</li>
+                        <li><strong>DisplayCAL:</strong> Open-source display calibration</li>
+                    </ul>
+                `
+            },
+            {
+                heading: 'Learning Resources',
+                content: `
+                    <h3>Books</h3>
+                    <ul>
+                        <li>"Real World Color Management" by Bruce Fraser</li>
+                        <li>"Color Management for Photographers" by Andrew Rodney</li>
+                        <li>"Digital Color Management" by Edward Giorgianni</li>
+                    </ul>
+                    
+                    <h3>Online Courses</h3>
+                    <ul>
+                        <li>LinkedIn Learning: Color Management Fundamentals</li>
+                        <li>CreativeLive: Color Theory for Designers</li>
+                        <li>FXPHD: Color Grading Masterclass</li>
+                    </ul>
+                    
+                    <h3>Communities</h3>
+                    <ul>
+                        <li>Reddit: r/colorists, r/graphic_design</li>
+                        <li>Digital Photography Review forums</li>
+                        <li>Professional colorist associations</li>
+                    </ul>
+                `
+            },
+            {
+                heading: 'Industry Standards',
+                content: `
+                    <h3>Video Standards</h3>
+                    <ul>
+                        <li><strong>Rec.709:</strong> HDTV standard color space</li>
+                        <li><strong>Rec.2020:</strong> UHDTV wide color gamut</li>
+                        <li><strong>DCI-P3:</strong> Digital cinema standard</li>
+                        <li><strong>HDR10/Dolby Vision:</strong> High dynamic range formats</li>
+                    </ul>
+                    
+                    <h3>Print Standards</h3>
+                    <ul>
+                        <li><strong>ISO 12647:</strong> Process control for print production</li>
+                        <li><strong>GRACoL:</strong> General Requirements for Applications in Commercial offset Lithography</li>
+                        <li><strong>Fogra:</strong> German print research organization standards</li>
+                    </ul>
+                    
+                    <h3>Web Standards</h3>
+                    <ul>
+                        <li><strong>WCAG 2.1:</strong> Web Content Accessibility Guidelines</li>
+                        <li><strong>sRGB IEC 61966-2-1:</strong> Standard default color space</li>
+                    </ul>
+                `
+            }
+        ]
     }
 };
