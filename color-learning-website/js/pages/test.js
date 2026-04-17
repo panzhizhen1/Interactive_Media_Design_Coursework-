@@ -10,42 +10,67 @@
   var SFX_HINT = SFX_BASE + "hint.mp3";
   var SFX_CORRECT = SFX_BASE + "correct_answer.mp3";
   var SFX_WRONG = SFX_BASE + "wrong_answer.mp3";
+  var EXTERNAL_QUESTION_BANK = window.CLWTestQuestionBank || null;
 
   var CHAPTERS = [
     {
       id: "basics",
-      name: "Color Basics",
+      name: "Foundations",
       eyebrow: "Chapter 1",
-      intro: "Build confidence with color families, contrast, and readable hierarchy.",
+      intro: "Follow the learn page from overview into models, spaces, and perception.",
       colors: { primary: "#f97316", secondary: "#fb923c", border: "#fed7aa" },
       focuses: {
-        easy: ["Primary and secondary colors", "Warm and cool groups", "Contrast spotting", "Repair weak palettes"],
-        medium: ["Analogous and complementary choices", "Value balance in layouts", "Saturation for hierarchy", "Repair weak contrast", "Applied palette decisions"],
-        hard: ["Audience-first palette planning", "Accessibility trade-offs", "Harmony versus emphasis", "Recovering confusing layouts", "Final critique round"]
+        easy: ["Overview & Core Concepts", "Color Models", "Color Spaces", "Attributes & Perception"],
+        medium: ["Overview & Core Concepts", "Color Models", "Color Spaces", "Attributes & Perception"],
+        hard: ["Overview & Core Concepts", "Color Models", "Color Spaces", "Attributes & Perception"]
       }
     },
     {
       id: "models",
-      name: "Color Models",
+      name: "Encoding Fundamentals",
       eyebrow: "Chapter 2",
-      intro: "Practice RGB, CMYK, and HSV choices for different devices and outputs.",
+      intro: "Follow the learn page into bit depth, ICC profiles, gamma, and practical encoding choices.",
       colors: { primary: "#2563eb", secondary: "#38bdf8", border: "#bfdbfe" },
       focuses: {
-        easy: ["RGB on screens", "CMYK for print", "HSV basics", "Review additive and subtractive color"],
-        medium: ["Channel mixing decisions", "Device output matching", "Converting between spaces", "Debugging wrong exports", "Applied model selection"],
-        hard: ["Cross-media production planning", "Color management pitfalls", "Interpreting channel data", "Recovering from conversion issues", "Final system critique"]
+        easy: ["Bit Depth Basics", "ICC Profiles", "Gamma Correction", "Encoding Decisions"],
+        medium: ["Bit Depth Basics", "ICC Profiles", "Gamma Correction", "Encoding Decisions"],
+        hard: ["Bit Depth Basics", "ICC Profiles", "Gamma Correction", "Encoding Decisions"]
       }
     },
     {
       id: "meaning",
-      name: "Color Meaning",
+      name: "Advanced Display Technologies",
       eyebrow: "Chapter 3",
-      intro: "Use color responsibly across mood, culture, accessibility, and social context.",
+      intro: "Move from core encoding concepts into HDR, wider gamut, and display-oriented production choices.",
       colors: { primary: "#db2777", secondary: "#f472b6", border: "#fbcfe8" },
       focuses: {
-        easy: ["Mood and emotion cues", "Inclusive warning colors", "Accessible call-to-action choices", "Review audience fit"],
-        medium: ["Cross-cultural assumptions", "Tone for different audiences", "Ethical feedback visuals", "Repair mixed signals", "Applied communication choices"],
-        hard: ["Conflicting audience expectations", "Accessible persuasion design", "Risk of over-coded meaning", "Recovering biased visual signals", "Final critique round"]
+        easy: ["HDR Fundamentals", "HDR Standards", "Wide Color Gamut", "HDR & WCG in Practice"],
+        medium: ["HDR Fundamentals", "HDR Standards", "Wide Color Gamut", "HDR & WCG in Practice"],
+        hard: ["HDR Fundamentals", "HDR Standards", "Wide Color Gamut", "HDR & WCG in Practice"]
+      }
+    },
+    {
+      id: "workflow",
+      name: "Color Management Workflow",
+      eyebrow: "Chapter 4",
+      intro: "Connect profiles, rendering intents, and practical review steps into one controlled workflow.",
+      colors: { primary: "#0f9f69", secondary: "#34d399", border: "#a7f3d0" },
+      focuses: {
+        easy: ["Introduction to Color Management", "CMS Architecture", "Rendering Intents", "Practical Workflow"],
+        medium: ["Introduction to Color Management", "CMS Architecture", "Rendering Intents", "Practical Workflow"],
+        hard: ["Introduction to Color Management", "CMS Architecture", "Rendering Intents", "Practical Workflow"]
+      }
+    },
+    {
+      id: "practice",
+      name: "Tool Use & Applied Practice",
+      eyebrow: "Chapter 5",
+      intro: "Use pickers, examples, and interactive tools to make practical colour decisions with more confidence.",
+      colors: { primary: "#7c3aed", secondary: "#c084fc", border: "#ddd6fe" },
+      focuses: {
+        easy: ["Color Picker", "Visual Examples", "Interactive Tools", "Applied Decision Making"],
+        medium: ["Color Picker", "Visual Examples", "Interactive Tools", "Applied Decision Making"],
+        hard: ["Color Picker", "Visual Examples", "Interactive Tools", "Applied Decision Making"]
       }
     }
   ];
@@ -67,15 +92,13 @@
       { id: "unit-1", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-2", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-3", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-5", kind: "question", label: "", short: "", taskLabel: "Quiz" }
+      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" }
     ],
     hard: [
       { id: "unit-1", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-2", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-3", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-5", kind: "question", label: "", short: "", taskLabel: "Quiz" }
+      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" }
     ]
   };
 
@@ -412,6 +435,16 @@
           easy: makeProgress(["unit-1"], "unit-2", 22, 0.75, "2026-04-04T09:00:00.000Z"),
           medium: makeProgress([], "unit-1", 0, 0, ""),
           hard: makeProgress([], "unit-1", 0, 0, "")
+        },
+        workflow: {
+          easy: makeProgress([], "unit-1", 0, 0, ""),
+          medium: makeProgress([], "unit-1", 0, 0, ""),
+          hard: makeProgress([], "unit-1", 0, 0, "")
+        },
+        practice: {
+          easy: makeProgress([], "unit-1", 0, 0, ""),
+          medium: makeProgress([], "unit-1", 0, 0, ""),
+          hard: makeProgress([], "unit-1", 0, 0, "")
         }
       },
       history: [
@@ -419,7 +452,7 @@
         {
           id: "result-seed-meaning-easy",
           chapter: "meaning",
-          chapterName: "Color Meaning",
+          chapterName: "Advanced Display Technologies",
           level: "easy",
           levelName: "Easy",
           unit: "unit-1",
@@ -448,7 +481,7 @@
         {
           id: "result-seed-basics-easy",
           chapter: "basics",
-          chapterName: "Color Basics",
+          chapterName: "Foundations",
           level: "easy",
           levelName: "Easy",
           unit: "unit-1",
@@ -529,7 +562,54 @@
     } else {
       next.lastQuizSubmit = null;
     }
+    normalizeStateForUnitTemplates(next);
     return next;
+  }
+
+  function normalizeStateForUnitTemplates(targetState) {
+    CHAPTERS.forEach(function (chapter) {
+      LEVEL_ORDER.forEach(function (levelId) {
+        var validIds = UNIT_TEMPLATES[levelId].map(function (item) { return item.id; });
+        var progress = targetState.progress && targetState.progress[chapter.id] ? targetState.progress[chapter.id][levelId] : null;
+        if (!targetState.progress[chapter.id]) targetState.progress[chapter.id] = {};
+        if (!progress) {
+          targetState.progress[chapter.id][levelId] = makeProgress([], "unit-1", 0, 0, "");
+          progress = targetState.progress[chapter.id][levelId];
+        }
+        if (progress) {
+          progress.completedUnits = Array.isArray(progress.completedUnits)
+            ? progress.completedUnits.filter(function (id) { return validIds.indexOf(id) !== -1; })
+            : [];
+          if (validIds.indexOf(progress.currentUnit) === -1) {
+            progress.currentUnit = validIds[progress.completedUnits.length] || validIds[validIds.length - 1] || "unit-1";
+          }
+        }
+      });
+    });
+
+    if (targetState.currentQuiz) {
+      var currentValid = UNIT_TEMPLATES[targetState.currentQuiz.levelId] || [];
+      var currentIds = currentValid.map(function (item) { return item.id; });
+      if (currentIds.indexOf(targetState.currentQuiz.unitId) === -1) {
+        targetState.currentQuiz = null;
+      }
+    }
+
+    if (targetState.lastQuizSubmit) {
+      var submitValid = UNIT_TEMPLATES[targetState.lastQuizSubmit.levelId] || [];
+      var submitIds = submitValid.map(function (item) { return item.id; });
+      if (submitIds.indexOf(targetState.lastQuizSubmit.unitId) === -1) {
+        targetState.lastQuizSubmit = null;
+      }
+    }
+
+    if (Array.isArray(targetState.history)) {
+      targetState.history = targetState.history.filter(function (item) {
+        var valid = UNIT_TEMPLATES[item.level] || [];
+        var ids = valid.map(function (template) { return template.id; });
+        return ids.indexOf(item.unit) !== -1;
+      });
+    }
   }
 
   function readStorage() {
@@ -1748,6 +1828,8 @@
   }
 
   function getUnitQuestions(chapterId, levelId, unitId) {
+    var banked = getBankQuestions(chapterId, levelId, unitId);
+    if (banked.length) return banked;
     if (chapterId === "basics" && levelId === "easy" && unitId === "unit-1") {
       var fixed = [
         makeQuestion("mcq", "Primary colors", "Which one is a primary color in the basic RYB model?", ["Red", "Green", "Purple", "Brown"], "Red", "Primary color groups", chapterId, levelId, unitId),
@@ -1783,6 +1865,108 @@
     return ordered;
   }
 
+  function getBankQuestions(chapterId, levelId, unitId) {
+    var chapter = EXTERNAL_QUESTION_BANK && EXTERNAL_QUESTION_BANK[chapterId];
+    var unit = chapter && chapter.units ? chapter.units[unitId] : null;
+    var rows = unit && unit.levels ? unit.levels[levelId] : null;
+    if (!Array.isArray(rows) || !rows.length) return [];
+    return rows.map(function (row, index) {
+      var question = makeQuestion(
+        row.type,
+        row.topic,
+        row.prompt,
+        row.options,
+        row.correct,
+        row.reviewTopic,
+        chapterId,
+        levelId,
+        unitId
+      );
+      if (row.explanation) question.explanation = row.explanation;
+      if (row.hint) question.hint = row.hint;
+      question.hint = polishQuestionHint(question.hint, question.reviewTopic, question.type);
+      question.explanation = polishQuestionExplanation(question.explanation, question.reviewTopic, question.type);
+      question.id = chapterId + "-" + levelId + "-" + unitId + "-q" + (index + 1);
+      return question;
+    });
+  }
+
+  function polishQuestionHint(hint, reviewTopic, type) {
+    var text = String(hint || "").trim();
+    if (!text) return text;
+
+    text = text
+      .replace(/^Choose the answer about (.+)\.$/i, "Focus on $1.")
+      .replace(/^Choose the option about (.+)\.$/i, "Focus on $1.")
+      .replace(/^Pick the answer about (.+)\.$/i, "Focus on $1.")
+      .replace(/^Pick the answer that (.+)\.$/i, "Focus on the option that $1.")
+      .replace(/^Choose the answer that (.+)\.$/i, "Focus on the option that $1.")
+      .replace(/^Look for the answer about (.+), not (.+)\.$/i, "Use $1 as the deciding idea rather than $2.")
+      .replace(/^Look for the answer connecting (.+) and (.+)\.$/i, "Use the link between $1 and $2 to decide.")
+      .replace(/^This is a (.+) question\.$/i, "Use the core idea of $1 here.")
+      .replace(/^This is an (.+) question\.$/i, "Use the core idea of $1 here.")
+      .replace(/^This is one of the main reasons (.+)\.$/i, "Keep in mind that $1.")
+      .replace(/^Think about (.+)\.$/i, "Use $1 as the main clue.")
+      .replace(/^Choose the answer with (.+)\.$/i, "Use $1 as the deciding clue.")
+      .replace(/^Choose the answer that starts with (.+)\.$/i, "Start from $1 when you compare the options.")
+      .replace(/^Choose the answer that verifies (.+)\.$/i, "Look for the option that checks $1.")
+      .replace(/^Choose the answer that balances (.+)\.$/i, "Look for the option that balances $1.")
+      .replace(/^Choose the answer that keeps (.+)\.$/i, "Keep $1 in view when you decide.")
+      .replace(/^Choose the answer that ties (.+)\.$/i, "Tie $1 back to the decision.")
+      .replace(/^Choose the answer that compares (.+)\.$/i, "Compare the options through $1.")
+      .replace(/^Choose the answer that thinks in (.+)\.$/i, "Think in terms of $1.")
+      .replace(/^Choose the answer that includes (.+)\.$/i, "Look for the option that includes $1.")
+      .replace(/^Choose the answer about verification\.$/i, "Look for the option that verifies the result instead of assuming it.")
+      .replace(/^Choose the answer about context\.$/i, "Use workflow context as the deciding idea.")
+      .replace(/^This is a core accessibility idea\.$/i, "Use readability and contrast as the deciding ideas.")
+      .replace(/^This is a basic colour-management principle\.$/i, "Use cross-device consistency as the key principle.")
+      .replace(/^This is a core HDR distinction\.$/i, "Keep luminance range separate from resolution or gamut.")
+      .replace(/^This is an end-to-end workflow topic\.$/i, "Judge the option by whether the whole workflow supports it.")
+      .replace(/^This is a practical workflow principle\.$/i, "Prefer the option that checks the output before sign-off.")
+      .replace(/^This is a destination-aware workflow question\.$/i, "Use the target destination as the deciding factor.")
+      .replace(/^This is a systems topic\.$/i, "Think about the connected workflow, not one isolated step.")
+      .replace(/^This is a workflow architecture question\.$/i, "Trace how colour is transformed through the system.")
+      .replace(/^This is a predictability question\.$/i, "Prefer the option that makes transformations more predictable.")
+      .replace(/^This is a trade-off question\.$/i, "Think about what the workflow is trying to preserve under constraints.")
+      .replace(/^This is about trade-offs under constraints\.$/i, "Focus on how the workflow manages unavoidable output limits.")
+      .replace(/^This is a practical sign-off principle\.$/i, "Prefer the option that checks the real destination before approval.")
+      .replace(/^This is about measurable values, not guessing\.$/i, "Treat the picker as a source of exact values, not visual memory.")
+      .replace(/^This is a precision question\.$/i, "Use the idea of exact, reusable values as the clue.")
+      .replace(/^This is a handoff-control question\.$/i, "Think about keeping the same value consistent between tools.")
+      .replace(/^This is a pattern-recognition idea\.$/i, "Look for the option that helps compare repeated visual patterns.")
+      .replace(/^This is an evidence question\.$/i, "Prefer the option that adds visible evidence instead of opinion.")
+      .replace(/^This is about choosing the right tool\.$/i, "Match the tool to the problem it is meant to measure.")
+      .replace(/^This is an evidence-versus-guessing question\.$/i, "Prefer measurable feedback over visual guesswork.")
+      .replace(/^This is a diagnosis question\.$/i, "Identify the actual problem before you choose a fix.")
+      .replace(/^This is an integration question\.$/i, "Combine tool choice, context, and visible outcome in your reasoning.")
+      .replace(/^This is a sign-off discipline point\.$/i, "Keep final-context review in the workflow before approval.");
+
+    if (/^Focus on [a-z]/.test(text)) {
+      text = text.replace(/^Focus on ([a-z])/, function (_, c) { return "Focus on " + c.toLowerCase(); });
+    }
+
+    if (type === "true-false" && /^Use /.test(text) === false && /^Focus /.test(text) === false) {
+      text = "Check whether the statement matches the core idea of " + String(reviewTopic || "this topic") + ".";
+    }
+
+    return text;
+  }
+
+  function polishQuestionExplanation(explanation, reviewTopic, type) {
+    var text = String(explanation || "").trim();
+    if (!text) return text;
+    if (type === "true-false" && /^That is /.test(text)) {
+      return text.replace(/^That is /, "That principle is ");
+    }
+    if (text === "The correct answer depends on the key concept in this topic.") {
+      return "The answer follows from the core idea behind " + String(reviewTopic || "this topic") + ".";
+    }
+    if (text === "This sequence matters because the process becomes easier to repeat and explain once the order is clear.") {
+      return "This order matters because the workflow becomes easier to apply and explain once each step is in the right place.";
+    }
+    return text;
+  }
+
   function makeQuestion(type, topic, prompt, options, correct, reviewTopic, chapterId, levelId, unitId) {
     return {
       type: type,
@@ -1808,12 +1992,24 @@
 
   function hasAnswer(question, draft) { return question.type === "sort" ? Array.isArray(draft) && draft.length === question.correct.length : typeof draft === "string" && draft.length > 0; }
   function evaluate(question, draft) { return question.type === "sort" ? JSON.stringify(draft) === JSON.stringify(question.correct) : draft === question.correct; }
+  function getQuestionOptionId(option) { return option && typeof option === "object" && Object.prototype.hasOwnProperty.call(option, "id") ? option.id : option; }
+  function getQuestionOptionLabel(option) { return option && typeof option === "object" && Object.prototype.hasOwnProperty.call(option, "label") ? option.label : String(option); }
+  function findQuestionOptionById(question, id) {
+    var opts = Array.isArray(question.options) ? question.options : [];
+    for (var i = 0; i < opts.length; i++) {
+      if (getQuestionOptionId(opts[i]) === id) return opts[i];
+    }
+    return null;
+  }
   /** Plain-text suffix after "The correct answer is: " for wrong-answer feedback (quiz + solo). */
   function formatCorrectAnswerForFeedback(question) {
     var opts = Array.isArray(question.options) ? question.options : [];
     var cor = question.correct;
     if (question.type === "sort" && Array.isArray(cor)) {
-      return cor.join(" \u2192 ");
+      return cor.map(function (id) {
+        var option = findQuestionOptionById(question, id);
+        return option ? getQuestionOptionLabel(option) : String(id);
+      }).join(" \u2192 ");
     }
     if (question.type === "image") {
       for (var ii = 0; ii < opts.length; ii++) {
@@ -1862,23 +2058,30 @@
       return '<div class="quiz-image-options">' + opts.map(function (option) {
         var sel = draft === option.id;
         var cls = "quiz-image-option" + (sel ? " is-selected" : "");
-        return '<button type="button" class="' + cls + '"' + (isSubmitted ? ' disabled' : ' data-answer-value="' + option.id + '"') + '>' + renderImagePreview(option) + '<strong class="quiz-image-option__label">' + option.label + "</strong></button>";
+        return '<button type="button" class="' + cls + '"' + (isSubmitted ? ' disabled' : ' data-answer-value="' + option.id + '"') + '>' + renderImagePreview(option) + (option.hideLabel ? "" : '<strong class="quiz-image-option__label">' + option.label + "</strong>") + '</button>';
       }).join("") + "</div>";
     }
     if (question.type === "sort") {
       var selected = Array.isArray(draft) ? draft : [];
-      var remaining = opts.filter(function (item) { return selected.indexOf(item) === -1; });
+      var remaining = opts.filter(function (item) { return selected.indexOf(getQuestionOptionId(item)) === -1; });
       var poolHtml = remaining.length
         ? remaining.map(function (item) {
-            return '<button type="button" class="quiz-sort-chip"' + (isSubmitted ? ' disabled' : ' data-sort-add="' + item + '"') + '>' + item + '</button>';
+            var itemId = getQuestionOptionId(item);
+            var itemLabel = getQuestionOptionLabel(item);
+            if (item && typeof item === "object" && item.preview) {
+              return '<button type="button" class="quiz-image-option quiz-image-option--sort"' + (isSubmitted ? ' disabled' : ' data-sort-add="' + itemId + '"') + '>' + renderImagePreview(item) + (item.hideLabel ? "" : '<strong class="quiz-image-option__label">' + itemLabel + '</strong>') + '</button>';
+            }
+            return '<button type="button" class="quiz-sort-chip"' + (isSubmitted ? ' disabled' : ' data-sort-add="' + itemId + '"') + '>' + itemLabel + '</button>';
           }).join("")
         : '<span class="quiz-sort-pool-empty">All items placed below</span>';
       var rankHtml = question.correct.map(function (item, index) {
         var filled = !!selected[index];
+        var selectedOption = filled ? findQuestionOptionById(question, selected[index]) : null;
+        var selectedLabel = selectedOption ? getQuestionOptionLabel(selectedOption) : (filled ? String(selected[index]) : "");
         return '<div class="quiz-rank-row' + (filled ? ' is-filled' : '') + '">' +
           '<span class="quiz-rank-num">' + (index + 1) + '</span>' +
           (filled
-            ? '<span class="quiz-rank-label">' + selected[index] + '</span>' +
+            ? '<span class="quiz-rank-label">' + selectedLabel + '</span>' +
               (!isSubmitted ? '<button type="button" class="quiz-rank-remove" data-sort-remove="' + index + '" aria-label="Remove">\u00d7</button>' : '')
             : '<span class="quiz-rank-placeholder">Click an item above to place it here</span>') +
         '</div>';
@@ -2497,7 +2700,7 @@
   function formatDate(value) { try { return value ? new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "Not yet"; } catch (e) { return value; } }
   function unique(items) { return items.filter(function (item, index) { return item && items.indexOf(item) === index; }); }
   function formatDateTime(value) { try { if (!value) return ""; var d = new Date(value); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) + " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); } catch (e) { return value || ""; } }
-  function buildBadgeName(chapterId) { return chapterId === "basics" ? "Contrast Keeper" : chapterId === "models" ? "Output Strategist" : "Meaning Steward"; }
+  function buildBadgeName(chapterId) { return chapterId === "basics" ? "Contrast Keeper" : chapterId === "models" ? "Output Strategist" : chapterId === "meaning" ? "Display Navigator" : chapterId === "workflow" ? "Workflow Steward" : chapterId === "practice" ? "Tool Pathfinder" : "Color Scholar"; }
   function createMistakeRecord(question, session, reason, timestamp) { return { id: "mistake-" + question.id, chapter: session.chapterId, level: session.levelId, unit: session.unitId, topic: question.topic, reviewTopic: question.reviewTopic, questionType: question.type, prompt: question.prompt, correctConcept: question.explanation, mistakeReason: reason, mastered: false, questionSnapshot: clone(question), lastWrongAt: timestamp, attemptCount: 1, userAnswer: "", reviewedAt: "", showExplanation: false }; }
   function upsertMistake(question, quiz, reason) { var existing = state.mistakes.find(function (item) { return item.questionSnapshot.id === question.id; }); if (existing) { existing.mastered = false; existing.reviewedAt = ""; existing.lastWrongAt = new Date().toISOString(); existing.mistakeReason = reason; existing.attemptCount = (existing.attemptCount || 1) + 1; existing.userAnswer = stringifyMistakeAnswer(quiz.drafts[question.id]); existing.showExplanation = false; return; } var next = createMistakeRecord(question, quiz, reason, new Date().toISOString()); next.userAnswer = stringifyMistakeAnswer(quiz.drafts[question.id]); state.mistakes.unshift(next); state.mistakes = state.mistakes.slice(0, 40); }
   function markMistakeReviewed(questionId) { var item = state.mistakes.find(function (mistake) { return mistake.questionSnapshot.id === questionId; }); if (item) { item.mastered = true; item.reviewedAt = new Date().toISOString(); } }
