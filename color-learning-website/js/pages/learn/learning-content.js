@@ -1445,6 +1445,336 @@ export const contentData = {
         ]
     },
 
+    'basic-color-attributes': {
+        title: 'Color Attributes & Perception',
+            subtitle: 'Understanding Hue, Saturation, Lightness, Contrast, and Color Temperature',
+            meta: {
+            readingTime: '25-30 minutes',
+                difficulty: 'Beginner',
+                type: 'Theoretical + Interactive'
+        },
+        sections: [
+            {
+                heading: 'Learning Objectives',
+                content: `
+                <p>After completing this module, you will be able to:</p>
+                
+                <h3>Understand Core Color Attributes</h3>
+                <ul>
+                  <li>Explain the three dimensions of color: Hue, Saturation, and Lightness</li>
+                  <li>Distinguish between brightness and lightness</li>
+                  <li>Understand how contrast affects readability and visual hierarchy</li>
+                </ul>
+                
+                <h3>Master Color Temperature Concepts</h3>
+                <ul>
+                  <li>Identify warm and cool colors and their psychological effects</li>
+                  <li>Understand the Kelvin scale and its applications</li>
+                  <li>Apply color temperature knowledge in design decisions</li>
+                </ul>
+                
+                <h3>Apply Practical Skills</h3>
+                <ul>
+                  <li>Use our interactive Color Picker to explore HSL values</li>
+                  <li>Check color contrast for accessibility compliance</li>
+                  <li>Make informed choices about color temperature in projects</li>
+                </ul>
+              `
+            },
+            {
+                heading: 'Hue, Saturation, and Lightness (HSL)',
+                content: `
+                <h3>The Three Dimensions of Color</h3>
+                <p>Every color can be described using three fundamental attributes that work together to create the full spectrum of visible colors. Understanding these dimensions gives you precise control over color selection and manipulation.</p>
+                
+                <img src="assets/images/learning/hsl-color-model-3d.png" alt="3D cylindrical representation of HSL color space showing Hue as angle around cylinder, Saturation as distance from center axis, and Lightness as vertical height" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h3>Hue - The Color Identity</h3>
+                <p><strong>Hue</strong> is what we typically think of as "color" - red, blue, green, yellow, etc. It represents the position on the color wheel and is measured in degrees (0° to 360°).</p>
+                
+                <div class="info-box info-box--highlight">
+                  <h4>Key Hue Positions</h4>
+                  <ul>
+                    <li><strong>0° / 360°:</strong> Red</li>
+                    <li><strong>60°:</strong> Yellow</li>
+                    <li><strong>120°:</strong> Green</li>
+                    <li><strong>180°:</strong> Cyan</li>
+                    <li><strong>240°:</strong> Blue</li>
+                    <li><strong>300°:</strong> Magenta</li>
+                  </ul>
+                </div>
+                
+                <h3>Saturation - Color Intensity</h3>
+                <p><strong>Saturation</strong> describes the purity or intensity of a color, ranging from 0% (completely gray) to 100% (fully vivid). It determines how much a color differs from a neutral gray of the same lightness.</p>
+                
+                <img src="assets/images/learning/saturation-comparison.png" alt="Horizontal gradient bar showing same hue with saturation varying from 0% (gray) to 100% (vivid), labeled Low Saturation to High Saturation" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h4>Practical Applications</h4>
+                <ul>
+                  <li><strong>High Saturation (80-100%):</strong> Creates energy, draws attention, ideal for calls-to-action and branding</li>
+                  <li><strong>Medium Saturation (40-70%):</strong> Balanced and professional, suitable for most UI elements</li>
+                  <li><strong>Low Saturation (0-30%):</strong> Subtle and sophisticated, perfect for backgrounds and secondary elements</li>
+                </ul>
+                
+                <div class="info-box">
+                  <h4>Try It Yourself</h4>
+                  <p>Use our <a href="#interaction-color-picker">interactive Color Picker</a> to adjust the saturation slider and observe how colors change from muted to vibrant. Notice how highly saturated colors can be overwhelming in large areas, while desaturated colors create calm, professional atmospheres.</p>
+                </div>
+                
+                <h3>Lightness - Brightness Level</h3>
+                <p><strong>Lightness</strong> (also called value) represents how light or dark a color is, ranging from 0% (pure black) through 50% (pure color) to 100% (pure white).</p>
+                
+                <img src="assets/images/learning/tints-shades-tones.png" alt="Grid showing one base color with tints (adding white) in top row, shades (adding black) in middle row, and tones (adding gray) in bottom row" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h4>Tints, Shades, and Tones</h4>
+                <ul>
+                  <li><strong>Tints:</strong> Created by adding white to a base color (increasing lightness above 50%)</li>
+                  <li><strong>Shades:</strong> Created by adding black to a base color (decreasing lightness below 50%)</li>
+                  <li><strong>Tones:</strong> Created by adding gray to a base color (reducing saturation while maintaining lightness)</li>
+                </ul>
+                
+                <div class="pros-cons">
+                  <div class="pros-cons__item pros-cons__item--pros">
+                    <h4>When to Use High Lightness</h4>
+                    <ul>
+                      <li>Backgrounds and surfaces</li>
+                      <li>Creating spacious, airy designs</li>
+                      <li>Daytime or positive themes</li>
+                      <li>Improving text readability on dark text</li>
+                    </ul>
+                  </div>
+                  <div class="pros-cons__item pros-cons__item--cons">
+                    <h4>When to Use Low Lightness</h4>
+                    <ul>
+                      <li>Text and important elements</li>
+                      <li>Creating depth and drama</li>
+                      <li>Night mode or luxury themes</li>
+                      <li>Reducing eye strain in dark environments</li>
+                    </ul>
+                  </div>
+                </div>
+              `
+            },
+            {
+                heading: 'Brightness and Contrast',
+                content: `
+                <h3>Understanding Brightness vs. Lightness</h3>
+                <p>While often used interchangeably, <strong>brightness</strong> and <strong>lightness</strong> have distinct meanings in color theory:</p>
+                
+                <ul>
+                  <li><strong>Lightness (HSL):</strong> A perceptual measure from black (0%) through pure color (50%) to white (100%)</li>
+                  <li><strong>Brightness (HSB/HSV):</strong> Represents the amount of light emitted or reflected, from dark (0%) to maximum intensity (100%)</li>
+                </ul>
+                
+                <p>In practical terms, brightness is more closely related to the physical properties of light, while lightness is based on human perception.</p>
+                
+                <h3>Contrast - Creating Visual Distinction</h3>
+                <p><strong>Contrast</strong> is the difference between two colors, and it's crucial for readability, visual hierarchy, and accessibility. There are several types of contrast:</p>
+                
+                <img src="assets/images/learning/contrast-types.png" alt="Three pairs of color squares demonstrating: Value contrast (black vs white), Hue contrast (red vs green), Saturation contrast (vivid red vs muted red)" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h4>Types of Contrast</h4>
+                <ol>
+                  <li><strong>Value Contrast (Brightness Contrast)</strong>
+                    <ul>
+                      <li>Difference in lightness/darkness between colors</li>
+                      <li>Most important for text readability</li>
+                      <li>Example: Black text on white background</li>
+                    </ul>
+                  </li>
+                  <li><strong>Hue Contrast</strong>
+                    <ul>
+                      <li>Difference in color identity (position on color wheel)</li>
+                      <li>Complementary colors (opposite on wheel) create maximum hue contrast</li>
+                      <li>Example: Red and green, blue and orange</li>
+                    </ul>
+                  </li>
+                  <li><strong>Saturation Contrast</strong>
+                    <ul>
+                      <li>Difference in color intensity</li>
+                      <li>Vivid colors stand out against muted backgrounds</li>
+                      <li>Example: Bright red button on gray background</li>
+                    </ul>
+                  </li>
+                </ol>
+                
+                <h3>Contrast and Accessibility</h3>
+                <p>Proper contrast is essential for making content accessible to users with visual impairments. The Web Content Accessibility Guidelines (WCAG) define specific contrast ratio requirements:</p>
+                
+                <img src="assets/images/learning/wcag-contrast-standards.png" alt="Infographic showing WCAG contrast ratio requirements: AA level 4.5:1 for normal text, 3:1 for large text; AAA level 7:1 for normal text, 4.5:1 for large text, with checkmark icons" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <div class="tech-specs">
+                  <div class="spec-row">
+                    <span class="spec-label">AA Level (Normal Text):</span>
+                    <span class="spec-value">Minimum 4.5:1 contrast ratio</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">AA Level (Large Text):</span>
+                    <span class="spec-value">Minimum 3:1 contrast ratio</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">AAA Level (Normal Text):</span>
+                    <span class="spec-value">Minimum 7:1 contrast ratio</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">AAA Level (Large Text):</span>
+                    <span class="spec-value">Minimum 4.5:1 contrast ratio</span>
+                  </div>
+                </div>
+                
+                <img src="assets/images/learning/contrast-readability-example.png" alt="Two text samples side by side: left shows high contrast black text on white background (labeled Good Contrast), right shows low contrast light gray text on white background (labeled Poor Contrast)" style="width: 100%; max-width: 700px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <div class="info-box info-box--highlight">
+                  <h4>Best Practices for Contrast</h4>
+                  <ul>
+                    <li>Always test text contrast ratios before publishing</li>
+                    <li>Don't rely solely on color to convey information</li>
+                    <li>Consider users with color vision deficiencies</li>
+                    <li>Use higher contrast for important content and calls-to-action</li>
+                    <li>Maintain consistent contrast levels throughout your design</li>
+                  </ul>
+                </div>
+                
+                <div class="info-box">
+                  <h4>Practice: Check Your Colors</h4>
+                  <p>Use our <a href="#interaction-interactive-tools">Accessibility Checker tool</a> to test color combinations and ensure they meet WCAG standards. Enter your foreground and background colors to get instant feedback on contrast ratios and compliance levels.</p>
+                </div>
+              `
+            },
+            {
+                heading: 'Color Temperature',
+                content: `
+                <h3>Warm and Cool Colors</h3>
+                <p><strong>Color temperature</strong> refers to the perceived warmth or coolness of a color. This concept originates from the color of light emitted by heated objects and has profound effects on mood, perception, and design effectiveness.</p>
+                
+                <img src="assets/images/learning/color-temperature-kelvin-scale.png" alt="Horizontal Kelvin scale from 2000K to 10000K showing color temperature progression: candlelight (2000K, orange), sunrise (3000K, warm yellow), daylight (5500K, neutral white), overcast sky (7000K, cool blue), clear sky (10000K, deep blue)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <h3>The Kelvin Scale</h3>
+                <p>Color temperature is measured in <strong>Kelvin (K)</strong>, a scientific unit that describes the color characteristics of light sources:</p>
+                
+                <div class="tech-specs">
+                  <div class="spec-row">
+                    <span class="spec-label">2000K - 3000K:</span>
+                    <span class="spec-value">Warm (orange/yellow) - Candlelight, incandescent bulbs</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">3500K - 4500K:</span>
+                    <span class="spec-value">Neutral Warm - Morning/evening sunlight</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">5000K - 6500K:</span>
+                    <span class="spec-value">Neutral - Daylight, standard white point (D65)</span>
+                  </div>
+                  <div class="spec-row">
+                    <span class="spec-label">7000K - 10000K:</span>
+                    <span class="spec-value">Cool (blue) - Overcast sky, shade</span>
+                  </div>
+                </div>
+                
+                <h3>Psychological Effects</h3>
+                <img src="assets/images/learning/warm-cool-emotions.png" alt="Split image: left side shows warm colors (red, orange, yellow) with words like energy, warmth, passion; right side shows cool colors (blue, green, purple) with words like calm, trust, professionalism" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <div class="pros-cons">
+                  <div class="pros-cons__item pros-cons__item--pros">
+                    <h4>Warm Colors (Red, Orange, Yellow)</h4>
+                    <ul>
+                      <li>Evoke feelings of energy, excitement, and warmth</li>
+                      <li>Create sense of urgency and action</li>
+                      <li>Appear to advance toward the viewer</li>
+                      <li>Stimulate appetite and social interaction</li>
+                      <li>Common in food, entertainment, and clearance sales</li>
+                    </ul>
+                  </div>
+                  <div class="pros-cons__item pros-cons__item--cons">
+                    <h4>Cool Colors (Blue, Green, Purple)</h4>
+                    <ul>
+                      <li>Convey calmness, trust, and professionalism</li>
+                      <li>Create sense of space and distance</li>
+                      <li>Appear to recede from the viewer</li>
+                      <li>Promote focus and concentration</li>
+                      <li>Popular in technology, healthcare, and finance</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <h3>Applications in Design</h3>
+                
+                <h4>Brand Identity</h4>
+                <img src="assets/images/learning/brand-color-temperature.png" alt="Logo examples: fast food brands using warm colors (McDonald's, Burger King) on left, tech companies using cool colors (IBM, Intel, Facebook) on right" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <ul>
+                  <li><strong>Fast Food & Retail:</strong> Warm colors stimulate appetite and create urgency (McDonald's, KFC, Target)</li>
+                  <li><strong>Technology & Finance:</strong> Cool colors convey trust and reliability (IBM, PayPal, Intel)</li>
+                  <li><strong>Healthcare:</strong> Cool blues and greens promote healing and calm (hospital brands, wellness apps)</li>
+                  <li><strong>Luxury Brands:</strong> Often use neutral or cool tones for sophistication (Tiffany blue, Mercedes silver)</li>
+                </ul>
+                
+                <h4>Photography and White Balance</h4>
+                <img src="assets/images/learning/white-balance-comparison.png" alt="Same indoor scene shown three times: left with warm white balance (orange tint, 3000K), center with neutral white balance (natural, 5500K), right with cool white balance (blue tint, 7000K)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                
+                <p><strong>White balance</strong> is the process of adjusting colors in photography to ensure that white objects appear truly white, compensating for the color temperature of the light source:</p>
+                
+                <ul>
+                  <li><strong>Auto White Balance (AWB):</strong> Camera attempts to detect and correct color temperature automatically</li>
+                  <li><strong>Preset Modes:</strong> Daylight, Cloudy, Tungsten, Fluorescent, Flash</li>
+                  <li><strong>Custom White Balance:</strong> Manual calibration using a gray card for perfect accuracy</li>
+                  <li><strong>Creative Use:</strong> Intentionally warming or cooling images for mood and atmosphere</li>
+                </ul>
+                
+                <div class="info-box info-box--additive">
+                  <h4>Interior Design Tip</h4>
+                  <p>Use warm lighting (2700K-3000K) in living spaces for comfort and relaxation. Choose cooler lighting (4000K-5000K) in kitchens, bathrooms, and offices for alertness and task performance. Many modern LED bulbs offer adjustable color temperature to match different activities and times of day.</p>
+                </div>
+                
+                <h3>Cultural Considerations</h3>
+                <p>Color temperature associations can vary across cultures:</p>
+                
+                <ul>
+                  <li><strong>Western Cultures:</strong> White = purity, cleanliness; Black = mourning, formality</li>
+                  <li><strong>Eastern Cultures:</strong> White = mourning in some contexts; Red = luck, prosperity</li>
+                  <li><strong>Middle Eastern:</strong> Green = paradise, Islam; Blue = protection</li>
+                  <li><strong>Global Design:</strong> Consider your audience when choosing color temperature for international projects</li>
+                </ul>
+                
+                <div class="info-box">
+                  <h4>Experiment with Color Temperature</h4>
+                  <p>Visit our <a href="#interaction-color-picker">Color Picker</a> and try creating color schemes with different temperature profiles. Notice how shifting from warm oranges to cool blues completely changes the mood of your palette. Practice identifying the temperature of colors in websites and apps you use daily.</p>
+                </div>
+              `
+            },
+            {
+                heading: 'Summary and Key Takeaways',
+                content: `
+                <h3>Core Concepts to Remember</h3>
+                <ol>
+                  <li><strong>HSL Model:</strong> Hue (color identity), Saturation (intensity), Lightness (brightness level) are the three fundamental attributes of color</li>
+                  <li><strong>Saturation Control:</strong> High saturation creates energy; low saturation creates sophistication</li>
+                  <li><strong>Contrast is Critical:</strong> Proper contrast ensures readability and accessibility (minimum 4.5:1 for normal text)</li>
+                  <li><strong>Temperature Matters:</strong> Warm colors energize; cool colors calm</li>
+                  <li><strong>Context is Key:</strong> Choose color attributes based on purpose, audience, and cultural considerations</li>
+                </ol>
+                
+                <h3>Practical Skills Acquired</h3>
+                <ul>
+                  <li>Manipulating HSL values for precise color control</li>
+                  <li>Evaluating and improving color contrast for accessibility</li>
+                  <li>Applying color temperature principles in design decisions</li>
+                  <li>Using interactive tools to test and refine color choices</li>
+                </ul>
+                
+                <div class="next-steps">
+                  <h3>Next Steps</h3>
+                  <div class="action-buttons">
+                    <a href="#interaction-color-picker" class="btn btn-primary">Practice with Color Picker</a>
+                    <a href="#interaction-interactive-tools" class="btn btn-secondary">Check Accessibility</a>
+                    <a href="#encoding-bit-depth" class="btn btn-outline">Continue to Bit Depth</a>
+                  </div>
+                </div>
+              `
+            }
+        ]
+    },
+
     'encoding-bit-depth': {
         title: 'Bit Depth and Colour Precision',
         subtitle: 'Understanding Digital Colour Representation and Image Quality',
