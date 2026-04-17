@@ -1,7 +1,7 @@
 /**
  * Local auth + local user data management (Scheme 1).
  * - Account system stays in localStorage (no backend)
- * - Supports sign in + sign up
+ * - Supports log in + create account
  * - Exposes CLWAuth API for other pages
  */
 (function () {
@@ -280,7 +280,7 @@
       avatar.classList.remove("user-avatar--placeholder");
       avatar.classList.add("user-avatar--active");
       avatar.textContent = getInitial(currentUser);
-      trigger.setAttribute("title", "Signed in as " + currentUser + " — hover for Log out");
+      trigger.setAttribute("title", "Logged in as " + currentUser + " - hover for Log out");
       trigger.setAttribute("aria-label", "Account: " + currentUser);
       trigger.setAttribute("aria-expanded", "false");
       return;
@@ -291,7 +291,7 @@
     avatar.classList.add("user-avatar--placeholder");
     avatar.classList.remove("user-avatar--active");
     avatar.textContent = "";
-    trigger.setAttribute("title", "Log in or sign up");
+    trigger.setAttribute("title", "Log in or create account");
     trigger.setAttribute("aria-label", "Account");
     trigger.setAttribute("aria-expanded", "false");
   }
@@ -307,33 +307,37 @@
     backdrop.className = "auth-modal-backdrop";
     backdrop.innerHTML = [
       '<div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">',
+      '  <button type="button" class="auth-modal__close" data-auth-cancel aria-label="Close account dialog">x</button>',
+      '  <div class="auth-modal__hero">',
+      '    <p class="auth-modal__eyebrow">Color Learning</p>',
+      '    <h2 class="auth-modal__title" id="auth-title">Log in</h2>',
+      '    <p class="auth-modal__desc" data-auth-desc>Access your saved progress, posts, and activity in this browser.</p>',
+      "  </div>",
       '  <div class="auth-mode-switch" role="tablist" aria-label="Auth mode">',
       '    <button type="button" class="auth-mode-switch__btn is-active" data-auth-mode-btn="signin">Log in</button>',
-      '    <button type="button" class="auth-mode-switch__btn" data-auth-mode-btn="signup">Sign up</button>',
+      '    <button type="button" class="auth-mode-switch__btn" data-auth-mode-btn="signup">Create account</button>',
       "  </div>",
-      '  <h2 class="auth-modal__title" id="auth-title">Log in</h2>',
-      '  <p class="auth-modal__desc" data-auth-desc>Use your local account to unlock member features.</p>',
       '  <form data-auth-form>',
       '    <div class="auth-modal__field">',
       '      <label class="auth-modal__label" for="auth-username">Username</label>',
-      '      <input class="auth-modal__input" id="auth-username" name="username" autocomplete="username" required />',
+      '      <input class="auth-modal__input" id="auth-username" name="username" placeholder="Enter your username" autocomplete="username" required />',
       "    </div>",
       '    <div class="auth-modal__field">',
       '      <label class="auth-modal__label" for="auth-password">Password</label>',
-      '      <input class="auth-modal__input" id="auth-password" name="password" type="password" autocomplete="current-password" required />',
+      '      <input class="auth-modal__input" id="auth-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required />',
       "    </div>",
       '    <div class="auth-modal__field auth-modal__field--signup" hidden>',
       '      <label class="auth-modal__label" for="auth-password-confirm">Confirm Password</label>',
-      '      <input class="auth-modal__input" id="auth-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" />',
+      '      <input class="auth-modal__input" id="auth-password-confirm" name="passwordConfirm" type="password" placeholder="Re-enter your password" autocomplete="new-password" />',
       "    </div>",
       '    <div class="auth-modal__field auth-modal__field--signup" hidden>',
       '      <label class="auth-modal__label" for="auth-display-name">Display Name (optional)</label>',
-      '      <input class="auth-modal__input" id="auth-display-name" name="displayName" autocomplete="nickname" />',
+      '      <input class="auth-modal__input" id="auth-display-name" name="displayName" placeholder="How should others see your name?" autocomplete="nickname" />',
       "    </div>",
       '    <p class="auth-help" data-auth-help>Demo accounts: studentA / studentB / studentC</p>',
       '    <p class="auth-message" data-auth-message></p>',
       '    <div class="auth-modal__actions">',
-      '      <button type="button" class="auth-modal__btn" data-auth-cancel>Cancel</button>',
+      '      <button type="button" class="auth-modal__btn auth-modal__btn--ghost" data-auth-cancel>Cancel</button>',
       '      <button type="submit" class="auth-modal__btn auth-modal__btn--primary" data-auth-submit>Log in</button>',
       "    </div>",
       "  </form>",
@@ -365,11 +369,11 @@
       signupFields.forEach(function (el) {
         el.hidden = !signup;
       });
-      if (title) title.textContent = signup ? "Create local account" : "Log in";
+      if (title) title.textContent = signup ? "Create account" : "Log in";
       if (desc) {
         desc.textContent = signup
-          ? "Your account and stats are saved in this browser only."
-          : "Use your local account to unlock member features.";
+          ? "Create a local account to save progress, palettes, and community activity in this browser."
+          : "Access your saved progress, posts, and activity in this browser.";
       }
       if (help) {
         help.textContent = signup
@@ -416,7 +420,7 @@
         ensureUser(result.username);
         updateAvatarUI();
         closeModal(backdrop);
-        alert("Account created and signed in as " + result.username + ".");
+        alert("Account created and logged in as " + result.username + ".");
         return;
       }
 
@@ -429,7 +433,7 @@
       ensureUser(result.username);
       updateAvatarUI();
       closeModal(backdrop);
-      alert("Signed in as " + result.username + ".");
+      alert("Logged in as " + result.username + ".");
     });
 
     document.body.appendChild(backdrop);
