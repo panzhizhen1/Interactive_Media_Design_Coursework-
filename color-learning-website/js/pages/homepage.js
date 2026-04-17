@@ -6,6 +6,10 @@
 
   var MODE_STORAGE_KEY = "clw_theme_mode";
   var WHEEL_COLOR_STORAGE_KEY = "clw_theme_wheel_color";
+  var HOME_GAME_PICK_INDEX_KEY = "clw_home_game_pick_index";
+  var HOME_TEST_PICK_INDEX_KEY = "clw_home_test_pick_index";
+  var HOME_LEARN_PICK_INDEX_KEY = "clw_home_learn_pick_index";
+  var HOME_COMMUNITY_PICK_INDEX_KEY = "clw_home_community_pick_index";
 
   function syncThemeSelection(section) {
     if (!window.CLWTheme) return;
@@ -39,6 +43,234 @@
     } catch (e) {
       /* ignore */
     }
+  }
+
+  function readSessionValue(key) {
+    try {
+      return sessionStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeSessionValue(key, value) {
+    try {
+      sessionStorage.setItem(key, value);
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function pickStableSessionIndex(key, maxCount) {
+    if (!(maxCount > 0)) return -1;
+    var raw = readSessionValue(key);
+    if (/^\d+$/.test(raw || "")) {
+      var stored = Number(raw);
+      if (stored >= 0 && stored < maxCount) return stored;
+    }
+    var picked = Math.floor(Math.random() * maxCount);
+    writeSessionValue(key, String(picked));
+    return picked;
+  }
+
+  function toPlainText(html) {
+    var holder = document.createElement("div");
+    holder.innerHTML = String(html || "");
+    return (holder.textContent || holder.innerText || "").replace(/\s+/g, " ").trim();
+  }
+
+  function clipWithEllipsis(text, maxLength) {
+    var source = String(text || "").trim();
+    if (!source) return "";
+    if (source.length <= maxLength) return source;
+    return source.slice(0, maxLength).trimEnd() + "...";
+  }
+
+  function parseLearnContentData(source) {
+    var normalized = String(source || "").replace(/^\s*export\s+const\s+contentData\s*=\s*/, "return ");
+    if (!/^return\s+/.test(normalized)) throw new Error("Missing contentData export");
+    return new Function(normalized)();
+  }
+
+  function readStoredJson(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      var parsed = JSON.parse(raw);
+      return parsed == null ? fallback : parsed;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function getLearnSectionLocation(sectionKey, sectionTitle) {
+    var key = String(sectionKey || "");
+    var branch = "Learning";
+    if (key === "overview") branch = "Overview";
+    else if (key.indexOf("basic-") === 0) branch = "Learning Module · Basic";
+    else if (key.indexOf("encoding-") === 0) branch = "Learning Module · Encoding Concepts";
+    else if (key.indexOf("advance-") === 0) branch = "Learning Module · Advance Topics";
+    else if (key.indexOf("interaction-") === 0) branch = "Interaction";
+    else if (key === "relative-information") branch = "Relative Information";
+    return branch + " · " + String(sectionTitle || "Section");
+  }
+
+  function loadLearnTopicCatalog() {
+    return fetch("js/pages/learn/learning-content.js")
+      .then(function (res) {
+        if (!res.ok) throw new Error("Failed to load learning content");
+        return res.text();
+      })
+      .then(function (source) {
+        var catalog = [];
+        var data = parseLearnContentData(source);
+        Object.keys(data || {}).forEach(function (sectionKey) {
+          var section = data[sectionKey];
+          if (!section || !Array.isArray(section.sections)) return;
+          var sectionTitle = section.title ? String(section.title) : "Section";
+          var sectionLocation = getLearnSectionLocation(sectionKey, sectionTitle);
+          section.sections.forEach(function (entry) {
+            var heading = String(entry && entry.heading ? entry.heading : "").trim();
+            var preview = clipWithEllipsis(toPlainText(entry && entry.content ? entry.content : ""), 185);
+            if (!heading || !preview) return;
+            catalog.push({
+              sectionKey: sectionKey,
+              sectionTitle: sectionTitle,
+              location: sectionLocation,
+              heading: heading,
+              preview: preview
+            });
+          });
+        });
+        return catalog;
+      });
+  }
+
+  function setupHomeLearnSpotlight() {
+    var linkEl = document.querySelector("[data-home-learn-link]");
+    var titleEl = document.querySelector("[data-home-learn-title]");
+    var topicEl = document.querySelector("[data-home-learn-topic]");
+    var snippetEl = document.querySelector("[data-home-learn-snippet]");
+    var metaEl = document.querySelector("[data-home-learn-meta]");
+    if (!linkEl || !titleEl || !topicEl || !snippetEl || !metaEl) return;
+
+    titleEl.textContent = "Learn Colors the Smart Way";
+    loadLearnTopicCatalog()
+      .then(function (catalog) {
+        if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty learn catalog");
+        var picked = catalog[pickStableSessionIndex(HOME_LEARN_PICK_INDEX_KEY, catalog.length)];
+        if (!picked || !picked.heading || !picked.preview) throw new Error("Invalid learn item");
+        topicEl.textContent = picked.heading;
+        snippetEl.textContent = picked.preview;
+        metaEl.textContent = picked.location;
+        linkEl.href = "learning.html#" + encodeURIComponent(String(picked.sectionKey || "overview"));
+        linkEl.setAttribute("aria-label", "Open Learn module topic: " + picked.heading);
+      })
+      .catch(function () {
+        topicEl.textContent = "What is Colour Encoding?";
+        snippetEl.textContent = "Explore how color information is represented and used across devices and media...";
+        metaEl.textContent = "Overview · Colour Encoding Overview";
+        linkEl.href = "learning.html#overview";
+      });
+  }
+
+  function extractCommunitySeedPosts(source) {
+    var markerMatch = source.match(/var\s+seedPosts\s*=\s*/);
+    if (!markerMatch) return [];
+    var markerIndex = markerMatch.index + markerMatch[0].length;
+    var expressionStart = source.indexOf("[", markerIndex);
+    if (expressionStart < 0) return [];
+    var depth = 0;
+    var expressionEnd = -1;
+    for (var i = expressionStart; i < source.length; i += 1) {
+      var ch = source[i];
+      if (ch === "[") depth += 1;
+      if (ch === "]") {
+        depth -= 1;
+        if (depth === 0) {
+          expressionEnd = i + 1;
+          break;
+        }
+      }
+    }
+    if (expressionEnd < 0) return [];
+    var expression = source.slice(expressionStart, expressionEnd).trim();
+    try {
+      var parsed = new Function("return " + expression + ";")();
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function normalizeCommunityPost(post) {
+    if (!post || typeof post !== "object") return null;
+    var content = clipWithEllipsis(toPlainText(post.content || ""), 190);
+    if (!content) return null;
+    var author = post.author ? String(post.author).trim() : "Guest";
+    var tag = post.tag ? String(post.tag).trim() : "#Community";
+    return {
+      author: author || "Guest",
+      tag: tag || "#Community",
+      content: content
+    };
+  }
+
+  function loadCommunityPostCatalog() {
+    var saved = readStoredJson("clw_posts_v3", null);
+    if (!Array.isArray(saved) || !saved.length) saved = readStoredJson("clw_posts_v2", null);
+    if (!Array.isArray(saved) || !saved.length) saved = readStoredJson("clw_posts_v1", null);
+    if (Array.isArray(saved) && saved.length) {
+      return Promise.resolve(
+        saved
+          .map(normalizeCommunityPost)
+          .filter(function (item) { return !!item; })
+      );
+    }
+    return fetch("js/pages/community.js")
+      .then(function (res) {
+        if (!res.ok) throw new Error("Failed to load community module");
+        return res.text();
+      })
+      .then(function (source) {
+        return extractCommunitySeedPosts(source)
+          .map(normalizeCommunityPost)
+          .filter(function (item) { return !!item; });
+      });
+  }
+
+  function setupHomeCommunitySpotlight() {
+    var noticeLinkEl = document.querySelector("[data-home-community-notice-link]");
+    var postLinkEl = document.querySelector("[data-home-community-post-link]");
+    var titleEl = document.querySelector("[data-home-community-title]");
+    var avatarEl = document.querySelector("[data-home-community-avatar]");
+    var authorEl = document.querySelector("[data-home-community-author]");
+    var tagEl = document.querySelector("[data-home-community-tag]");
+    var postEl = document.querySelector("[data-home-community-post]");
+    if (!noticeLinkEl || !postLinkEl || !titleEl || !avatarEl || !authorEl || !tagEl || !postEl) return;
+
+    titleEl.textContent = "👥 Join the Color Community";
+    noticeLinkEl.href = "community.html";
+    loadCommunityPostCatalog()
+      .then(function (catalog) {
+        if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty community catalog");
+        var picked = catalog[pickStableSessionIndex(HOME_COMMUNITY_PICK_INDEX_KEY, catalog.length)];
+        if (!picked || !picked.content) throw new Error("Invalid community item");
+        var initial = picked.author && picked.author.charAt(0) ? picked.author.charAt(0).toUpperCase() : "U";
+        avatarEl.textContent = initial;
+        authorEl.textContent = "@" + picked.author;
+        tagEl.textContent = picked.tag || "#Community";
+        postEl.textContent = picked.content;
+        postLinkEl.href = "community-posts.html";
+        postLinkEl.setAttribute("aria-label", "Open community post list, highlighted from @" + picked.author);
+      })
+      .catch(function () {
+        avatarEl.textContent = "C";
+        authorEl.textContent = "@colorLearner";
+        tagEl.textContent = "#Community";
+        postEl.textContent = "Share one color insight, palette, or learning takeaway with peers in the community.";
+        postLinkEl.href = "community-posts.html";
+      });
   }
 
   function parseHexColor(hex) {
@@ -291,12 +523,26 @@
         return res.text();
       })
       .then(function (source) {
-        var startToken = "const drawings=";
-        var endToken = "\n\nconst galleryView";
-        var startIndex = source.indexOf(startToken);
-        var endIndex = source.indexOf(endToken, startIndex);
-        if (startIndex < 0 || endIndex < 0) throw new Error("Could not parse drawings library");
-        var expression = source.slice(startIndex + startToken.length, endIndex).trim();
+        var markerMatch = source.match(/const\s+drawings\s*=\s*/);
+        if (!markerMatch) throw new Error("Could not find drawings declaration");
+        var markerIndex = markerMatch.index + markerMatch[0].length;
+        var expressionStart = source.indexOf("[", markerIndex);
+        if (expressionStart < 0) throw new Error("Could not find drawings array start");
+        var depth = 0;
+        var expressionEnd = -1;
+        for (var i = expressionStart; i < source.length; i += 1) {
+          var ch = source[i];
+          if (ch === "[") depth += 1;
+          if (ch === "]") {
+            depth -= 1;
+            if (depth === 0) {
+              expressionEnd = i + 1;
+              break;
+            }
+          }
+        }
+        if (expressionEnd < 0) throw new Error("Could not parse drawings array");
+        var expression = source.slice(expressionStart, expressionEnd).trim();
         if (expression.endsWith(";")) expression = expression.slice(0, -1);
         return new Function("return " + expression + ";")();
       });
@@ -305,6 +551,7 @@
   function setupHomeGameSpotlight() {
     var previewCanvas = document.querySelector("[data-home-game-preview]");
     var previewLink = document.querySelector("[data-home-game-link]");
+    var previewTitle = document.querySelector(".home-card__text--game");
     if (!previewCanvas || !previewLink) return;
 
     var ctx = previewCanvas.getContext("2d");
@@ -313,9 +560,18 @@
     loadGameDrawingsLibrary()
       .then(function (drawings) {
         if (!Array.isArray(drawings) || !drawings.length) return;
-        var randomIndex = Math.floor(Math.random() * drawings.length);
-        var drawing = drawings[randomIndex];
-        if (!drawing || typeof drawing.draw !== "function") return;
+        var validDrawings = drawings
+          .map(function (drawing, index) {
+            return { drawing: drawing, index: index };
+          })
+          .filter(function (item) {
+            return item.drawing && typeof item.drawing.draw === "function";
+          });
+        if (!validDrawings.length) return;
+        var picked = validDrawings[pickStableSessionIndex(HOME_GAME_PICK_INDEX_KEY, validDrawings.length)];
+        var drawing = picked.drawing;
+        var randomIndex = picked.index;
+        var drawingName = drawing.name ? String(drawing.name) : "a random drawing";
 
         ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
         ctx.fillStyle = "#ffffff";
@@ -324,10 +580,12 @@
         drawing.draw(ctx, previewCanvas.width, previewCanvas.height);
 
         previewLink.href = "game.html?openDrawing=" + String(randomIndex);
-        previewLink.setAttribute("aria-label", "Start your color challenge with " + drawing.name);
+        previewLink.setAttribute("aria-label", "Start your color challenge with " + drawingName);
+        if (previewTitle) previewTitle.textContent = "Start your color challenge: " + drawingName + "!";
       })
       .catch(function () {
         previewLink.href = "game.html";
+        if (previewTitle) previewTitle.textContent = "Start your color challenge!";
       });
   }
 
@@ -492,7 +750,7 @@
     loadTestQuestionCatalog()
       .then(function (catalog) {
         if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty question catalog");
-        var picked = catalog[Math.floor(Math.random() * catalog.length)];
+        var picked = catalog[pickStableSessionIndex(HOME_TEST_PICK_INDEX_KEY, catalog.length)];
         if (!picked || !picked.prompt) throw new Error("Invalid question item");
 
         promptEl.textContent = picked.prompt;
@@ -603,8 +861,10 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     setupHeroTagline();
+    setupHomeLearnSpotlight();
     setupHomeGameSpotlight();
     setupHomeTestSpotlight();
+    setupHomeCommunitySpotlight();
 
     var section = document.querySelector("[data-theme-picker]");
     if (!section || !window.CLWTheme) return;
