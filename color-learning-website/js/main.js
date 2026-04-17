@@ -34,7 +34,60 @@
     }
   }
 
+  function ensureFluidCanvas() {
+    if (!document.body) return null;
+
+    var canvas = document.getElementById("fluid-canvas");
+    if (canvas) return canvas;
+
+    canvas = document.createElement("canvas");
+    canvas.id = "fluid-canvas";
+    canvas.className = "fluid-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    document.body.insertBefore(canvas, document.body.firstChild);
+    return canvas;
+  }
+
+  function loadScriptOnce(src) {
+    return new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[src="' + src + '"]');
+      if (existing) {
+        if (existing.dataset.loaded === "true") {
+          resolve();
+          return;
+        }
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+        return;
+      }
+
+      var script = document.createElement("script");
+      script.src = src;
+      script.defer = true;
+      script.addEventListener("load", function () {
+        script.dataset.loaded = "true";
+        resolve();
+      }, { once: true });
+      script.addEventListener("error", function () {
+        reject(new Error("Failed to load " + src));
+      }, { once: true });
+      document.head.appendChild(script);
+    });
+  }
+
+  function initFluidBackground() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return Promise.resolve();
+    }
+
+    ensureFluidCanvas();
+    return loadScriptOnce("js/fluid-background.js").catch(function (error) {
+      console.warn("[main.js] fluid background init failed:", error);
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", async function () {
+    initFluidBackground();
     await loadFragment("#site-navbar", "components/navbar.html", EMBEDDED_NAVBAR);
     await loadFragment("#site-footer", "components/footer.html", EMBEDDED_FOOTER);
 
