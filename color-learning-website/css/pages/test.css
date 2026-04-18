@@ -798,6 +798,8 @@ a.test-stat--link:focus-visible {
   text-decoration: none;
   flex-shrink: 0;
   transition: border-color 0.14s, background 0.14s;
+  cursor: pointer;
+  font: inherit;
 }
 
 .quiz-workspace-topbar__close span {
@@ -1070,6 +1072,7 @@ a.test-stat--link:focus-visible {
 }
 
 .quiz-index-btn {
+  position: relative;
   min-height: 2.88rem;
   border: 1.5px solid transparent;
   border-radius: 0.9rem;
@@ -1080,6 +1083,20 @@ a.test-stat--link:focus-visible {
   cursor: pointer;
   box-shadow: 0 3px 0 rgba(16, 35, 60, 0.05);
   transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.quiz-index-btn__number {
+  display: inline-block;
+}
+
+.quiz-index-btn__status {
+  position: absolute;
+  right: 0.28rem;
+  bottom: 0.24rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .quiz-index-btn:hover {
@@ -1726,6 +1743,110 @@ a.test-stat--link:focus-visible {
   font-size: 0.7rem;
 }
 
+/* Quiz confirm dialog (hint + exit) — plain white card; primary action still uses chapter theme */
+.quiz-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(6px);
+  animation: quizDialogFadeIn 0.18s ease;
+}
+
+@keyframes quizDialogFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.quiz-dialog {
+  width: min(26rem, 100%);
+  border-radius: 1.25rem;
+  border: 1.5px solid var(--test-border);
+  background: #ffffff;
+  box-shadow: var(--test-shadow);
+  padding: 1.35rem;
+  position: relative;
+}
+
+.quiz-dialog__title {
+  margin: 0 0 0.65rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--test-ink);
+  line-height: 1.25;
+}
+
+.quiz-dialog__body {
+  margin: 0 0 1.35rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--test-muted);
+}
+
+.quiz-dialog__body strong {
+  color: var(--test-ink);
+  font-weight: 700;
+}
+
+.quiz-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.quiz-dialog__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid rgba(15, 23, 42, 0.12);
+  transition:
+    border-color 0.14s ease,
+    background 0.14s ease,
+    transform 0.12s ease;
+}
+
+.quiz-dialog__btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.quiz-dialog__btn--ghost {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--test-ink);
+}
+
+.quiz-dialog__btn--ghost:hover {
+  border-color: var(--color-primary);
+}
+
+.quiz-dialog__btn--primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--theme-stop-2), var(--theme-stop-3));
+  color: #ffffff;
+  box-shadow: 0 3px 0 rgba(16, 35, 60, 0.12);
+}
+
+.quiz-dialog__btn--primary:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
 /* answer options submitted state */
 .quiz-option.is-answer-correct,
 .quiz-image-option.is-answer-correct {
@@ -1871,7 +1992,29 @@ a.test-stat--link:focus-visible {
   justify-content: flex-end;
 }
 
+.results-mini-ov-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.72rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.results-mini-ov__hint {
+  margin: 0;
+  color: var(--test-muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: resultsHintPulse 1.35s ease-in-out 2;
+}
+
+.results-mini-ov__hint span {
+  color: inherit;
+}
+
 .results-mini-ov__block {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1883,6 +2026,20 @@ a.test-stat--link:focus-visible {
   font-weight: 800;
   color: rgba(16, 35, 60, 0.45);
   letter-spacing: 0;
+}
+
+.results-mini-ov__number {
+  display: inline-block;
+}
+
+.results-mini-ov__status {
+  position: absolute;
+  right: 0.26rem;
+  bottom: 0.22rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .results-mini-ov__block.is-correct {
@@ -1916,6 +2073,21 @@ a.results-mini-ov__block:hover {
 a.results-mini-ov__block:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+@keyframes resultsHintPulse {
+  0%, 100% {
+    opacity: 0.72;
+    transform: translateX(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+  60% {
+    opacity: 0.82;
+    transform: translateX(0);
+  }
 }
 
 /* attempt switcher bar */
@@ -2076,6 +2248,16 @@ a.results-mini-ov__block:focus-visible {
   animation: badgePaste 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+/* Invisible placeholder until intro SFX ends (3★ + new badge) */
+.result-badge-wrap--slot {
+  visibility: hidden;
+  pointer-events: none;
+  animation: none;
+  opacity: 1;
+  min-height: 5.25rem;
+  min-width: 3.5rem;
+}
+
 .result-badge-icon {
   line-height: 1;
 }
@@ -2114,7 +2296,7 @@ a.results-mini-ov__block:focus-visible {
 .results-split {
   display: grid;
   gap: var(--space-lg);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 /* bottom action buttons, no card wrapper */
@@ -2129,6 +2311,10 @@ a.results-mini-ov__block:focus-visible {
   min-height: 2.72rem;
   padding: 0.74rem 1.14rem;
   font-size: calc(var(--text-sm) + 0.065rem);
+}
+
+.results-actions-bar [data-share-community] {
+  margin-left: auto;
 }
 
 /* keep old class working if referenced elsewhere */
@@ -2328,6 +2514,46 @@ a.results-mini-ov__block:focus-visible {
 
 .test-note-list li + li {
   margin-top: 0.45rem;
+}
+
+.test-note-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.test-note-list a::after {
+  content: "";
+  width: 0.9rem;
+  height: 0.9rem;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  background-color: var(--color-primary);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8h8m0 0-3-3m3 3-3 3' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8h8m0 0-3-3m3 3-3 3' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+  transition: transform 0.15s ease;
+}
+
+.test-note-list a:hover {
+  color: var(--color-primary);
+}
+
+.test-note-list a:hover::after {
+  transform: translateX(2px);
+}
+
+.test-note-list a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+  color: var(--color-primary);
 }
 
 .reward-grid {
@@ -3274,3 +3500,273 @@ a.results-mini-ov__block:focus-visible {
 
 .confetti-piece.confetti-cw  { animation: confettiCW  linear forwards; }
 .confetti-piece.confetti-ccw { animation: confettiCCW linear forwards; }
+
+.badge-reveal-ol {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  pointer-events: none;
+  background: transparent;
+  animation: brOlIn 0.35s ease forwards;
+}
+
+.badge-reveal-ol--replay {
+  pointer-events: auto;
+  animation: brOlInReplay 0.35s ease forwards;
+}
+
+.badge-reveal-ol.is-exiting {
+  animation: brOlOut 0.45s ease forwards;
+}
+
+@keyframes brOlIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes brOlInReplay {
+  from { opacity: 0; background: rgba(15, 23, 42, 0); }
+  to   { opacity: 1; background: rgba(15, 23, 42, 0.18); }
+}
+
+@keyframes brOlOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Card — the actual white box (~size of screenshot red border) */
+.badge-reveal__card {
+  position: relative;
+  width: min(380px, 90vw);
+  padding: 1.65rem 1.5rem 1.8rem;
+  border-radius: 1.5rem;
+  transform-origin: center center;
+
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 2px 8px   rgba(16, 35, 60, 0.08),
+    0 8px 28px  rgba(16, 35, 60, 0.13),
+    0 0  60px   rgba(16, 35, 60, 0.10),
+    0 0  110px  rgba(16, 35, 60, 0.07),
+    0 0  180px  rgba(16, 35, 60, 0.04);
+  overflow: visible;
+  animation: brCardIn 0.42s cubic-bezier(0.34, 1.1, 0.64, 1) both;
+}
+
+@keyframes brCardIn {
+  from { opacity: 0; transform: scale(0.9) translateY(14px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+/* Centred content column */
+.badge-reveal__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  animation: brContentIn 0.38s ease 0.16s both;
+}
+
+@keyframes brContentIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.badge-reveal__kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.badge-reveal__title {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+/* Stage: fixed-size container that sparkles and badge live inside */
+.badge-reveal__stage {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Sparkle ring */
+.badge-reveal__sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.badge-reveal__sparkle {
+  position: absolute;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  transform: translate(-50%, -50%) scale(0) rotate(0deg);
+  animation: brSparkle 1.35s ease-in-out infinite both;
+}
+
+@keyframes brSparkle {
+  0%   { transform: translate(-50%, -50%) scale(0)    rotate(0deg);   opacity: 0; }
+  22%  { transform: translate(-50%, -50%) scale(1.35) rotate(25deg);  opacity: 1; }
+  55%  { transform: translate(-50%, -50%) scale(0.9)  rotate(-12deg); opacity: 0.75; }
+  100% { transform: translate(-50%, -50%) scale(0)    rotate(45deg);  opacity: 0; }
+}
+
+/* Badge (icon + name) */
+.badge-reveal__badge {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  animation: brBadgePop 0.58s cubic-bezier(0.34, 1.56, 0.64, 1) 0.28s both;
+  transform-origin: center center;
+}
+
+@keyframes brBadgePop {
+  from { opacity: 0; transform: scale(0.3) rotate(-8deg); }
+  65%  { transform: scale(1.18) rotate(3deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.badge-reveal__badge.is-wiggling {
+  animation: brWiggle 0.84s ease-in-out;
+  transform-origin: center bottom;
+}
+
+/* Replay (manual): same rhythm, gentler tilt */
+.badge-reveal-ol--replay .badge-reveal__badge.is-wiggling {
+  animation: brWiggleReplay 0.84s ease-in-out;
+}
+
+/* Two full left-right-left-right swings with damping */
+@keyframes brWiggle {
+  0%   { transform: rotate(0deg)   scale(1); }
+  14%  { transform: rotate(-16deg) scale(1.06); }
+  28%  { transform: rotate(15deg)  scale(1.06); }
+  42%  { transform: rotate(-13deg) scale(1.04); }
+  56%  { transform: rotate(11deg)  scale(1.04); }
+  70%  { transform: rotate(-6deg)  scale(1.02); }
+  84%  { transform: rotate(4deg)   scale(1.01); }
+  100% { transform: rotate(0deg)   scale(1); }
+}
+
+@keyframes brWiggleReplay {
+  0%   { transform: rotate(0deg)   scale(1); }
+  14%  { transform: rotate(-9deg)  scale(1.035); }
+  28%  { transform: rotate(8deg)   scale(1.035); }
+  42%  { transform: rotate(-7deg)  scale(1.025); }
+  56%  { transform: rotate(6deg)   scale(1.025); }
+  70%  { transform: rotate(-3.5deg) scale(1.015); }
+  84%  { transform: rotate(2.5deg) scale(1.01); }
+  100% { transform: rotate(0deg)   scale(1); }
+}
+
+.badge-reveal__close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(15, 23, 42, 0.07);
+  color: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+  z-index: 2;
+  animation: brContentIn 0.35s ease 0.5s both;
+}
+
+.badge-reveal__close:hover {
+  background: rgba(15, 23, 42, 0.12);
+  color: rgba(15, 23, 42, 0.85);
+  transform: scale(1.08);
+}
+
+.badge-reveal__close:focus-visible {
+  outline: 2px solid rgba(15, 23, 42, 0.4);
+  outline-offset: 2px;
+}
+
+/* Description line below badge name (replay mode) */
+.badge-reveal__desc {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(15, 23, 42, 0.52);
+  text-align: center;
+  max-width: 15rem;
+  line-height: 1.55;
+}
+
+/* Stage height adapts when description is present */
+.badge-reveal-ol--replay .badge-reveal__stage {
+  height: auto;
+  min-height: 200px;
+}
+
+/* Clickable badge tag in rewards card (chapter colours come from inline style) */
+.reward-badges .reward-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  font: inherit;
+  font-weight: 800;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.reward-badges .reward-badge-tag__ic {
+  flex-shrink: 0;
+  display: block;
+}
+
+.reward-badges .reward-badge-tag__lbl {
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.reward-badges .reward-badge-tag:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.badge-reveal-tag {
+  cursor: pointer;
+  transition: opacity 0.14s ease, transform 0.14s ease, filter 0.14s ease;
+}
+
+.badge-reveal-tag:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.badge-reveal__name {
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
