@@ -2556,6 +2556,87 @@ a.results-mini-ov__block:focus-visible {
   color: var(--color-primary);
 }
 
+.test-learn-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.test-learn-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem 0.72rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: rgba(16, 35, 60, 0.04);
+  color: var(--test-ink);
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    color 0.15s ease;
+}
+
+.test-learn-row:hover,
+.test-learn-row:focus-visible {
+  background: color-mix(in srgb, var(--color-primary) 9%, white);
+  border-color: var(--color-primary);
+  color: var(--test-ink);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+.test-learn-row:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 38%, white);
+  outline-offset: 2px;
+}
+
+.test-learn-row__label {
+  min-width: 0;
+  flex: 1;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.test-learn-row__arrow {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1rem;
+  color: var(--color-primary);
+  opacity: 1;
+  transition: transform 0.15s ease;
+}
+
+.test-learn-row__arrow::before {
+  content: "";
+  width: 0.95rem;
+  height: 0.9rem;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8h8m0 0-3-3m3 3-3 3' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8h8m0 0-3-3m3 3-3 3' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+  transform-origin: left center;
+  transition: transform 0.15s ease;
+}
+
+.test-learn-row:hover .test-learn-row__arrow,
+.test-learn-row:focus-visible .test-learn-row__arrow {
+  transform: translateX(2px);
+}
+
+.test-learn-row:hover .test-learn-row__arrow::before,
+.test-learn-row:focus-visible .test-learn-row__arrow::before {
+  transform: scaleX(1.28);
+}
+
 .reward-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3052,6 +3133,12 @@ a.results-mini-ov__block:focus-visible {
   min-height: 22rem; /* always tall enough for ~2 rows */
   align-content: start;
 }
+
+.mistakes-toolbar + .mistake-compact-grid,
+.mistakes-stats-row + .mistake-compact-grid {
+  margin-top: 1.35rem;
+}
+
 .mistake-compact-card {
   display: flex;
   flex-direction: column;
