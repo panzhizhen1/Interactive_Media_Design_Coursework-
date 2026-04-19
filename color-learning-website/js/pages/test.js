@@ -1285,7 +1285,7 @@
     } else {
       title = "Leave this quiz?";
       body =
-        "Your progress is saved automatically. If you go back now, you can pick up where you left off later. Are you sure you want to leave?";
+        "Your progress is saved automatically. If you go back now, you can pick up where you left off later.";
       confirmLabel = "Leave";
       cancelLabel = "Stay";
       cancelClass = "quiz-dialog__btn quiz-dialog__btn--primary";
@@ -1582,8 +1582,8 @@
     mainEl.style.removeProperty("--test-border");
 
     var backUrl = buildUrl("test.html", { chapter: chapterFilter === "all" ? state.selection.chapter : chapterFilter, level: levelFilter === "all" ? state.selection.level : levelFilter });
-    var mkTabUrl = buildUrl("test-mistakes.html", { chapter: chapterFilter === "all" ? "" : chapterFilter, level: levelFilter === "all" ? "" : levelFilter });
-    var flTabUrl = buildUrl("test-mistakes.html", { chapter: chapterFilter === "all" ? "" : chapterFilter, level: levelFilter === "all" ? "" : levelFilter, tab: "flagged" });
+    var mkTabUrl = buildUrl("test-mistakes.html", {});
+    var flTabUrl = buildUrl("test-mistakes.html", { tab: "flagged" });
 
     var allMistakes = getVisibleMistakes(chapterFilter, levelFilter, "all");
     var reviewedCount = allMistakes.filter(function (i) { return i.mastered; }).length;
@@ -2220,7 +2220,7 @@
 
     return {
       continueHref: currentQuizLink,
-      mistakesHref: buildUrl("test-mistakes.html", { chapter: chapterId, level: levelId }),
+      mistakesHref: buildUrl("test-mistakes.html", {}),
       summaryHref: latest ? buildUrl("test-results.html", { chapter: chapterId, level: levelId, resultId: latest.id }) : "#"
     };
   }
@@ -2550,8 +2550,8 @@
   }
   function renderSidebarLinkCard(title, inner, href) { return '<a class="test-sidebar-card test-sidebar-card--link" href="' + href + '"><h3 class="test-card-title">' + title + "</h3>" + inner + "</a>"; }
   function renderReviewCard(chapterId, levelId) {
-    var mistakesUrl = buildUrl("test-mistakes.html", { chapter: chapterId, level: levelId });
-    var savedUrl = buildUrl("test-mistakes.html", { chapter: chapterId, level: levelId, tab: "flagged" });
+    var mistakesUrl = buildUrl("test-mistakes.html", {});
+    var savedUrl = buildUrl("test-mistakes.html", { tab: "flagged" });
     var mistakeSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 13.59L14.59 17 12 14.41 9.41 17 8 15.59l2.59-2.59L8 10.41 9.41 9 12 11.59 14.59 9 16 10.41l-2.59 2.59L16 15.59z"/></svg>';
     var bookmarkSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
     return '<section class="test-sidebar-card">' +
@@ -2812,7 +2812,6 @@
         (chBorder ? ' style="border-color:' + chBorder + '"' : '') + '>' +
         '<div class="mcc__meta">' +
           '<span class="mcc__source"' + (chColor ? ' style="color:' + chColor + '"' : '') + '>' + chapterName + ' \xb7 ' + nodeNum + '</span>' +
-          '<span class="mcc__status-tag is-flagged">Bookmarked</span>' +
         '</div>' +
         '<p class="mcc__prompt">' + (q.prompt || '\u2014') + '</p>' +
         '<div class="mcc__tags">' +
@@ -3029,7 +3028,6 @@
         (type === "mistake" && !submitted
           ? '<span class="mcc__status-tag' + (item.mastered ? ' is-ok' : '') + '">' + (item.mastered ? 'Reviewed' : 'Pending') + '</span>'
           : '') +
-        (type === "flagged" ? '<span class="mcc__status-tag is-flagged">Bookmarked</span>' : '') +
       '</div>' +
       '<h2 class="solo-panel__prompt">' + question.prompt + '</h2>' +
       renderSoloQuestionBody(question, draft, submitted) +
@@ -3149,9 +3147,9 @@
   }
   function renderLearnTopicList(topics) {
     var list = Array.isArray(topics) && topics.length ? topics : [{ label: "Overview", href: "learning.html#overview" }];
-    return '<ul class="test-note-list">' + list.map(function (item) {
-      return '<li><a href="' + item.href + '">' + item.label + '</a></li>';
-    }).join("") + '</ul>';
+    return '<div class="test-learn-rows">' + list.map(function (item) {
+      return '<a class="test-learn-row" href="' + item.href + '"><span class="test-learn-row__label">' + item.label + '</span><span class="test-learn-row__arrow" aria-hidden="true"></span></a>';
+    }).join("") + '</div>';
   }
   function renderResultInsightContent(items, emptyMessage) {
     if (!Array.isArray(items) || !items.length) {
