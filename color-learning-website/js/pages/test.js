@@ -192,8 +192,10 @@
   var rootEl = document.querySelector("[data-test-root]");
   /** Transient UI while quiz page is active: { kind: "hint" } | { kind: "exit", exitHref: string } */
   var quizDialog = null;
+  /** setInterval id for live Time / Score labels on the quiz page */
+  var quizLiveTimerId = null;
   /* Solo-practice workbench state (transient, also reflected in URL ?solo=type:id) */
-  var soloState = null; // { type, itemId, draft, submitted, isCorrect }
+  var soloState = null; // { type, itemId, draft, submitted, isCorrect, filterSheet? }
   var IC = {
     prev: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>',
     next: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>',
@@ -216,7 +218,8 @@
     weakTitle: '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#14b8a6" stroke-width="1.9"/><circle cx="12" cy="12" r="4.8" fill="none" stroke="#14b8a6" stroke-width="1.9"/><circle cx="12" cy="12" r="2.1" fill="#14b8a6"/></svg>',
     correctStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#16a34a"/><path fill="none" stroke="#fff" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round" d="M7.2 12.5l2.9 2.9 6.7-6.7"/></svg>',
     wrongStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#dc2626"/><path fill="none" stroke="#fff" stroke-width="2.35" stroke-linecap="round" d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8"/></svg>',
-    scoreStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="#6d28d9"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>'
+    scoreStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="#6d28d9"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>',
+    timeClock: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>'
   };
 
   if (!mainEl || !rootEl) return;
@@ -715,6 +718,8 @@
   function bindEvents() {
     rootEl.addEventListener("click", handleClick);
     rootEl.addEventListener("change", handleChange);
+    document.addEventListener("visibilitychange", handleDocumentVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
   }
 
   function handleClick(event) {
@@ -788,6 +793,7 @@
         }
         if (quizDialog.kind === "exit" && quizDialog.exitHref) {
           var go = quizDialog.exitHref;
+          pauseActiveQuizTimer();
           quizDialog = null;
           window.location.href = go;
           return;
@@ -849,6 +855,15 @@
       enterSoloPractice(practiceBtn.getAttribute("data-practice-type"), practiceBtn.getAttribute("data-practice-question"));
       return;
     }
+    var soloFilterToggle = target.closest("[data-solo-toggle-filter]");
+    if (soloFilterToggle) {
+      event.preventDefault();
+      if (soloState) {
+        soloState.filterSheet = !soloState.filterSheet;
+        renderPage();
+      }
+      return;
+    }
     var soloAction = target.closest("[data-solo-action]");
     if (soloAction) {
       event.preventDefault();
@@ -887,6 +902,55 @@
       }
       if (found) {
         window.location.href = buildUrl("test-results.html", { chapter: found.chapter, level: found.level, resultId: nextResultId, slideDir: dir });
+      }
+      return;
+    }
+    var quizWsDock = target.closest("[data-quiz-workspace-dock]");
+    var quizWsDockTab = target.closest("[data-quiz-workspace-dock-tab]");
+    if (quizWsDockTab && quizWsDock) {
+      event.preventDefault();
+      var qTab = quizWsDockTab.getAttribute("data-quiz-workspace-dock-tab");
+      var qCur = quizWsDock.getAttribute("data-active") || "";
+      if (quizWsDock.classList.contains("is-open") && qCur === qTab) {
+        syncQuizWorkspaceDock(quizWsDock, null);
+      } else {
+        syncQuizWorkspaceDock(quizWsDock, qTab);
+      }
+      return;
+    }
+    var openQuizWsDock = rootEl.querySelector("[data-quiz-workspace-dock].is-open");
+    if (openQuizWsDock) {
+      var qInWsDock = target.closest("[data-quiz-workspace-dock]");
+      if (!qInWsDock) {
+        syncQuizWorkspaceDock(openQuizWsDock, null);
+      }
+    }
+    var mapDock = target.closest("[data-map-dock]");
+    var mapDockTab = target.closest("[data-map-dock-tab]");
+    var mapDockScrim = target.closest("[data-map-dock-scrim]");
+    if (mapDockTab && mapDock) {
+      event.preventDefault();
+      var tabId = mapDockTab.getAttribute("data-map-dock-tab");
+      var cur = mapDock.getAttribute("data-active") || "";
+      if (mapDock.classList.contains("is-open") && cur === tabId) {
+        syncMapDockPanel(mapDock, null);
+      } else {
+        syncMapDockPanel(mapDock, tabId);
+      }
+      return;
+    }
+    if (mapDockScrim && mapDock) {
+      event.preventDefault();
+      syncMapDockPanel(mapDock, null);
+      return;
+    }
+    var openMapDock = rootEl.querySelector("[data-map-dock].is-open");
+    if (openMapDock) {
+      var inDockSheet = target.closest(".test-map-dock__sheet-wrap");
+      var inDockBar = target.closest(".test-map-dock__bar");
+      var inDockScrimHit = target.closest("[data-map-dock-scrim]");
+      if (!inDockSheet && !inDockBar && !inDockScrimHit) {
+        syncMapDockPanel(openMapDock, null);
       }
     }
   }
@@ -932,7 +996,10 @@
   function renderPage() {
     try {
       var page = mainEl.getAttribute("data-test-page");
+      if (page !== "quiz") stopQuizLiveTimer();
+      if (page !== "map") setTestMapDockOpenOnBody(false);
       if (page !== "quiz") quizDialog = null;
+      if (page !== "quiz") pauseActiveQuizTimer();
       if (page === "map") return renderMapPage();
       if (page === "quiz") return renderQuizPage();
       if (page === "results") return renderResultsPage();
@@ -944,7 +1011,92 @@
         renderLinkButton("Back to map", "test.html", "test-link-btn--primary") +
         "</div></section>";
       if (window && window.console && console.error) console.error("[test-module] renderPage failed:", error);
+      setTestMapDockOpenOnBody(false);
     }
+  }
+
+  function setTestMapDockOpenOnBody(isOpen) {
+    if (typeof document === "undefined" || !document.body) return;
+    if (isOpen) document.body.classList.add("test-map-dock-open");
+    else document.body.classList.remove("test-map-dock-open");
+  }
+
+  function getMapRewardsAnchorEl() {
+    var dock = document.querySelector(".test-map-page > .test-map-dock");
+    try {
+      if (dock && typeof window.getComputedStyle === "function" && window.getComputedStyle(dock).display !== "none") {
+        var inDock = dock.querySelector("[data-rewards-card]");
+        if (inDock) return inDock;
+      }
+    } catch (e) {}
+    return document.querySelector(".test-sidebar--map [data-rewards-card]");
+  }
+
+  function syncMapDockPanel(dockRoot, panelId) {
+    if (!dockRoot) return;
+    var tabs = dockRoot.querySelectorAll("[data-map-dock-tab]");
+    var panels = dockRoot.querySelectorAll("[data-map-dock-panel]");
+    var i;
+    var tid;
+    var pid;
+    if (!panelId) {
+      dockRoot.classList.remove("is-open");
+      dockRoot.removeAttribute("data-active");
+      for (i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("is-active");
+        tabs[i].setAttribute("aria-expanded", "false");
+      }
+      for (i = 0; i < panels.length; i++) {
+        panels[i].classList.remove("is-dock-active");
+      }
+      setTestMapDockOpenOnBody(false);
+      return;
+    }
+    dockRoot.classList.add("is-open");
+    dockRoot.setAttribute("data-active", panelId);
+    for (i = 0; i < tabs.length; i++) {
+      tid = tabs[i].getAttribute("data-map-dock-tab");
+      tabs[i].classList.toggle("is-active", tid === panelId);
+      tabs[i].setAttribute("aria-expanded", tid === panelId ? "true" : "false");
+    }
+    for (i = 0; i < panels.length; i++) {
+      pid = panels[i].getAttribute("data-map-dock-panel");
+      panels[i].classList.toggle("is-dock-active", pid === panelId);
+    }
+    setTestMapDockOpenOnBody(true);
+  }
+
+  function renderMapDockBar() {
+    function tab(panel, label) {
+      return (
+        '<button type="button" class="test-map-dock__tab" data-map-dock-tab="' +
+        panel +
+        '" aria-expanded="false" aria-controls="map-dock-panel-' +
+        panel +
+        '">' +
+        '<span class="test-map-dock__tab-ic" aria-hidden="true">' +
+        (panel === "snapshot"
+          ? IC.snapshotTitle
+          : panel === "review"
+            ? IC.bookTitle
+            : panel === "folder"
+              ? IC.folderTitle
+              : IC.rewardsTitle) +
+        "</span>" +
+        '<span class="visually-hidden">' +
+        label +
+        "</span>" +
+        "</button>"
+      );
+    }
+    return (
+      '<nav class="test-map-dock__bar" aria-label="Map summary panels">' +
+        tab("snapshot", "Progress Snapshot") +
+        tab("review", "Recommended Review") +
+        tab("folder", "Question Folder") +
+        tab("rewards", "Rewards") +
+      "</nav>"
+    );
   }
 
   function renderMapPage() {
@@ -961,33 +1113,58 @@
     var resumeHref = buildLastSubmitResumeHref(state.lastQuizSubmit);
 
     applyChapterTheme(chapter.id);
+    setTestMapDockOpenOnBody(false);
+
+    var snapshotInner =
+      '<div class="test-stat-grid">' +
+      renderStat("Whole Chapter", snapshot.chapterUnits, "Finished units in this chapter, all difficulties added together.") +
+      renderStat("Average Accuracy", snapshot.overallAccuracy, "Average accuracy across completed quizzes for the chapter and difficulty you are viewing (every full run counts).") +
+      renderStatLink("Last working on", resumeText, resumeHref, "The map unit (chapter, unit, difficulty) where you last pressed Submit in a normal path quiz - not mistakes review or bookmark practice.", "test-stat--full-row") +
+      "</div>";
+    var recommendedInner = renderLearnTopicList(recommended);
+    var mapAsideCards =
+      renderSidebarCard("Progress Snapshot", snapshotInner, IC.snapshotTitle) +
+      renderSidebarCard("Recommended Review", recommendedInner, IC.bookTitle) +
+      renderReviewCard(chapter.id, level.id) +
+      renderRewardsCard(totalScore);
+    var mapShellDock =
+      '<div class="test-map-dock" data-map-dock>' +
+      '<button type="button" class="test-map-dock__scrim" data-map-dock-scrim aria-label="Close panel"></button>' +
+      '<div class="test-map-dock__sheet-wrap">' +
+      renderSidebarCard("Progress Snapshot", snapshotInner, IC.snapshotTitle, "snapshot") +
+      renderSidebarCard("Recommended Review", recommendedInner, IC.bookTitle, "review") +
+      renderReviewCard(chapter.id, level.id, "folder") +
+      renderRewardsCard(totalScore, "rewards") +
+      "</div>" +
+      renderMapDockBar() +
+      "</div>";
 
     rootEl.innerHTML =
-      '<div class="test-map-layout">' +
-        '<div class="test-map-main">' +
-          '<section class="test-panel test-map-header-card">' +
-            '<div class="test-map-hcard__meta">' +
-              '<div class="test-kicker">' + chapter.eyebrow + '</div>' +
-              '<h2 class="test-map-heading">' + chapter.name + '</h2>' +
-              '<p class="test-map-intro">' + chapter.intro + '</p>' +
-            '</div>' +
-            '<div class="test-map-filters">' +
-              '<label class="test-map-topbar__field"><span>Chapter</span>' + renderMapChapterSelect(chapter.id) + '</label>' +
-              '<label class="test-map-topbar__field"><span>Difficulty</span>' + renderMapLevelSelect(level.id) + '</label>' +
-            '</div>' +
-          '</section>' +
-          '<div class="test-grid test-grid--map">' +
-            '<section class="test-panel test-map-shell">' +
-              '<div class="test-map-list">' + units.map(renderMapNode).join("") + '</div>' +
+      '<div class="test-map-page">' +
+        '<div class="test-map-layout">' +
+          '<div class="test-map-main">' +
+            '<section class="test-panel test-map-header-card">' +
+              '<div class="test-map-hcard__meta">' +
+                '<div class="test-kicker">' + chapter.eyebrow + '</div>' +
+                '<h2 class="test-map-heading">' + chapter.name + '</h2>' +
+                '<p class="test-map-intro">' + chapter.intro + '</p>' +
+              '</div>' +
+              '<div class="test-map-filters">' +
+                '<label class="test-map-topbar__field"><span>Chapter</span>' + renderMapChapterSelect(chapter.id) + '</label>' +
+                '<label class="test-map-topbar__field"><span>Difficulty</span>' + renderMapLevelSelect(level.id) + '</label>' +
+              '</div>' +
             '</section>' +
-          '</div>' +
+            '<div class="test-grid test-grid--map">' +
+              '<section class="test-panel test-map-shell">' +
+                '<div class="test-map-list">' + units.map(renderMapNode).join("") + "</div>" +
+              "</section>" +
+            "</div>" +
+          "</div>" +
+          '<aside class="test-sidebar test-sidebar--map">' +
+            mapAsideCards +
+          "</aside>" +
         "</div>" +
-        '<aside class="test-sidebar test-sidebar--map">' +
-          renderSidebarCard("Progress Snapshot", '<div class="test-stat-grid">' + renderStat("Whole Chapter", snapshot.chapterUnits, "Finished units in this chapter, all difficulties added together.") + renderStat("Average Accuracy", snapshot.overallAccuracy, "Average accuracy across completed quizzes for the chapter and difficulty you are viewing (every full run counts).") + renderStatLink("Last working on", resumeText, resumeHref, "The map unit (chapter, unit, difficulty) where you last pressed Submit in a normal path quiz - not mistakes review or bookmark practice.", "test-stat--full-row") + "</div>", IC.snapshotTitle) +
-          renderSidebarCard("Recommended Review", renderLearnTopicList(recommended), IC.bookTitle) +
-          renderReviewCard(chapter.id, level.id) +
-          renderRewardsCard(totalScore) +
-        "</aside>" +
+        mapShellDock +
       "</div>";
 
     checkAndShowBadgeReveal();
@@ -1095,8 +1272,8 @@
 
     var genieTarget =
       originEl ||
-      document.querySelector('[data-rewards-card]') ||
-      document.querySelector('.reward-badges');
+      getMapRewardsAnchorEl() ||
+      document.querySelector(".reward-badges");
     var closeBtn = overlay.querySelector('.badge-reveal__close');
     if (closeBtn) {
       closeBtn.addEventListener('click', function () {
@@ -1178,6 +1355,7 @@
   }
 
   function renderQuizPage() {
+    stopQuizLiveTimer();
     var session = ensureQuizSession();
     if (!session) {
       quizDialog = null;
@@ -1226,9 +1404,12 @@
 
     applyChapterTheme(session.chapterId);
 
+    var overviewPanelHtml = renderQuizOverviewPanel(session);
+    var analysisPanelHtml = renderQuizAnalysisPanel(session, accuracy);
+
     rootEl.innerHTML =
       '<div class="quiz-shell quiz-shell--workspace">' +
-        renderQuizWorkspaceTopbar(session, chapter, level) +
+        renderQuizWorkspaceTopbar(session, chapter, level, overviewPanelHtml, analysisPanelHtml) +
         '<div class="quiz-workspace">' +
           '<div class="quiz-workspace__main">' +
             '<section class="quiz-workspace-card">' +
@@ -1251,12 +1432,13 @@
             '</div>' +
           '</div>' +
           '<aside class="quiz-workspace__sidebar">' +
-            renderQuizOverviewPanel(session) +
-            renderQuizAnalysisPanel(session, accuracy) +
-          '</aside>' +
+            overviewPanelHtml +
+            analysisPanelHtml +
+          "</aside>" +
         "</div>" +
       "</div>" +
       renderQuizDialog();
+    startQuizLiveTimerIfNeeded();
   }
 
   function escapeAttr(value) {
@@ -1279,7 +1461,7 @@
       body =
         "If you reveal a hint, you will earn <strong>fewer points</strong> on this question when you answer correctly. Continue?";
       confirmLabel = "Show hint";
-      cancelLabel = "Hmm...I’ll figure it out myself!";
+      cancelLabel = "I’ll figure it out myself!";
       cancelClass = "quiz-dialog__btn quiz-dialog__btn--primary";
       confirmClass = "quiz-dialog__btn quiz-dialog__btn--ghost";
     } else {
@@ -1309,7 +1491,7 @@
     );
   }
 
-  function renderQuizWorkspaceTopbar(session, chapter, level) {
+  function renderQuizWorkspaceTopbar(session, chapter, level, overviewPanelHtml, analysisPanelHtml) {
     var unitIndex = Math.max(0, (Number(session.unitId.split("-")[1]) || 1) - 1);
     var levelName = level && level.name ? level.name : "Level";
     var chapterName = chapter && chapter.name ? chapter.name : "Chapter";
@@ -1321,19 +1503,113 @@
 
     var backLabel = session.browseOnly ? "Back to summary" : "Leave quiz";
     var closeControl = session.browseOnly
-      ? '<a class="quiz-workspace-topbar__close" href="' + escapeAttr(closeHref) + '" aria-label="' + escapeAttr(backLabel) + '">' +
+      ? '<a class="quiz-workspace-topbar__close quiz-workspace-topbar__close--browse" href="' + escapeAttr(closeHref) + '" aria-label="' + escapeAttr(backLabel) + '">' +
           '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' +
           '<span>Back to Summary</span>' +
         "</a>"
       : '<button type="button" class="quiz-workspace-topbar__close" data-quiz-exit data-quiz-exit-href="' + escapeAttr(closeHref) + '" aria-label="' + escapeAttr(backLabel) + '">' +
           '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' +
         "</button>";
-    return '<section class="quiz-workspace-topbar">' +
+    var dockHtml =
+      overviewPanelHtml && analysisPanelHtml
+        ? '<div class="quiz-workspace-topbar__dock" data-quiz-workspace-dock>' +
+          '<div class="quiz-workspace-topbar__dock-icons">' +
+            '<div class="quiz-workspace-dock-slot quiz-workspace-dock-slot--overview">' +
+              '<button type="button" class="quiz-workspace-dock__tab" data-quiz-workspace-dock-tab="overview" aria-expanded="false" aria-controls="quiz-dock-panel-overview">' +
+              '<span class="quiz-workspace-dock__tab-ic" aria-hidden="true">' +
+              IC.overview +
+              "</span>" +
+              '<span class="visually-hidden">Question Overview</span>' +
+              "</button>" +
+              '<div id="quiz-dock-panel-overview" class="quiz-workspace-dock__sheet" data-quiz-workspace-dock-sheet="overview">' +
+              overviewPanelHtml +
+              "</div>" +
+            "</div>" +
+            '<div class="quiz-workspace-dock-slot quiz-workspace-dock-slot--analysis">' +
+              '<button type="button" class="quiz-workspace-dock__tab" data-quiz-workspace-dock-tab="analysis" aria-expanded="false" aria-controls="quiz-dock-panel-analysis">' +
+              '<span class="quiz-workspace-dock__tab-ic" aria-hidden="true">' +
+              IC.analysis +
+              "</span>" +
+              '<span class="visually-hidden">Live Analysis</span>' +
+              "</button>" +
+              '<div id="quiz-dock-panel-analysis" class="quiz-workspace-dock__sheet" data-quiz-workspace-dock-sheet="analysis">' +
+              analysisPanelHtml +
+              "</div>" +
+            "</div>" +
+          "</div>" +
+          "</div>"
+        : "";
+    return (
+      '<section class="quiz-workspace-topbar">' +
       '<div class="quiz-workspace-topbar__backblock">' +
-        closeControl +
-        '<div class="quiz-workspace-topbar__heading"><strong>' + title + '</strong><span>' + chapterName + '</span></div>' +
-      '</div>' +
-    '</section>';
+      closeControl +
+      '<div class="quiz-workspace-topbar__heading"><strong>' +
+      title +
+      "</strong><span>" +
+      chapterName +
+      "</span></div>" +
+      "</div>" +
+      dockHtml +
+      "</section>"
+    );
+  }
+
+  function syncQuizWorkspaceDock(dockRoot, panelId) {
+    if (!dockRoot) return;
+    var tabs = dockRoot.querySelectorAll("[data-quiz-workspace-dock-tab]");
+    var sheets = dockRoot.querySelectorAll("[data-quiz-workspace-dock-sheet]");
+    var i;
+    var tid;
+    var sid;
+    if (!panelId) {
+      dockRoot.classList.remove("is-open");
+      dockRoot.removeAttribute("data-active");
+      for (i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("is-active");
+        tabs[i].setAttribute("aria-expanded", "false");
+      }
+      for (i = 0; i < sheets.length; i++) {
+        sheets[i].classList.remove("is-dock-active");
+      }
+      return;
+    }
+    dockRoot.classList.add("is-open");
+    dockRoot.setAttribute("data-active", panelId);
+    for (i = 0; i < tabs.length; i++) {
+      tid = tabs[i].getAttribute("data-quiz-workspace-dock-tab");
+      tabs[i].classList.toggle("is-active", tid === panelId);
+      tabs[i].setAttribute("aria-expanded", tid === panelId ? "true" : "false");
+    }
+    for (i = 0; i < sheets.length; i++) {
+      sid = sheets[i].getAttribute("data-quiz-workspace-dock-sheet");
+      sheets[i].classList.toggle("is-dock-active", sid === panelId);
+    }
+  }
+
+  function renderQuizLiveTimeScoreRow(session) {
+    var timeText = formatElapsedDuration(getQuizElapsedMs(session));
+    return (
+      '<div class="quiz-sidecard__statgrid quiz-sidecard__statgrid--timescore">' +
+        '<div class="quiz-sidecard__stat is-time">' +
+          '<span class="quiz-sidecard__stat-ic quiz-sidecard__stat-ic--time" aria-hidden="true">' +
+          IC.timeClock +
+          "</span>" +
+          '<span class="quiz-sidecard__stat-name">Time</span>' +
+          '<strong class="quiz-sidecard__stat-val"><span data-quiz-live-time>' +
+          timeText +
+          "</span></strong>" +
+        "</div>" +
+        '<div class="quiz-sidecard__stat is-score">' +
+          '<span class="quiz-sidecard__stat-ic" aria-hidden="true">' +
+          IC.scoreStat +
+          "</span>" +
+          '<span class="quiz-sidecard__stat-name">Current Score</span>' +
+          '<strong class="quiz-sidecard__stat-val"><span data-quiz-live-score>' +
+          session.score +
+          "</span></strong>" +
+        "</div>" +
+      "</div>"
+    );
   }
 
   function renderQuizOverviewPanel(session) {
@@ -1379,11 +1655,7 @@
           '<strong class="quiz-sidecard__stat-val">' + Math.max(Object.keys(session.submitted).length - session.correctCount, 0) + '</strong>' +
         '</div>' +
       '</div>' +
-      '<div class="quiz-sidecard__scorebox">' +
-        '<span class="quiz-sidecard__stat-ic" aria-hidden="true">' + IC.scoreStat + '</span>' +
-        '<span class="quiz-sidecard__stat-name">Current Score</span>' +
-        '<strong class="quiz-sidecard__stat-val">' + session.score + '</strong>' +
-      '</div>' +
+      renderQuizLiveTimeScoreRow(session) +
     '</section>';
   }
 
@@ -1523,7 +1795,7 @@
               renderResultStat("Score", result.score + " / " + result.maxScore) +
               renderResultStat("Accuracy", Math.round(result.accuracy * 100) + "%") +
               renderResultStat("Hints used", result.hintsUsed) +
-              renderResultStat("Best streak", result.bestStreak) +
+              renderResultStat("Time spent", formatElapsedDuration(getResultElapsedMs(result))) +
             '</div>' +
           '</div>' +
           '<div class="results-insights">' +
@@ -1535,8 +1807,24 @@
           '</div>' +
         '</div>' +
         '<div class="results-actions-bar">' +
-          renderLinkButton("Retry This Quiz", buildUrl("test-quiz.html", { chapter: result.chapter, level: result.level, unit: result.unit, fresh: "1" }), "test-link-btn--primary") +
-          '<button type="button" class="test-link-btn test-link-btn--soft" data-share-community="' + result.id + '">Share Reflection to Community</button>' +
+          renderLinkButton(
+            '<span class="label-desktop">Retry This Quiz</span><span class="label-mobile">Retry</span>',
+            buildUrl("test-quiz.html", { chapter: result.chapter, level: result.level, unit: result.unit, fresh: "1" }),
+            "test-link-btn--primary results-action-retry"
+          ) +
+          renderLinkButton(
+            "Reflect",
+            buildUrl("test-quiz.html", { chapter: result.chapter, level: result.level, unit: result.unit, resultId: result.id, browse: "1" }),
+            "test-link-btn--primary results-action-summarize"
+          ) +
+          '<button type="button" class="test-link-btn test-link-btn--primary results-action-share" data-share-community="' + result.id + '">' +
+            '<span class="results-action-share__icon" aria-hidden="true">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">' +
+                '<path d="M16 11c1.93 0 3.5-1.57 3.5-3.5S17.93 4 16 4s-3.5 1.57-3.5 3.5S14.07 11 16 11zm-8 0c1.93 0 3.5-1.57 3.5-3.5S9.93 4 8 4 4.5 5.57 4.5 7.5 6.07 11 8 11zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm8 0c-.29 0-.62.02-.97.05 1.33.96 2.47 2.25 2.47 3.95v2h6v-2c0-2.66-5.33-4-7.5-4z"/>' +
+              "</svg>" +
+            "</span>" +
+            '<span class="label-desktop">Share to Community</span><span class="label-mobile">Share</span>' +
+          "</button>" +
         '</div>' +
       '</div>';
 
@@ -1572,8 +1860,8 @@
     var levelFilter = getMistakeLevelFilter();
     var statusFilter = getMistakeStatusFilter();
     var tab = getMistakeTab();
-    var page = getMistakePage();
-    var PER_PAGE = 9;
+    var rawMistakePage = getMistakePage();
+    var PER_PAGE = isTestMistakesNarrowViewport() ? 3 : 9;
 
     // Use the home theme colours, not the chapter override
     mainEl.style.removeProperty("--theme-stop-2");
@@ -1606,17 +1894,19 @@
     var bodyHtml;
     if (tab === "flagged") {
       var fTotalPages = Math.max(1, Math.ceil(allFlagged.length / PER_PAGE));
-      var fPageItems = allFlagged.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      var fPage = Math.min(rawMistakePage, fTotalPages);
+      var fPageItems = allFlagged.slice((fPage - 1) * PER_PAGE, fPage * PER_PAGE);
       bodyHtml =
         renderMistakesToolbar(chapterFilter, levelFilter, null) +
         (fPageItems.length
           ? '<div class="mistake-compact-grid">' + fPageItems.map(renderFlaggedCompactCard).join("") + '</div>'
           : '<div class="mistakes-empty mistakes-empty--stacked"><p class="mistakes-empty__line">No bookmarked questions yet.</p><p class="mistakes-empty__line">Use the <span class="mistakes-empty__ic" aria-hidden="true">' + bookmarkSvg + '</span> button during a quiz to save questions here.</p></div>') +
-        renderPagination(page, fTotalPages, chapterFilter, levelFilter, tab, "");
+        renderPagination(fPage, fTotalPages, chapterFilter, levelFilter, tab, "");
     } else {
       var visible = getVisibleMistakes(chapterFilter, levelFilter, statusFilter);
       var mTotalPages = Math.max(1, Math.ceil(visible.length / PER_PAGE));
-      var mPageItems = visible.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      var mPage = Math.min(rawMistakePage, mTotalPages);
+      var mPageItems = visible.slice((mPage - 1) * PER_PAGE, mPage * PER_PAGE);
       bodyHtml =
         renderMistakesToolbar(chapterFilter, levelFilter, statusFilter) +
         '<div class="mistakes-stats-row">' +
@@ -1629,7 +1919,7 @@
         (mPageItems.length
           ? '<div class="mistake-compact-grid">' + mPageItems.map(renderMistakeCompactCard).join("") + '</div>'
           : '<div class="mistakes-empty">No mistakes match the current filters.</div>') +
-        renderPagination(page, mTotalPages, chapterFilter, levelFilter, tab, statusFilter);
+        renderPagination(mPage, mTotalPages, chapterFilter, levelFilter, tab, statusFilter);
     }
 
     var mainBodyHtml;
@@ -1663,7 +1953,7 @@
             '<div class="mistakes-header__text">' +
               '<div class="test-kicker">Study Tools</div>' +
               '<h1 class="mistakes-title">Question Folder</h1>' +
-              '<p class="mistakes-subtitle">Review missed questions and bookmarked items.</p>' +
+              '<p class="mistakes-subtitle">Review missed and bookmarked questions.</p>' +
             '</div>' +
           '</div>' +
           tabsHtml +
@@ -1717,6 +2007,9 @@
     state.selection.level = levelId;
 
     if (params.fresh !== "1" && state.currentQuiz && state.currentQuiz.baseSignature === baseSignature) {
+      ensureQuizTimerState(state.currentQuiz);
+      normalizeQuizTimerForMode(state.currentQuiz);
+      if (shouldRunQuizTimer(state.currentQuiz)) resumeQuizTimer(state.currentQuiz);
       if (state.currentQuiz.browseOnly && params.browse === "1") {
         var qSync = parseInt(params.q, 10);
         if (!isNaN(qSync) && qSync >= 0 && qSync < state.currentQuiz.questions.length && qSync !== state.currentQuiz.currentIndex) {
@@ -1786,6 +2079,8 @@
       correctInit = typeof browseResult.correctCount === "number" ? browseResult.correctCount : 0;
     }
 
+    var runLiveTimer = !isBrowseReplay && mode !== "review";
+
     state.currentQuiz = {
       baseSignature: baseSignature,
       chapterId: chapterId,
@@ -1801,9 +2096,12 @@
       correctCount: isBrowseReplay && browseResult ? correctInit : 0,
       currentStreak: 0,
       bestStreak: isBrowseReplay && browseResult && typeof browseResult.bestStreak === "number" ? browseResult.bestStreak : 0,
+      elapsedMs: isBrowseReplay && browseResult ? getResultElapsedMs(browseResult) : 0,
+      timerActiveSince: runLiveTimer ? Date.now() : null,
       browseOnly: !!(isBrowseReplay && browseResult),
       reviewResultId: isBrowseReplay && browseResult ? browseResult.id : ""
     };
+    normalizeQuizTimerForMode(state.currentQuiz);
     saveState();
     if (state.currentQuiz && state.currentQuiz.browseOnly) {
       syncBrowseReplayQueryUrl(state.currentQuiz);
@@ -1982,6 +2280,7 @@
   function finalizeQuiz() {
     var quiz = state.currentQuiz;
     if (!quiz || quiz.browseOnly) return;
+    pauseQuizTimer(quiz);
     var result = buildResult(quiz);
     state.history.unshift(result);
     state.history = state.history.slice(0, 20);
@@ -2031,6 +2330,7 @@
       starsEarned: Math.max(1, Math.round(accuracy * 3)),
       badgeAwarded: null,
       bestStreak: quiz.bestStreak,
+      elapsedMs: getQuizElapsedMs(quiz),
       questionResults: quiz.questions.map(function (q) {
         var sub = quiz.submitted[q.id] || null;
         return { id: q.id, isCorrect: sub ? sub.isCorrect : null, selected: sub ? sub.selected : null, questionSnapshot: clone(q) };
@@ -2542,19 +2842,21 @@
     var explanationOpen = !!mistake.showExplanation;
     return '<article class="mistake-card mistake-card--review"><div class="mistake-item__header"><div><div class="test-inline-meta"><span class="mistake-tag">' + getLevel(mistake.level).name + '</span><span class="mistake-tag">' + mistake.topic + '</span><span class="mistake-tag">' + (mistake.mastered ? "Reviewed" : "Pending") + '</span></div><h3 class="mistake-card__title">' + mistake.prompt + '</h3></div></div><div class="mistake-answer-panels"><div class="mistake-answer-panel is-wrong"><span class="mistake-answer-panel__label">Your answer</span><strong>' + getMistakeUserAnswer(mistake) + '</strong></div><div class="mistake-answer-panel is-correct"><span class="mistake-answer-panel__label">Correct answer</span><strong>' + getMistakeCorrectAnswer(mistake) + '</strong></div></div>' + (explanationOpen ? '<div class="mistake-explanation"><strong>Explanation:</strong> ' + mistake.correctConcept + '<br /><span class="test-card-copy">' + mistake.mistakeReason + '</span></div>' : "") + '<div class="mistake-item__footer"><div class="mistake-item__meta"><span>Attempts: ' + (mistake.attemptCount || 1) + '</span><span>Last attempt: ' + formatDate(mistake.lastWrongAt) + '</span></div><div class="mistake-item__controls"><button type="button" class="test-inline-btn" data-toggle-explanation="' + mistake.id + '">' + (explanationOpen ? "Hide explanation" : "View explanation") + '</button><button type="button" class="test-action test-action--primary" data-mark-mastered="' + mistake.id + '">' + (mistake.mastered ? "Mark as pending" : "Mark reviewed") + '</button></div></div></article>';
   }
-  function renderSidebarCard(title, inner, iconHtml) {
+  function renderSidebarCard(title, inner, iconHtml, dockPanelId) {
     var head = iconHtml
       ? '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + iconHtml + '</span><span class="test-card-title__text">' + title + "</span></h3>"
       : '<h3 class="test-card-title">' + title + "</h3>";
-    return "<section class=\"test-sidebar-card\">" + head + inner + "</section>";
+    var dockAttr = dockPanelId ? ' data-map-dock-panel="' + dockPanelId + '" id="map-dock-panel-' + dockPanelId + '"' : "";
+    return "<section class=\"test-sidebar-card\"" + dockAttr + ">" + head + inner + "</section>";
   }
   function renderSidebarLinkCard(title, inner, href) { return '<a class="test-sidebar-card test-sidebar-card--link" href="' + href + '"><h3 class="test-card-title">' + title + "</h3>" + inner + "</a>"; }
-  function renderReviewCard(chapterId, levelId) {
+  function renderReviewCard(chapterId, levelId, dockPanelId) {
     var mistakesUrl = buildUrl("test-mistakes.html", {});
     var savedUrl = buildUrl("test-mistakes.html", { tab: "flagged" });
     var mistakeSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 13.59L14.59 17 12 14.41 9.41 17 8 15.59l2.59-2.59L8 10.41 9.41 9 12 11.59 14.59 9 16 10.41l-2.59 2.59L16 15.59z"/></svg>';
     var bookmarkSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-    return '<section class="test-sidebar-card">' +
+    var dockAttr = dockPanelId ? ' data-map-dock-panel="' + dockPanelId + '" id="map-dock-panel-' + dockPanelId + '"' : "";
+    return '<section class="test-sidebar-card"' + dockAttr + ">" +
       '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + IC.folderTitle + '</span><span class="test-card-title__text">Question Folder</span></h3>' +
       '<div class="review-btn-row">' +
         '<a class="review-btn review-btn--mistakes" href="' + mistakesUrl + '">' + mistakeSvg + '<span>Mistakes</span></a>' +
@@ -2585,11 +2887,12 @@
     );
   }
 
-  function renderRewardsCard(totalScore) {
+  function renderRewardsCard(totalScore, dockPanelId) {
     var starSvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/></svg>';
     var flameSvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8c0-5.39-2.59-10.2-6.5-13.33zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>';
     var trophySvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>';
-    return '<section class="test-sidebar-card" data-rewards-card>' +
+    var dockAttr = dockPanelId ? ' data-map-dock-panel="' + dockPanelId + '" id="map-dock-panel-' + dockPanelId + '"' : "";
+    return '<section class="test-sidebar-card" data-rewards-card' + dockAttr + ">" +
       '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + IC.rewardsTitle + '</span><span class="test-card-title__text">Rewards</span></h3>' +
       '<div class="reward-grid">' +
         '<div class="reward-item">' +
@@ -2757,6 +3060,9 @@
   /* ── Question Folder page renderers ── */
   function getMistakeTab() { return getParams().tab === "flagged" ? "flagged" : "mistakes"; }
   function getMistakePage() { return Math.max(1, parseInt(getParams().page, 10) || 1); }
+  function isTestMistakesNarrowViewport() {
+    return typeof window.matchMedia !== "undefined" && window.matchMedia("(max-width: 60rem)").matches;
+  }
 
   function renderMistakesToolbar(chapterFilter, levelFilter, statusFilter) {
     return '<div class="mistakes-toolbar">' +
@@ -2861,12 +3167,12 @@
     var type = params.solo.slice(0, sep);
     var id = params.solo.slice(sep + 1);
     if ((type === "mistake" || type === "flagged") && id) {
-      soloState = { type: type, itemId: id, draft: null, submitted: false, isCorrect: false };
+      soloState = { type: type, itemId: id, draft: null, submitted: false, isCorrect: false, filterSheet: false };
     }
   }
 
   function enterSoloPractice(type, itemId) {
-    soloState = { type: type, itemId: itemId, draft: null, submitted: false, isCorrect: false };
+    soloState = { type: type, itemId: itemId, draft: null, submitted: false, isCorrect: false, filterSheet: false };
     var params = getParams();
     var next = { chapter: params.chapter || "", level: params.level || "", tab: params.tab || "", status: params.status || "", solo: type + ":" + itemId };
     if (window.history && window.history.replaceState) window.history.replaceState(null, "", buildUrl("test-mistakes.html", next));
@@ -2924,6 +3230,7 @@
     var correct = evaluate(question, soloState.draft);
     soloState.submitted = true;
     soloState.isCorrect = correct;
+    soloState.filterSheet = false;
     if (correct) playSfx(SFX_CORRECT);
     else playSfx(SFX_WRONG);
     var now = new Date().toISOString();
@@ -2970,7 +3277,7 @@
     });
     if (!inList && listItems.length > 0) {
       var firstId = tab === "flagged" ? listItems[0].questionId : listItems[0].id;
-      soloState = { type: type, itemId: firstId, draft: null, submitted: false, isCorrect: false };
+      soloState = { type: type, itemId: firstId, draft: null, submitted: false, isCorrect: false, filterSheet: false };
       itemId = firstId;
       item = getSoloItem(type, itemId);
     }
@@ -2981,10 +3288,28 @@
         '</div>'
       : renderSoloLeft(item, type);
 
+    var narrowSolo = isTestMistakesNarrowViewport();
+    if (!narrowSolo && soloState.filterSheet) soloState.filterSheet = false;
+
+    var listHtml = renderSoloRight(itemId, tab, listItems, type);
+    if (narrowSolo) {
+      var filterOpen = !!soloState.filterSheet;
+      var menuBtn =
+        '<button type="button" class="solo-filter-menu-btn" data-solo-toggle-filter aria-expanded="' +
+        (filterOpen ? "true" : "false") +
+        '" aria-label="' +
+        (filterOpen ? "Back to question" : "Questions in this filter") +
+        '">' +
+        '<svg class="solo-filter-menu-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14"/></svg>' +
+        "</button>";
+      var mainInner = '<div class="solo-narrow-main-wrap">' + menuBtn + (filterOpen ? listHtml : emptyMain) + "</div>";
+      return '<div class="solo-workbench solo-workbench--narrow">' + '<div class="solo-workbench__main">' + mainInner + "</div>" + "</div>";
+    }
+
     return '<div class="solo-workbench">' +
       '<div class="solo-workbench__main">' + emptyMain + '</div>' +
-      '<aside class="solo-workbench__sidebar">' + renderSoloRight(itemId, tab, listItems, type) + '</aside>' +
-    '</div>';
+      '<aside class="solo-workbench__sidebar">' + listHtml + "</aside>" +
+    "</div>";
   }
 
   function renderSoloLeft(item, type) {
@@ -3174,6 +3499,101 @@
   function formatDate(value) { try { return value ? new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "Not yet"; } catch (e) { return value; } }
   function unique(items) { return items.filter(function (item, index) { return item && items.indexOf(item) === index; }); }
   function formatDateTime(value) { try { if (!value) return ""; var d = new Date(value); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) + " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); } catch (e) { return value || ""; } }
+  function shouldRunQuizTimer(quiz) {
+    return !!(quiz && !quiz.browseOnly && quiz.mode !== "review");
+  }
+  function normalizeQuizTimerForMode(quiz) {
+    if (!quiz) return;
+    ensureQuizTimerState(quiz);
+    if (!shouldRunQuizTimer(quiz)) quiz.timerActiveSince = null;
+  }
+  function stopQuizLiveTimer() {
+    if (quizLiveTimerId) {
+      clearInterval(quizLiveTimerId);
+      quizLiveTimerId = null;
+    }
+  }
+  function syncQuizLiveDisplays() {
+    var q = state.currentQuiz;
+    if (!q || !rootEl || mainEl.getAttribute("data-test-page") !== "quiz") return;
+    var timeText = formatElapsedDuration(getQuizElapsedMs(q));
+    var scoreText = String(q.score);
+    var ti;
+    var timeNodes = rootEl.querySelectorAll("[data-quiz-live-time]");
+    for (ti = 0; ti < timeNodes.length; ti++) timeNodes[ti].textContent = timeText;
+    var si;
+    var scoreNodes = rootEl.querySelectorAll("[data-quiz-live-score]");
+    for (si = 0; si < scoreNodes.length; si++) scoreNodes[si].textContent = scoreText;
+  }
+  function startQuizLiveTimerIfNeeded() {
+    stopQuizLiveTimer();
+    if (!rootEl || mainEl.getAttribute("data-test-page") !== "quiz") return;
+    var q = state.currentQuiz;
+    syncQuizLiveDisplays();
+    if (!shouldRunQuizTimer(q)) return;
+    quizLiveTimerId = setInterval(syncQuizLiveDisplays, 500);
+  }
+  function ensureQuizTimerState(quiz) {
+    if (!quiz) return;
+    if (typeof quiz.elapsedMs !== "number" || quiz.elapsedMs < 0) quiz.elapsedMs = 0;
+    if (!Object.prototype.hasOwnProperty.call(quiz, "timerActiveSince")) quiz.timerActiveSince = null;
+  }
+  function getQuizElapsedMs(quiz) {
+    if (!quiz) return 0;
+    ensureQuizTimerState(quiz);
+    if (!shouldRunQuizTimer(quiz)) return Math.max(0, Math.round(quiz.elapsedMs));
+    if (!quiz.timerActiveSince) return Math.max(0, Math.round(quiz.elapsedMs));
+    return Math.max(0, Math.round(quiz.elapsedMs + Math.max(0, Date.now() - Number(quiz.timerActiveSince))));
+  }
+  function pauseQuizTimer(quiz) {
+    if (!quiz || !shouldRunQuizTimer(quiz)) return;
+    ensureQuizTimerState(quiz);
+    if (!quiz.timerActiveSince) return;
+    quiz.elapsedMs = getQuizElapsedMs(quiz);
+    quiz.timerActiveSince = null;
+    saveState();
+  }
+  function resumeQuizTimer(quiz) {
+    if (!quiz || !shouldRunQuizTimer(quiz)) return;
+    ensureQuizTimerState(quiz);
+    if (quiz.timerActiveSince) return;
+    quiz.timerActiveSince = Date.now();
+    saveState();
+  }
+  function pauseActiveQuizTimer() {
+    if (!state || !state.currentQuiz) return;
+    pauseQuizTimer(state.currentQuiz);
+  }
+  function getResultElapsedMs(result) {
+    return result && typeof result.elapsedMs === "number" && result.elapsedMs > 0 ? result.elapsedMs : 0;
+  }
+  function formatElapsedDuration(ms) {
+    var totalSeconds = Math.max(0, Math.floor(Number(ms || 0) / 1000));
+    if (totalSeconds >= 3600) {
+      var hours = Math.floor(totalSeconds / 3600);
+      var minutes = Math.floor((totalSeconds % 3600) / 60);
+      return String(hours) + "h" + String(minutes).padStart(2, "0") + "min";
+    }
+    var mins = Math.floor(totalSeconds / 60);
+    var secs = totalSeconds % 60;
+    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+  }
+  function handleDocumentVisibilityChange() {
+    var quiz = state.currentQuiz;
+    if (!quiz || !shouldRunQuizTimer(quiz)) return;
+    if (document.hidden) {
+      pauseQuizTimer(quiz);
+      stopQuizLiveTimer();
+      syncQuizLiveDisplays();
+      return;
+    }
+    if (mainEl.getAttribute("data-test-page") === "quiz") {
+      resumeQuizTimer(quiz);
+      syncQuizLiveDisplays();
+      startQuizLiveTimerIfNeeded();
+    }
+  }
+  function handlePageHide() { pauseActiveQuizTimer(); }
   function buildBadgeName(chapterId) {
     return chapterId === "basics" ? "Contrast Keeper"
       : chapterId === "models" ? "Output Strategist"
