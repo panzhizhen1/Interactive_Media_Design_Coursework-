@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   "use strict";
 
   var STORAGE_KEY = "clw_test_module_state_v2";
@@ -6,46 +6,154 @@
   var LEVEL_POINTS = { easy: 4, medium: 6, hard: 8 };
   var SFX_BASE = "assets/sound%20effects/";
   var SFX_STAR = SFX_BASE + "star.mp3";
-  var SFX_BADGE = SFX_BASE + "badge.mp3";
+  var SFX_CONFETTI = SFX_BASE + "confetti.mp3";
+  var SFX_TADA = SFX_BASE + "tada.mp3";
   var SFX_HINT = SFX_BASE + "hint.mp3";
   var SFX_CORRECT = SFX_BASE + "correct_answer.mp3";
   var SFX_WRONG = SFX_BASE + "wrong_answer.mp3";
+  var EXTERNAL_QUESTION_BANK = window.CLWTestQuestionBank || null;
+  var LEARN_SECTION_MAP = {
+    basics: {
+      chapterTopics: [
+        { label: "Overview", href: "learning.html#overview" },
+        { label: "Color Models", href: "learning.html#basic-color-models" },
+        { label: "Color Spaces", href: "learning.html#basic-color-spaces" },
+        { label: "Color Attributes & Perception", href: "learning.html#basic-color-attributes" }
+      ],
+      unitTopics: {
+        "unit-1": [{ label: "Overview", href: "learning.html#overview" }],
+        "unit-2": [{ label: "Color Models", href: "learning.html#basic-color-models" }],
+        "unit-3": [{ label: "Color Spaces", href: "learning.html#basic-color-spaces" }],
+        "unit-4": [{ label: "Color Attributes & Perception", href: "learning.html#basic-color-attributes" }]
+      }
+    },
+    models: {
+      chapterTopics: [
+        { label: "Bit Depth", href: "learning.html#encoding-bit-depth" },
+        { label: "Color Profiles", href: "learning.html#encoding-color-profiles" },
+        { label: "Gamma Correction", href: "learning.html#encoding-gamma-correction" }
+      ],
+      unitTopics: {
+        "unit-1": [{ label: "Bit Depth", href: "learning.html#encoding-bit-depth" }],
+        "unit-2": [{ label: "Color Profiles", href: "learning.html#encoding-color-profiles" }],
+        "unit-3": [{ label: "Gamma Correction", href: "learning.html#encoding-gamma-correction" }],
+        "unit-4": [
+          { label: "Bit Depth", href: "learning.html#encoding-bit-depth" },
+          { label: "Color Profiles", href: "learning.html#encoding-color-profiles" },
+          { label: "Gamma Correction", href: "learning.html#encoding-gamma-correction" }
+        ]
+      }
+    },
+    meaning: {
+      chapterTopics: [
+        { label: "HDR Color", href: "learning.html#advance-hdr-color" },
+        { label: "Wide Color Gamut", href: "learning.html#advance-wide-gamut" }
+      ],
+      unitTopics: {
+        "unit-1": [{ label: "HDR Color", href: "learning.html#advance-hdr-color" }],
+        "unit-2": [{ label: "HDR Color", href: "learning.html#advance-hdr-color" }],
+        "unit-3": [{ label: "Wide Color Gamut", href: "learning.html#advance-wide-gamut" }],
+        "unit-4": [
+          { label: "HDR Color", href: "learning.html#advance-hdr-color" },
+          { label: "Wide Color Gamut", href: "learning.html#advance-wide-gamut" }
+        ]
+      }
+    },
+    workflow: {
+      chapterTopics: [
+        { label: "Color Management", href: "learning.html#advance-color-management" }
+      ],
+      unitTopics: {
+        "unit-1": [{ label: "Color Management", href: "learning.html#advance-color-management" }],
+        "unit-2": [{ label: "Color Management", href: "learning.html#advance-color-management" }],
+        "unit-3": [{ label: "Color Management", href: "learning.html#advance-color-management" }],
+        "unit-4": [{ label: "Color Management", href: "learning.html#advance-color-management" }]
+      }
+    },
+    practice: {
+      chapterTopics: [
+        { label: "Color Picker", href: "learning.html#interaction-color-picker" },
+        { label: "Visual Example", href: "learning.html#interaction-visual-example" },
+        { label: "Interactive Tools", href: "learning.html#interaction-interactive-tools" }
+      ],
+      unitTopics: {
+        "unit-1": [{ label: "Color Picker", href: "learning.html#interaction-color-picker" }],
+        "unit-2": [{ label: "Visual Example", href: "learning.html#interaction-visual-example" }],
+        "unit-3": [{ label: "Interactive Tools", href: "learning.html#interaction-interactive-tools" }],
+        "unit-4": [
+          { label: "Color Picker", href: "learning.html#interaction-color-picker" },
+          { label: "Visual Example", href: "learning.html#interaction-visual-example" },
+          { label: "Interactive Tools", href: "learning.html#interaction-interactive-tools" }
+        ]
+      }
+    }
+  };
+  var NO_STRENGTH_MESSAGE = "No clear strength yet. Revisit the linked Learn topic before trying this quiz again.";
+  function getNoWeaknessMessage(levelId) {
+    return levelId === "hard"
+      ? "No clear weak area yet. You have this down really well!"
+      : "No clear weak area yet. Try the next difficulty and see what happens!";
+  }
 
   var CHAPTERS = [
     {
       id: "basics",
-      name: "Color Basics",
+      name: "Foundations",
       eyebrow: "Chapter 1",
-      intro: "Build confidence with color families, contrast, and readable hierarchy.",
+      intro: "Follow the learn page from overview into models, spaces, and perception.",
       colors: { primary: "#f97316", secondary: "#fb923c", border: "#fed7aa" },
       focuses: {
-        easy: ["Primary and secondary colors", "Warm and cool groups", "Contrast spotting", "Repair weak palettes"],
-        medium: ["Analogous and complementary choices", "Value balance in layouts", "Saturation for hierarchy", "Repair weak contrast", "Applied palette decisions"],
-        hard: ["Audience-first palette planning", "Accessibility trade-offs", "Harmony versus emphasis", "Recovering confusing layouts", "Final critique round"]
+        easy: ["Overview & Core Concepts", "Color Models", "Color Spaces", "Attributes & Perception"],
+        medium: ["Overview & Core Concepts", "Color Models", "Color Spaces", "Attributes & Perception"],
+        hard: ["Overview & Core Concepts", "Color Models", "Color Spaces", "Attributes & Perception"]
       }
     },
     {
       id: "models",
-      name: "Color Models",
+      name: "Encoding Fundamentals",
       eyebrow: "Chapter 2",
-      intro: "Practice RGB, CMYK, and HSV choices for different devices and outputs.",
+      intro: "Follow the learn page into bit depth, ICC profiles, gamma, and practical encoding choices.",
       colors: { primary: "#2563eb", secondary: "#38bdf8", border: "#bfdbfe" },
       focuses: {
-        easy: ["RGB on screens", "CMYK for print", "HSV basics", "Review additive and subtractive color"],
-        medium: ["Channel mixing decisions", "Device output matching", "Converting between spaces", "Debugging wrong exports", "Applied model selection"],
-        hard: ["Cross-media production planning", "Color management pitfalls", "Interpreting channel data", "Recovering from conversion issues", "Final system critique"]
+        easy: ["Bit Depth Basics", "ICC Profiles", "Gamma Correction", "Encoding Decisions"],
+        medium: ["Bit Depth Basics", "ICC Profiles", "Gamma Correction", "Encoding Decisions"],
+        hard: ["Bit Depth Basics", "ICC Profiles", "Gamma Correction", "Encoding Decisions"]
       }
     },
     {
       id: "meaning",
-      name: "Color Meaning",
+      name: "Advanced Display Technologies",
       eyebrow: "Chapter 3",
-      intro: "Use color responsibly across mood, culture, accessibility, and social context.",
+      intro: "Move from core encoding concepts into HDR, wider gamut, and display-oriented production choices.",
       colors: { primary: "#db2777", secondary: "#f472b6", border: "#fbcfe8" },
       focuses: {
-        easy: ["Mood and emotion cues", "Inclusive warning colors", "Accessible call-to-action choices", "Review audience fit"],
-        medium: ["Cross-cultural assumptions", "Tone for different audiences", "Ethical feedback visuals", "Repair mixed signals", "Applied communication choices"],
-        hard: ["Conflicting audience expectations", "Accessible persuasion design", "Risk of over-coded meaning", "Recovering biased visual signals", "Final critique round"]
+        easy: ["HDR Fundamentals", "HDR Standards", "Wide Color Gamut", "HDR & WCG in Practice"],
+        medium: ["HDR Fundamentals", "HDR Standards", "Wide Color Gamut", "HDR & WCG in Practice"],
+        hard: ["HDR Fundamentals", "HDR Standards", "Wide Color Gamut", "HDR & WCG in Practice"]
+      }
+    },
+    {
+      id: "workflow",
+      name: "Color Management Workflow",
+      eyebrow: "Chapter 4",
+      intro: "Connect profiles, rendering intents, and practical review steps into one controlled workflow.",
+      colors: { primary: "#0f9f69", secondary: "#34d399", border: "#a7f3d0" },
+      focuses: {
+        easy: ["Introduction to Color Management", "CMS Architecture", "Rendering Intents", "Practical Workflow"],
+        medium: ["Introduction to Color Management", "CMS Architecture", "Rendering Intents", "Practical Workflow"],
+        hard: ["Introduction to Color Management", "CMS Architecture", "Rendering Intents", "Practical Workflow"]
+      }
+    },
+    {
+      id: "practice",
+      name: "Tool Use & Applied Practice",
+      eyebrow: "Chapter 5",
+      intro: "Use pickers, examples, and interactive tools to make practical colour decisions with more confidence.",
+      colors: { primary: "#7c3aed", secondary: "#c084fc", border: "#ddd6fe" },
+      focuses: {
+        easy: ["Color Picker", "Visual Examples", "Interactive Tools", "Applied Decision Making"],
+        medium: ["Color Picker", "Visual Examples", "Interactive Tools", "Applied Decision Making"],
+        hard: ["Color Picker", "Visual Examples", "Interactive Tools", "Applied Decision Making"]
       }
     }
   ];
@@ -67,15 +175,13 @@
       { id: "unit-1", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-2", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-3", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-5", kind: "question", label: "", short: "", taskLabel: "Quiz" }
+      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" }
     ],
     hard: [
       { id: "unit-1", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-2", kind: "question", label: "", short: "", taskLabel: "Quiz" },
       { id: "unit-3", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" },
-      { id: "unit-5", kind: "question", label: "", short: "", taskLabel: "Quiz" }
+      { id: "unit-4", kind: "question", label: "", short: "", taskLabel: "Quiz" }
     ]
   };
 
@@ -84,8 +190,12 @@
   var state = loadState();
   var mainEl = document.querySelector("[data-test-page]");
   var rootEl = document.querySelector("[data-test-root]");
+  /** Transient UI while quiz page is active: { kind: "hint" } | { kind: "exit", exitHref: string } */
+  var quizDialog = null;
+  /** setInterval id for live Time / Score labels on the quiz page */
+  var quizLiveTimerId = null;
   /* Solo-practice workbench state (transient, also reflected in URL ?solo=type:id) */
-  var soloState = null; // { type, itemId, draft, submitted, isCorrect }
+  var soloState = null; // { type, itemId, draft, submitted, isCorrect, filterSheet? }
   var IC = {
     prev: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>',
     next: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>',
@@ -94,23 +204,22 @@
     finish: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>',
     correct: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
     wrong: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>',
+    correctMini: '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 8.2l2.6 2.6 6-6"/></svg>',
+    wrongMini: '<svg viewBox="0 0 16 16" width="12" height="10" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><path d="M3.2 3.2l9.6 9.6M12.8 3.2L3.2 12.8"/></svg>',
     overview: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>',
     analysis: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>',
     flag: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>',
     flagFilled: '<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>',
-    /* ── Title-row icons (flat, no backdrop circle) ── */
     snapshotTitle: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="13" width="4" height="8" rx="1.5" fill="#818cf8"/><rect x="10" y="8" width="4" height="13" rx="1.5" fill="#6366f1"/><rect x="17" y="3" width="4" height="18" rx="1.5" fill="#4338ca"/></svg>',
     folderTitle: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="#fb923c" d="M20 6h-8l-2-2H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>',
     rewardsTitle: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8.5" r="6" fill="#fbbf24"/><circle cx="12" cy="8.5" r="3.5" fill="#d97706"/><circle cx="12" cy="8.5" r="1.8" fill="#fef9c3"/><path fill="#f59e0b" d="M8.5 14.5l-2 6.5 5.5-3 5.5 3-2-6.5"/></svg>',
     bookTitle: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#2563eb" d="M4 6.5A1.5 1.5 0 015.5 5H11v14l-3.5-2L4 19V6.5z"/><path fill="#1e40af" d="M20 6.5A1.5 1.5 0 0018.5 5H13v14l3.5-2 3.5 2V6.5z"/><path stroke="#bfdbfe" stroke-width="1.2" stroke-linecap="round" fill="none" d="M6.5 8.5h3.5M6.5 11h3.5M6.5 13.5h2"/><path stroke="#93c5fd" stroke-width="1.2" stroke-linecap="round" fill="none" d="M13.5 8.5h3.5M13.5 11h3.5M13.5 13.5h2"/></svg>',
-    /* Strength — barbell (rect-only SVG, renders everywhere) */
     strengthTitle: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none"><rect x="1.25" y="7.75" width="4.25" height="8.5" rx="1.1" fill="#c2410c"/><rect x="5.25" y="6.25" width="3.2" height="11.5" rx="0.65" fill="#ea580c"/><rect x="8.35" y="10.35" width="7.3" height="3.3" rx="1.65" fill="#7c2d12"/><rect x="15.55" y="6.25" width="3.2" height="11.5" rx="0.65" fill="#ea580c"/><rect x="18.5" y="7.75" width="4.25" height="8.5" rx="1.1" fill="#c2410c"/><rect x="4.1" y="11.35" width="15.8" height="1.3" rx="0.5" fill="#fb923c"/></svg>',
-    /* Weak Areas — compact bullseye */
     weakTitle: '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#14b8a6" stroke-width="1.9"/><circle cx="12" cy="12" r="4.8" fill="none" stroke="#14b8a6" stroke-width="1.9"/><circle cx="12" cy="12" r="2.1" fill="#14b8a6"/></svg>',
-    /* Live-analysis stats: solid coloured disc + white symbol — matches Mistakes-button grammar */
     correctStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#16a34a"/><path fill="none" stroke="#fff" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round" d="M7.2 12.5l2.9 2.9 6.7-6.7"/></svg>',
     wrongStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#dc2626"/><path fill="none" stroke="#fff" stroke-width="2.35" stroke-linecap="round" d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8"/></svg>',
-    scoreStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="#6d28d9"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>'
+    scoreStat: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="#6d28d9"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>',
+    timeClock: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>'
   };
 
   if (!mainEl || !rootEl) return;
@@ -119,6 +228,7 @@
   applyChapterTheme(resolveChapterId());
   initSoloState();
   bindEvents();
+  bindAuthStateSync();
   renderPage();
 
   function buildQuestionData() {
@@ -353,139 +463,48 @@
     return { type: "image", src: "", alt: alt, eyebrow: eyebrow || "Preview pending", background: background || "#e2e8f0" };
   }
 
-  /** Per-question mock answers for default seed results (browse / summary replay). */
-  function mockQuestionResultsForSeed(chapterId, levelId, unitId, rows) {
-    var qs = getUnitQuestions(chapterId, levelId, unitId);
-    return qs.map(function (q, i) {
-      var row = rows[i];
-      return { id: q.id, isCorrect: row.ok, selected: row.sel, questionSnapshot: clone(q) };
-    });
-  }
-
   function createDefaultState() {
-    var baseResult = {
-      id: "result-seed-models-easy",
-      chapter: "models",
-      chapterName: "Color Models",
-      level: "easy",
-      levelName: "Easy",
-      unit: "unit-2",
-      mode: "path",
-      score: 26,
-      maxScore: 40,
-      accuracy: 0.75,
-      correctCount: 3,
-      totalQuestions: 4,
-      hintsUsed: 1,
-      starsEarned: 2,
-      badgeAwarded: "Model Navigator",
-      bestStreak: 2,
-      strengths: ["RGB for digital displays", "Matching model to output"],
-      weakAreas: ["HSV brightness control"],
-      reviewTopics: ["HSV brightness control", "Additive color sequence"],
-      trendText: "Up 12% from the previous Color Models attempt.",
-      timestamp: "2026-04-07T18:20:00.000Z",
-      questionResults: mockQuestionResultsForSeed("models", "easy", "unit-2", [
-        { ok: true, sel: "True" },
-        { ok: true, sel: "a" },
-        { ok: false, sel: ["No light", "Two channels active", "One channel active", "All three channels active"] },
-        { ok: true, sel: "Value" }
-      ])
-    };
-
-    return {
+    var defaultState = {
       version: 2,
-      selection: { chapter: "models", level: "easy" },
+      selection: { chapter: "basics", level: "easy" },
       ui: {},
       progress: {
         basics: {
-          easy: makeProgress(["unit-1"], "unit-2", 18, 0.5, "2026-04-02T13:30:00.000Z"),
+          easy: makeProgress([], "unit-1", 0, 0, ""),
           medium: makeProgress([], "unit-1", 0, 0, ""),
           hard: makeProgress([], "unit-1", 0, 0, "")
         },
         models: {
-          easy: makeProgress(["unit-1"], "unit-2", 26, 0.75, "2026-04-07T18:20:00.000Z"),
-          medium: makeProgress(["unit-1"], "unit-2", 34, 0.64, "2026-04-03T10:10:00.000Z"),
+          easy: makeProgress([], "unit-1", 0, 0, ""),
+          medium: makeProgress([], "unit-1", 0, 0, ""),
           hard: makeProgress([], "unit-1", 0, 0, "")
         },
         meaning: {
-          easy: makeProgress(["unit-1"], "unit-2", 22, 0.75, "2026-04-04T09:00:00.000Z"),
+          easy: makeProgress([], "unit-1", 0, 0, ""),
+          medium: makeProgress([], "unit-1", 0, 0, ""),
+          hard: makeProgress([], "unit-1", 0, 0, "")
+        },
+        workflow: {
+          easy: makeProgress([], "unit-1", 0, 0, ""),
+          medium: makeProgress([], "unit-1", 0, 0, ""),
+          hard: makeProgress([], "unit-1", 0, 0, "")
+        },
+        practice: {
+          easy: makeProgress([], "unit-1", 0, 0, ""),
           medium: makeProgress([], "unit-1", 0, 0, ""),
           hard: makeProgress([], "unit-1", 0, 0, "")
         }
       },
-      history: [
-        baseResult,
-        {
-          id: "result-seed-meaning-easy",
-          chapter: "meaning",
-          chapterName: "Color Meaning",
-          level: "easy",
-          levelName: "Easy",
-          unit: "unit-1",
-          mode: "path",
-          score: 22,
-          maxScore: 40,
-          accuracy: 0.75,
-          correctCount: 3,
-          totalQuestions: 4,
-          hintsUsed: 0,
-          starsEarned: 2,
-          badgeAwarded: null,
-          bestStreak: 3,
-          strengths: ["Inclusive warning design", "Mood-setting with color"],
-          weakAreas: ["Checking color meaning across audiences"],
-          reviewTopics: ["Checking color meaning across audiences"],
-          trendText: "Steady performance compared with the prior easy attempt.",
-          timestamp: "2026-04-04T09:00:00.000Z",
-          questionResults: mockQuestionResultsForSeed("meaning", "easy", "unit-1", [
-            { ok: true, sel: "Soft blues and greens" },
-            { ok: true, sel: "True" },
-            { ok: true, sel: "a" },
-            { ok: false, sel: ["High-alert emergency tone", "Clear and calm", "Warm and encouraging", "Focused and urgent"] }
-          ])
-        },
-        {
-          id: "result-seed-basics-easy",
-          chapter: "basics",
-          chapterName: "Color Basics",
-          level: "easy",
-          levelName: "Easy",
-          unit: "unit-1",
-          mode: "path",
-          score: 8,
-          maxScore: 16,
-          accuracy: 0.5,
-          correctCount: 2,
-          totalQuestions: 4,
-          hintsUsed: 0,
-          starsEarned: 2,
-          badgeAwarded: null,
-          bestStreak: 1,
-          strengths: ["Warm and cool color groups", "Value order and hierarchy"],
-          weakAreas: ["Primary color groups", "Readable contrast for basic interfaces"],
-          reviewTopics: ["Primary color groups", "Readable contrast for basic interfaces"],
-          trendText: "Mixed results — revisit contrast and primaries before the next easy unit.",
-          timestamp: "2026-04-02T13:30:00.000Z",
-          questionResults: mockQuestionResultsForSeed("basics", "easy", "unit-1", [
-            { ok: false, sel: "Green" },
-            { ok: true, sel: "True" },
-            { ok: false, sel: "a" },
-            { ok: true, sel: ["Pale yellow", "Soft orange", "Brick orange", "Deep brown"] }
-          ])
-        }
-      ],
-      mistakes: [
-        createMistakeRecord(getUnitQuestions("models", "easy", "unit-2")[2], { chapterId: "models", levelId: "easy", unitId: "unit-2" }, "Review the difference between screen-first exports and print workflows.", "2026-04-07T18:20:00.000Z"),
-        createMistakeRecord(getUnitQuestions("basics", "easy", "unit-1")[0], { chapterId: "basics", levelId: "easy", unitId: "unit-1" }, "Revisit which color pairs sit opposite each other on the wheel.", "2026-04-02T13:30:00.000Z"),
-        createMistakeRecord(getUnitQuestions("meaning", "medium", "unit-1")[1], { chapterId: "meaning", levelId: "medium", unitId: "unit-1" }, "Do not assume color cues work equally for every audience without testing context.", "2026-04-05T14:10:00.000Z")
-      ],
-      rewards: { lifetimePoints: 56, badges: ["Contrast Scout", "Model Navigator"], streak: 4 },
+      history: [],
+      mistakes: [],
+      rewards: { lifetimePoints: 0, badges: [], streak: 0, currentStreak: 0, shownBadgeAnimations: [] },
       flagged: [],
       currentQuiz: null,
-      lastResult: baseResult,
+      lastResult: null,
       lastQuizSubmit: null
     };
+    assignGlobalPathStreak(defaultState);
+    return defaultState;
   }
 
   function makeProgress(completedUnits, currentUnit, lastScore, accuracy, lastPlayed) {
@@ -529,12 +548,88 @@
     } else {
       next.lastQuizSubmit = null;
     }
+    normalizeStateForUnitTemplates(next);
+    assignGlobalPathStreak(next);
+    next.rewards.badges = getBadgeInventoryFromHistory(next.history);
     return next;
+  }
+
+  function normalizeStateForUnitTemplates(targetState) {
+    CHAPTERS.forEach(function (chapter) {
+      LEVEL_ORDER.forEach(function (levelId) {
+        var validIds = UNIT_TEMPLATES[levelId].map(function (item) { return item.id; });
+        var progress = targetState.progress && targetState.progress[chapter.id] ? targetState.progress[chapter.id][levelId] : null;
+        if (!targetState.progress[chapter.id]) targetState.progress[chapter.id] = {};
+        if (!progress) {
+          targetState.progress[chapter.id][levelId] = makeProgress([], "unit-1", 0, 0, "");
+          progress = targetState.progress[chapter.id][levelId];
+        }
+        if (progress) {
+          progress.completedUnits = Array.isArray(progress.completedUnits)
+            ? progress.completedUnits.filter(function (id) { return validIds.indexOf(id) !== -1; })
+            : [];
+          if (validIds.indexOf(progress.currentUnit) === -1) {
+            progress.currentUnit = validIds[progress.completedUnits.length] || validIds[validIds.length - 1] || "unit-1";
+          }
+        }
+      });
+    });
+
+    if (targetState.currentQuiz) {
+      var currentValid = UNIT_TEMPLATES[targetState.currentQuiz.levelId] || [];
+      var currentIds = currentValid.map(function (item) { return item.id; });
+      if (currentIds.indexOf(targetState.currentQuiz.unitId) === -1) {
+        targetState.currentQuiz = null;
+      }
+    }
+
+    if (targetState.lastQuizSubmit) {
+      var submitValid = UNIT_TEMPLATES[targetState.lastQuizSubmit.levelId] || [];
+      var submitIds = submitValid.map(function (item) { return item.id; });
+      if (submitIds.indexOf(targetState.lastQuizSubmit.unitId) === -1) {
+        targetState.lastQuizSubmit = null;
+      }
+    }
+
+    if (Array.isArray(targetState.history)) {
+      targetState.history = targetState.history.filter(function (item) {
+        var valid = UNIT_TEMPLATES[item.level] || [];
+        var ids = valid.map(function (template) { return template.id; });
+        return ids.indexOf(item.unit) !== -1;
+      });
+    }
+  }
+
+  function assignGlobalPathStreak(targetState) {
+    var streakState = getGlobalPathStreakState((targetState && targetState.history) || []);
+    if (!targetState.rewards) targetState.rewards = {};
+    targetState.rewards.currentStreak = streakState.current;
+    targetState.rewards.streak = streakState.max;
+  }
+
+  function getGlobalPathStreakState(history) {
+    var current = 0;
+    var max = 0;
+    var ordered = Array.isArray(history) ? history.slice().sort(function (a, b) {
+      return new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime();
+    }) : [];
+    ordered.forEach(function (result) {
+      if (!result || result.mode !== "path" || !Array.isArray(result.questionResults)) return;
+      result.questionResults.forEach(function (item) {
+        if (item && item.isCorrect) {
+          current += 1;
+          max = Math.max(max, current);
+        } else {
+          current = 0;
+        }
+      });
+    });
+    return { current: current, max: max };
   }
 
   function readStorage() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(getStorageKey());
       return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;
@@ -543,10 +638,25 @@
 
   function saveState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(getStorageKey(), JSON.stringify(state));
     } catch (e) {
       /* ignore */
     }
+  }
+
+  function getStorageKey() {
+    var username = getCurrentUsername();
+    var scope = username ? username : "guest";
+    return STORAGE_KEY + "__" + scope;
+  }
+
+  function bindAuthStateSync() {
+    document.addEventListener("clw:auth-changed", function () {
+      state = loadState();
+      syncSelectionFromQuery();
+      applyChapterTheme(resolveChapterId());
+      renderPage();
+    });
   }
 
   function assign(target, source) {
@@ -608,6 +718,8 @@
   function bindEvents() {
     rootEl.addEventListener("click", handleClick);
     rootEl.addEventListener("change", handleChange);
+    document.addEventListener("visibilitychange", handleDocumentVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
   }
 
   function handleClick(event) {
@@ -659,6 +771,46 @@
       handleQuizAction(quizAction.getAttribute("data-quiz-action"));
       return;
     }
+    var dialogBackdrop = target.closest("[data-quiz-dialog-backdrop]");
+    if (dialogBackdrop && target === dialogBackdrop) {
+      quizDialog = null;
+      renderPage();
+      return;
+    }
+    var dialogAction = target.closest("[data-quiz-dialog-action]");
+    if (dialogAction) {
+      var dact = dialogAction.getAttribute("data-quiz-dialog-action");
+      if (dact === "cancel") {
+        quizDialog = null;
+        renderPage();
+        return;
+      }
+      if (dact === "confirm" && quizDialog) {
+        if (quizDialog.kind === "hint") {
+          quizDialog = null;
+          handleQuizAction("hint-confirm");
+          return;
+        }
+        if (quizDialog.kind === "exit" && quizDialog.exitHref) {
+          var go = quizDialog.exitHref;
+          pauseActiveQuizTimer();
+          quizDialog = null;
+          window.location.href = go;
+          return;
+        }
+      }
+      return;
+    }
+    var exitQuizBtn = target.closest("[data-quiz-exit]");
+    if (exitQuizBtn) {
+      event.preventDefault();
+      quizDialog = {
+        kind: "exit",
+        exitHref: exitQuizBtn.getAttribute("data-quiz-exit-href") || "test.html"
+      };
+      renderPage();
+      return;
+    }
     if (jumpButton) {
       jumpToQuizQuestion(Number(jumpButton.getAttribute("data-quiz-jump")));
       return;
@@ -688,10 +840,28 @@
       shareResultToCommunity(shareCommunityBtn.getAttribute("data-share-community"));
       return;
     }
+    var badgeReplayBtn = target.closest("[data-badge-replay]");
+    if (badgeReplayBtn) {
+      event.preventDefault();
+      var replayBadgeName = badgeReplayBtn.getAttribute("data-badge-replay");
+      var replayChapterId = getBadgeChapterId(replayBadgeName);
+      var replayChapter = getChapter(replayChapterId) || CHAPTERS[0];
+      showBadgeRevealAnimation(replayBadgeName, replayChapter.colors.primary, replayChapter.colors.secondary, { originEl: badgeReplayBtn });
+      return;
+    }
     var practiceBtn = target.closest("[data-practice-question]");
     if (practiceBtn) {
       event.preventDefault();
       enterSoloPractice(practiceBtn.getAttribute("data-practice-type"), practiceBtn.getAttribute("data-practice-question"));
+      return;
+    }
+    var soloFilterToggle = target.closest("[data-solo-toggle-filter]");
+    if (soloFilterToggle) {
+      event.preventDefault();
+      if (soloState) {
+        soloState.filterSheet = !soloState.filterSheet;
+        renderPage();
+      }
       return;
     }
     var soloAction = target.closest("[data-solo-action]");
@@ -732,6 +902,55 @@
       }
       if (found) {
         window.location.href = buildUrl("test-results.html", { chapter: found.chapter, level: found.level, resultId: nextResultId, slideDir: dir });
+      }
+      return;
+    }
+    var quizWsDock = target.closest("[data-quiz-workspace-dock]");
+    var quizWsDockTab = target.closest("[data-quiz-workspace-dock-tab]");
+    if (quizWsDockTab && quizWsDock) {
+      event.preventDefault();
+      var qTab = quizWsDockTab.getAttribute("data-quiz-workspace-dock-tab");
+      var qCur = quizWsDock.getAttribute("data-active") || "";
+      if (quizWsDock.classList.contains("is-open") && qCur === qTab) {
+        syncQuizWorkspaceDock(quizWsDock, null);
+      } else {
+        syncQuizWorkspaceDock(quizWsDock, qTab);
+      }
+      return;
+    }
+    var openQuizWsDock = rootEl.querySelector("[data-quiz-workspace-dock].is-open");
+    if (openQuizWsDock) {
+      var qInWsDock = target.closest("[data-quiz-workspace-dock]");
+      if (!qInWsDock) {
+        syncQuizWorkspaceDock(openQuizWsDock, null);
+      }
+    }
+    var mapDock = target.closest("[data-map-dock]");
+    var mapDockTab = target.closest("[data-map-dock-tab]");
+    var mapDockScrim = target.closest("[data-map-dock-scrim]");
+    if (mapDockTab && mapDock) {
+      event.preventDefault();
+      var tabId = mapDockTab.getAttribute("data-map-dock-tab");
+      var cur = mapDock.getAttribute("data-active") || "";
+      if (mapDock.classList.contains("is-open") && cur === tabId) {
+        syncMapDockPanel(mapDock, null);
+      } else {
+        syncMapDockPanel(mapDock, tabId);
+      }
+      return;
+    }
+    if (mapDockScrim && mapDock) {
+      event.preventDefault();
+      syncMapDockPanel(mapDock, null);
+      return;
+    }
+    var openMapDock = rootEl.querySelector("[data-map-dock].is-open");
+    if (openMapDock) {
+      var inDockSheet = target.closest(".test-map-dock__sheet-wrap");
+      var inDockBar = target.closest(".test-map-dock__bar");
+      var inDockScrimHit = target.closest("[data-map-dock-scrim]");
+      if (!inDockSheet && !inDockBar && !inDockScrimHit) {
+        syncMapDockPanel(openMapDock, null);
       }
     }
   }
@@ -777,6 +996,10 @@
   function renderPage() {
     try {
       var page = mainEl.getAttribute("data-test-page");
+      if (page !== "quiz") stopQuizLiveTimer();
+      if (page !== "map") setTestMapDockOpenOnBody(false);
+      if (page !== "quiz") quizDialog = null;
+      if (page !== "quiz") pauseActiveQuizTimer();
       if (page === "map") return renderMapPage();
       if (page === "quiz") return renderQuizPage();
       if (page === "results") return renderResultsPage();
@@ -788,7 +1011,92 @@
         renderLinkButton("Back to map", "test.html", "test-link-btn--primary") +
         "</div></section>";
       if (window && window.console && console.error) console.error("[test-module] renderPage failed:", error);
+      setTestMapDockOpenOnBody(false);
     }
+  }
+
+  function setTestMapDockOpenOnBody(isOpen) {
+    if (typeof document === "undefined" || !document.body) return;
+    if (isOpen) document.body.classList.add("test-map-dock-open");
+    else document.body.classList.remove("test-map-dock-open");
+  }
+
+  function getMapRewardsAnchorEl() {
+    var dock = document.querySelector(".test-map-page > .test-map-dock");
+    try {
+      if (dock && typeof window.getComputedStyle === "function" && window.getComputedStyle(dock).display !== "none") {
+        var inDock = dock.querySelector("[data-rewards-card]");
+        if (inDock) return inDock;
+      }
+    } catch (e) {}
+    return document.querySelector(".test-sidebar--map [data-rewards-card]");
+  }
+
+  function syncMapDockPanel(dockRoot, panelId) {
+    if (!dockRoot) return;
+    var tabs = dockRoot.querySelectorAll("[data-map-dock-tab]");
+    var panels = dockRoot.querySelectorAll("[data-map-dock-panel]");
+    var i;
+    var tid;
+    var pid;
+    if (!panelId) {
+      dockRoot.classList.remove("is-open");
+      dockRoot.removeAttribute("data-active");
+      for (i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("is-active");
+        tabs[i].setAttribute("aria-expanded", "false");
+      }
+      for (i = 0; i < panels.length; i++) {
+        panels[i].classList.remove("is-dock-active");
+      }
+      setTestMapDockOpenOnBody(false);
+      return;
+    }
+    dockRoot.classList.add("is-open");
+    dockRoot.setAttribute("data-active", panelId);
+    for (i = 0; i < tabs.length; i++) {
+      tid = tabs[i].getAttribute("data-map-dock-tab");
+      tabs[i].classList.toggle("is-active", tid === panelId);
+      tabs[i].setAttribute("aria-expanded", tid === panelId ? "true" : "false");
+    }
+    for (i = 0; i < panels.length; i++) {
+      pid = panels[i].getAttribute("data-map-dock-panel");
+      panels[i].classList.toggle("is-dock-active", pid === panelId);
+    }
+    setTestMapDockOpenOnBody(true);
+  }
+
+  function renderMapDockBar() {
+    function tab(panel, label) {
+      return (
+        '<button type="button" class="test-map-dock__tab" data-map-dock-tab="' +
+        panel +
+        '" aria-expanded="false" aria-controls="map-dock-panel-' +
+        panel +
+        '">' +
+        '<span class="test-map-dock__tab-ic" aria-hidden="true">' +
+        (panel === "snapshot"
+          ? IC.snapshotTitle
+          : panel === "review"
+            ? IC.bookTitle
+            : panel === "folder"
+              ? IC.folderTitle
+              : IC.rewardsTitle) +
+        "</span>" +
+        '<span class="visually-hidden">' +
+        label +
+        "</span>" +
+        "</button>"
+      );
+    }
+    return (
+      '<nav class="test-map-dock__bar" aria-label="Map summary panels">' +
+        tab("snapshot", "Progress Snapshot") +
+        tab("review", "Recommended Review") +
+        tab("folder", "Question Folder") +
+        tab("rewards", "Rewards") +
+      "</nav>"
+    );
   }
 
   function renderMapPage() {
@@ -796,7 +1104,7 @@
     var level = getLevel(state.selection.level) || LEVELS[0];
     var units = getUnits(chapter.id, level.id);
     var snapshot = getProgressSnapshot(chapter.id, level.id);
-    var recommended = getRecommendedTopics(chapter.id, level.id);
+    var recommended = getLearnTopicsForChapter(chapter.id);
     var mistakeCount = getVisibleMistakes(chapter.id, level.id).length;
     var totalScore = typeof state.rewards.lifetimePoints === "number" ? state.rewards.lifetimePoints : 0;
     var resumeText = state.lastQuizSubmit && state.lastQuizSubmit.at
@@ -805,41 +1113,252 @@
     var resumeHref = buildLastSubmitResumeHref(state.lastQuizSubmit);
 
     applyChapterTheme(chapter.id);
+    setTestMapDockOpenOnBody(false);
+
+    var snapshotInner =
+      '<div class="test-stat-grid">' +
+      renderStat("Whole Chapter", snapshot.chapterUnits, "Finished units in this chapter, all difficulties added together.") +
+      renderStat("Average Accuracy", snapshot.overallAccuracy, "Average accuracy across completed quizzes for the chapter and difficulty you are viewing (every full run counts).") +
+      renderStatLink("Last working on", resumeText, resumeHref, "The map unit (chapter, unit, difficulty) where you last pressed Submit in a normal path quiz - not mistakes review or bookmark practice.", "test-stat--full-row") +
+      "</div>";
+    var recommendedInner = renderLearnTopicList(recommended);
+    var mapAsideCards =
+      renderSidebarCard("Progress Snapshot", snapshotInner, IC.snapshotTitle) +
+      renderSidebarCard("Recommended Review", recommendedInner, IC.bookTitle) +
+      renderReviewCard(chapter.id, level.id) +
+      renderRewardsCard(totalScore);
+    var mapShellDock =
+      '<div class="test-map-dock" data-map-dock>' +
+      '<button type="button" class="test-map-dock__scrim" data-map-dock-scrim aria-label="Close panel"></button>' +
+      '<div class="test-map-dock__sheet-wrap">' +
+      renderSidebarCard("Progress Snapshot", snapshotInner, IC.snapshotTitle, "snapshot") +
+      renderSidebarCard("Recommended Review", recommendedInner, IC.bookTitle, "review") +
+      renderReviewCard(chapter.id, level.id, "folder") +
+      renderRewardsCard(totalScore, "rewards") +
+      "</div>" +
+      renderMapDockBar() +
+      "</div>";
 
     rootEl.innerHTML =
-      '<div class="test-map-layout">' +
-        '<div class="test-map-main">' +
-          '<section class="test-panel test-map-header-card">' +
-            '<div class="test-map-hcard__meta">' +
-              '<div class="test-kicker">' + chapter.eyebrow + '</div>' +
-              '<h2 class="test-map-heading">' + chapter.name + '</h2>' +
-              '<p class="test-map-intro">' + chapter.intro + '</p>' +
-            '</div>' +
-            '<div class="test-map-filters">' +
-              '<label class="test-map-topbar__field"><span>Chapter</span>' + renderMapChapterSelect(chapter.id) + '</label>' +
-              '<label class="test-map-topbar__field"><span>Difficulty</span>' + renderMapLevelSelect(level.id) + '</label>' +
-            '</div>' +
-          '</section>' +
-          '<div class="test-grid test-grid--map">' +
-            '<section class="test-panel test-map-shell">' +
-              '<div class="test-map-list">' + units.map(renderMapNode).join("") + '</div>' +
+      '<div class="test-map-page">' +
+        '<div class="test-map-layout">' +
+          '<div class="test-map-main">' +
+            '<section class="test-panel test-map-header-card">' +
+              '<div class="test-map-hcard__meta">' +
+                '<div class="test-kicker">' + chapter.eyebrow + '</div>' +
+                '<h2 class="test-map-heading">' + chapter.name + '</h2>' +
+                '<p class="test-map-intro">' + chapter.intro + '</p>' +
+              '</div>' +
+              '<div class="test-map-filters">' +
+                '<label class="test-map-topbar__field"><span>Chapter</span>' + renderMapChapterSelect(chapter.id) + '</label>' +
+                '<label class="test-map-topbar__field"><span>Difficulty</span>' + renderMapLevelSelect(level.id) + '</label>' +
+              '</div>' +
             '</section>' +
-          '</div>' +
+            '<div class="test-grid test-grid--map">' +
+              '<section class="test-panel test-map-shell">' +
+                '<div class="test-map-list">' + units.map(renderMapNode).join("") + "</div>" +
+              "</section>" +
+            "</div>" +
+          "</div>" +
+          '<aside class="test-sidebar test-sidebar--map">' +
+            mapAsideCards +
+          "</aside>" +
         "</div>" +
-        '<aside class="test-sidebar test-sidebar--map">' +
-          renderSidebarCard("Progress Snapshot", '<div class="test-stat-grid">' + renderStat("Whole Chapter", snapshot.chapterUnits, "Finished units in this chapter, all difficulties added together.") + renderStat("Average Accuracy", snapshot.overallAccuracy, "Average accuracy across completed quizzes for the chapter and difficulty you are viewing (every full run counts).") + renderStatLink("Last working on", resumeText, resumeHref, "The map unit (chapter, unit, difficulty) where you last pressed Submit in a normal path quiz — not mistakes review or bookmark practice.", "test-stat--full-row") + "</div>", IC.snapshotTitle) +
-          renderReviewCard(chapter.id, level.id) +
-          renderRewardsCard(totalScore) +
-          renderSidebarCard("Recommended Review", '<ul class="test-note-list">' + recommended.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>", IC.bookTitle) +
-        "</aside>" +
+        mapShellDock +
       "</div>";
+
+    checkAndShowBadgeReveal();
   }
 
-  /* ── SVG icon helpers ── */
+  function checkAndShowBadgeReveal() {
+    var result = state.lastResult;
+    if (!result || !result.badgeAwarded) return;
+    var badgeName = result.badgeAwarded;
+    var shown = Array.isArray(state.rewards.shownBadgeAnimations) ? state.rewards.shownBadgeAnimations : [];
+    if (shown.indexOf(badgeName) !== -1) return;
+    /* Mark immediately so re-renders do not re-trigger */
+    state.rewards.shownBadgeAnimations = shown.concat([badgeName]);
+    saveState();
+    var chapter = getChapter(result.chapter) || CHAPTERS[0];
+    showBadgeRevealAnimation(badgeName, chapter.colors.primary, chapter.colors.secondary);
+  }
+
+  function showBadgeRevealAnimation(badgeName, colorPrimary, colorSecondary, opts) {
+    opts = opts || {};
+    var originEl = opts.originEl || null;
+
+    var rgb = hexToRgb(colorPrimary);
+    var c18 = 'rgb(' +
+      Math.round(rgb.r * 0.18 + 255 * 0.82) + ',' +
+      Math.round(rgb.g * 0.18 + 255 * 0.82) + ',' +
+      Math.round(rgb.b * 0.18 + 255 * 0.82) + ')';
+    var c12 = 'rgb(' +
+      Math.round(rgb.r * 0.12 + 255 * 0.88) + ',' +
+      Math.round(rgb.g * 0.12 + 255 * 0.88) + ',' +
+      Math.round(rgb.b * 0.12 + 255 * 0.88) + ')';
+
+    var badgeSvg =
+      '<svg viewBox="0 0 48 48" aria-hidden="true" width="92" height="92">' +
+        '<path d="M11.5 32.5L9 44.5L22 38.8L24 45L26 38.8L39 44.5L36.5 32.5L24 34.2Z" fill="' + colorPrimary + '" opacity="0.93"/>' +
+        '<circle cx="24" cy="18" r="13" fill="' + c18 + '" stroke="' + colorPrimary + '" stroke-width="2.5"/>' +
+        '<circle cx="24" cy="18" r="8.5" fill="' + c12 + '"/>' +
+        '<path d="M24 11.5l2.1 4.25h4.7L27.35 18.9l1.45 4.65L24 20.35l-4.8 3.2 1.45-4.65-3.45-2.15h4.7z" fill="' + colorPrimary + '"/>' +
+      '</svg>';
+
+    var chapterId = getBadgeChapterId(badgeName);
+    var earnDesc = buildBadgeEarnDescription(chapterId);
+
+    var closeBtnHtml =
+      '<button type="button" class="badge-reveal__close" aria-label="Close">' +
+        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">' +
+          '<path d="M6 6l12 12M18 6L6 18"/>' +
+        '</svg>' +
+      '</button>';
+
+    var overlay = document.createElement('div');
+    overlay.className = 'badge-reveal-ol badge-reveal-ol--replay';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML =
+      '<div class="badge-reveal__card">' +
+        closeBtnHtml +
+        '<div class="badge-reveal__content">' +
+          '<p class="badge-reveal__kicker" style="color:' + colorPrimary + '">' +
+            'Your Badge' +
+          '</p>' +
+          '<h2 class="badge-reveal__title">Congratulations!</h2>' +
+          '<div class="badge-reveal__stage">' +
+            '<div class="badge-reveal__sparkles"></div>' +
+            '<div class="badge-reveal__badge">' +
+              badgeSvg +
+              '<span class="badge-reveal__name" style="color:' + colorPrimary + '">' + badgeName + '</span>' +
+              (earnDesc ? '<span class="badge-reveal__desc">' + earnDesc + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    /* Sparkles */
+    var sparkleWrap = overlay.querySelector('.badge-reveal__sparkles');
+    var sparkleColors = [colorPrimary, colorSecondary, '#fbbf24', '#ffffff'];
+    for (var i = 0; i < 14; i++) {
+      var angle = (i / 14) * 360;
+      var radius = 66 + (i % 3) * 16;
+      var sx = Math.cos(angle * Math.PI / 180) * radius;
+      var sy = Math.sin(angle * Math.PI / 180) * radius;
+      var size = 5 + (i % 5) * 2.5;
+      var delay = Math.round((i * 97) % 750);
+      var sp = document.createElement('div');
+      sp.className = 'badge-reveal__sparkle';
+      sp.style.cssText =
+        'left:calc(50% + ' + sx.toFixed(1) + 'px);' +
+        'top:calc(50% + ' + sy.toFixed(1) + 'px);' +
+        'width:' + size.toFixed(1) + 'px;' +
+        'height:' + size.toFixed(1) + 'px;' +
+        'background:' + sparkleColors[i % sparkleColors.length] + ';' +
+        'animation-delay:' + delay + 'ms;';
+      sparkleWrap.appendChild(sp);
+    }
+
+    playSfx(SFX_TADA);
+
+    var badgeEl = overlay.querySelector('.badge-reveal__badge');
+
+    /* Phase 2 — wiggle */
+    var tWiggle = setTimeout(function () {
+      badgeEl.classList.add('is-wiggling');
+    }, 920);
+
+    var genieTarget =
+      originEl ||
+      getMapRewardsAnchorEl() ||
+      document.querySelector(".reward-badges");
+    var closeBtn = overlay.querySelector('.badge-reveal__close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        clearTimeout(tWiggle);
+        dismissBadgeReveal(overlay, genieTarget);
+      });
+    }
+  }
+
+  function dismissBadgeReveal(overlay, targetEl) {
+    var cardEl = overlay.querySelector('.badge-reveal__card');
+    if (!cardEl) return;
+
+    var cardRect = cardEl.getBoundingClientRect();
+    var cx = cardRect.left + cardRect.width / 2;
+    var cy = cardRect.top + cardRect.height / 2;
+
+    var dx = 0;
+    var dy = 0;
+    if (targetEl) {
+      var targetRect = targetEl.getBoundingClientRect();
+      dx = (targetRect.left + targetRect.width / 2) - cx;
+      dy = (targetRect.top + targetRect.height / 2) - cy;
+    }
+
+    var sparkleWrap = overlay.querySelector('.badge-reveal__sparkles');
+    if (sparkleWrap) {
+      sparkleWrap.style.transition = 'opacity 0.2s ease';
+      sparkleWrap.style.opacity = '0';
+    }
+
+    /* Stop nested CSS animations so brBadgePop does not restart from opacity:0 when is-wiggling is cleared */
+    var badgeEl = overlay.querySelector('.badge-reveal__badge');
+    if (badgeEl) {
+      badgeEl.classList.remove('is-wiggling');
+      badgeEl.style.animation = 'none';
+      badgeEl.style.opacity = '1';
+      badgeEl.style.transform = 'none';
+    }
+    var contentEl = overlay.querySelector('.badge-reveal__content');
+    if (contentEl) {
+      contentEl.style.animation = 'none';
+      contentEl.style.opacity = '1';
+      contentEl.style.transform = 'none';
+    }
+    var closeBtn = overlay.querySelector('.badge-reveal__close');
+    if (closeBtn) {
+      closeBtn.style.animation = 'none';
+      closeBtn.style.opacity = '1';
+    }
+
+    cardEl.style.animation = 'none';
+    cardEl.getBoundingClientRect();
+    cardEl.style.transition =
+      'transform 0.55s cubic-bezier(0.55, 0, 0.8, 0.08), opacity 0.42s ease 0.12s';
+    cardEl.style.transformOrigin = '50% 50%';
+    cardEl.style.transform =
+      'translate(' + dx.toFixed(1) + 'px, ' + dy.toFixed(1) + 'px) scale(0.04)';
+    cardEl.style.opacity = '0';
+
+    setTimeout(function () { overlay.classList.add('is-exiting'); }, 380);
+    setTimeout(function () {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 950);
+  }
+
+  function getBadgeChapterId(badgeName) {
+    for (var i = 0; i < CHAPTERS.length; i++) {
+      if (buildBadgeName(CHAPTERS[i].id) === badgeName) return CHAPTERS[i].id;
+    }
+    return CHAPTERS[0].id;
+  }
+
+  function buildBadgeEarnDescription(chapterId) {
+    var chapter = getChapter(chapterId);
+    var name = chapter ? chapter.name : 'this chapter';
+    var count = UNIT_TEMPLATES.easy.length;
+    return 'Awarded for earning 3 stars on all ' + count + ' units in ' + name + ' within any single difficulty.';
+  }
 
   function renderQuizPage() {
+    stopQuizLiveTimer();
     var session = ensureQuizSession();
     if (!session) {
+      quizDialog = null;
       rootEl.innerHTML =
         '<section class="test-hero"><div class="test-kicker">Quiz unavailable</div><h1 class="test-title">No question set is ready for this route yet.</h1><div class="test-quick-actions">' +
         renderLinkButton("Back to map", "test.html", "test-link-btn--primary") +
@@ -851,6 +1370,7 @@
     var chapter = getChapter(session.chapterId);
     var level = getLevel(session.levelId);
     if (!Array.isArray(session.questions) || !session.questions.length) {
+      quizDialog = null;
       rootEl.innerHTML =
         '<section class="test-hero"><div class="test-kicker">Quiz unavailable</div><h1 class="test-title">No question set is ready for this route yet.</h1><div class="test-quick-actions">' +
         renderLinkButton("Back to map", "test.html", "test-link-btn--primary") +
@@ -863,6 +1383,7 @@
     }
     var question = session.questions[session.currentIndex];
     if (!question) {
+      quizDialog = null;
       rootEl.innerHTML =
         '<section class="test-hero"><div class="test-kicker">Quiz unavailable</div><h1 class="test-title">Current quiz state is out of sync. Please restart this unit.</h1><div class="test-quick-actions">' +
         renderLinkButton("Restart unit", buildUrl("test-quiz.html", { chapter: session.chapterId, level: session.levelId, unit: session.unitId, fresh: "1" }), "test-link-btn--primary") +
@@ -883,9 +1404,12 @@
 
     applyChapterTheme(session.chapterId);
 
+    var overviewPanelHtml = renderQuizOverviewPanel(session);
+    var analysisPanelHtml = renderQuizAnalysisPanel(session, accuracy);
+
     rootEl.innerHTML =
       '<div class="quiz-shell quiz-shell--workspace">' +
-        renderQuizWorkspaceTopbar(session, chapter, level) +
+        renderQuizWorkspaceTopbar(session, chapter, level, overviewPanelHtml, analysisPanelHtml) +
         '<div class="quiz-workspace">' +
           '<div class="quiz-workspace__main">' +
             '<section class="quiz-workspace-card">' +
@@ -908,14 +1432,66 @@
             '</div>' +
           '</div>' +
           '<aside class="quiz-workspace__sidebar">' +
-            renderQuizOverviewPanel(session) +
-            renderQuizAnalysisPanel(session, accuracy) +
-          '</aside>' +
+            overviewPanelHtml +
+            analysisPanelHtml +
+          "</aside>" +
         "</div>" +
-      "</div>";
+      "</div>" +
+      renderQuizDialog();
+    startQuizLiveTimerIfNeeded();
   }
 
-  function renderQuizWorkspaceTopbar(session, chapter, level) {
+  function escapeAttr(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;");
+  }
+
+  function renderQuizDialog() {
+    if (!quizDialog) return "";
+    var title;
+    var body;
+    var confirmLabel;
+    var cancelLabel;
+    var cancelClass = "quiz-dialog__btn quiz-dialog__btn--ghost";
+    var confirmClass = "quiz-dialog__btn quiz-dialog__btn--primary";
+    if (quizDialog.kind === "hint") {
+      title = "Use a hint?";
+      body =
+        "If you reveal a hint, you will earn <strong>fewer points</strong> on this question when you answer correctly. Continue?";
+      confirmLabel = "Show hint";
+      cancelLabel = "I’ll figure it out myself!";
+      cancelClass = "quiz-dialog__btn quiz-dialog__btn--primary";
+      confirmClass = "quiz-dialog__btn quiz-dialog__btn--ghost";
+    } else {
+      title = "Leave this quiz?";
+      body =
+        "Your progress is saved automatically. If you go back now, you can pick up where you left off later.";
+      confirmLabel = "Leave";
+      cancelLabel = "Stay";
+      cancelClass = "quiz-dialog__btn quiz-dialog__btn--primary";
+      confirmClass = "quiz-dialog__btn quiz-dialog__btn--ghost";
+    }
+    return (
+      '<div class="quiz-dialog-backdrop" data-quiz-dialog-backdrop="1" role="presentation">' +
+        '<div class="quiz-dialog" role="alertdialog" aria-modal="true" aria-labelledby="quiz-dialog-title">' +
+          '<h2 id="quiz-dialog-title" class="quiz-dialog__title">' + title + "</h2>" +
+          '<p class="quiz-dialog__body">' + body + "</p>" +
+          '<div class="quiz-dialog__actions">' +
+            '<button type="button" class="' + cancelClass + '" data-quiz-dialog-action="cancel">' +
+              cancelLabel +
+            "</button>" +
+            '<button type="button" class="' + confirmClass + '" data-quiz-dialog-action="confirm">' +
+              confirmLabel +
+            "</button>" +
+          "</div>" +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderQuizWorkspaceTopbar(session, chapter, level, overviewPanelHtml, analysisPanelHtml) {
     var unitIndex = Math.max(0, (Number(session.unitId.split("-")[1]) || 1) - 1);
     var levelName = level && level.name ? level.name : "Level";
     var chapterName = chapter && chapter.name ? chapter.name : "Chapter";
@@ -925,15 +1501,115 @@
       ? buildUrl("test-results.html", { chapter: session.chapterId, level: session.levelId, resultId: session.reviewResultId })
       : buildUrl("test.html", { chapter: session.chapterId, level: session.levelId });
 
-    return '<section class="quiz-workspace-topbar">' +
-      '<div class="quiz-workspace-topbar__backblock">' +
-        '<a class="quiz-workspace-topbar__close" href="' + closeHref + '">' +
+    var backLabel = session.browseOnly ? "Back to summary" : "Leave quiz";
+    var closeControl = session.browseOnly
+      ? '<a class="quiz-workspace-topbar__close quiz-workspace-topbar__close--browse" href="' + escapeAttr(closeHref) + '" aria-label="' + escapeAttr(backLabel) + '">' +
           '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' +
-          (session.browseOnly ? '<span>Back to Summary</span>' : '') +
-        '</a>' +
-        '<div class="quiz-workspace-topbar__heading"><strong>' + title + '</strong><span>' + chapterName + '</span></div>' +
-      '</div>' +
-    '</section>';
+          '<span>Back to Summary</span>' +
+        "</a>"
+      : '<button type="button" class="quiz-workspace-topbar__close" data-quiz-exit data-quiz-exit-href="' + escapeAttr(closeHref) + '" aria-label="' + escapeAttr(backLabel) + '">' +
+          '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' +
+        "</button>";
+    var dockHtml =
+      overviewPanelHtml && analysisPanelHtml
+        ? '<div class="quiz-workspace-topbar__dock" data-quiz-workspace-dock>' +
+          '<div class="quiz-workspace-topbar__dock-icons">' +
+            '<div class="quiz-workspace-dock-slot quiz-workspace-dock-slot--overview">' +
+              '<button type="button" class="quiz-workspace-dock__tab" data-quiz-workspace-dock-tab="overview" aria-expanded="false" aria-controls="quiz-dock-panel-overview">' +
+              '<span class="quiz-workspace-dock__tab-ic" aria-hidden="true">' +
+              IC.overview +
+              "</span>" +
+              '<span class="visually-hidden">Question Overview</span>' +
+              "</button>" +
+              '<div id="quiz-dock-panel-overview" class="quiz-workspace-dock__sheet" data-quiz-workspace-dock-sheet="overview">' +
+              overviewPanelHtml +
+              "</div>" +
+            "</div>" +
+            '<div class="quiz-workspace-dock-slot quiz-workspace-dock-slot--analysis">' +
+              '<button type="button" class="quiz-workspace-dock__tab" data-quiz-workspace-dock-tab="analysis" aria-expanded="false" aria-controls="quiz-dock-panel-analysis">' +
+              '<span class="quiz-workspace-dock__tab-ic" aria-hidden="true">' +
+              IC.analysis +
+              "</span>" +
+              '<span class="visually-hidden">Live Analysis</span>' +
+              "</button>" +
+              '<div id="quiz-dock-panel-analysis" class="quiz-workspace-dock__sheet" data-quiz-workspace-dock-sheet="analysis">' +
+              analysisPanelHtml +
+              "</div>" +
+            "</div>" +
+          "</div>" +
+          "</div>"
+        : "";
+    return (
+      '<section class="quiz-workspace-topbar">' +
+      '<div class="quiz-workspace-topbar__backblock">' +
+      closeControl +
+      '<div class="quiz-workspace-topbar__heading"><strong>' +
+      title +
+      "</strong><span>" +
+      chapterName +
+      "</span></div>" +
+      "</div>" +
+      dockHtml +
+      "</section>"
+    );
+  }
+
+  function syncQuizWorkspaceDock(dockRoot, panelId) {
+    if (!dockRoot) return;
+    var tabs = dockRoot.querySelectorAll("[data-quiz-workspace-dock-tab]");
+    var sheets = dockRoot.querySelectorAll("[data-quiz-workspace-dock-sheet]");
+    var i;
+    var tid;
+    var sid;
+    if (!panelId) {
+      dockRoot.classList.remove("is-open");
+      dockRoot.removeAttribute("data-active");
+      for (i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("is-active");
+        tabs[i].setAttribute("aria-expanded", "false");
+      }
+      for (i = 0; i < sheets.length; i++) {
+        sheets[i].classList.remove("is-dock-active");
+      }
+      return;
+    }
+    dockRoot.classList.add("is-open");
+    dockRoot.setAttribute("data-active", panelId);
+    for (i = 0; i < tabs.length; i++) {
+      tid = tabs[i].getAttribute("data-quiz-workspace-dock-tab");
+      tabs[i].classList.toggle("is-active", tid === panelId);
+      tabs[i].setAttribute("aria-expanded", tid === panelId ? "true" : "false");
+    }
+    for (i = 0; i < sheets.length; i++) {
+      sid = sheets[i].getAttribute("data-quiz-workspace-dock-sheet");
+      sheets[i].classList.toggle("is-dock-active", sid === panelId);
+    }
+  }
+
+  function renderQuizLiveTimeScoreRow(session) {
+    var timeText = formatElapsedDuration(getQuizElapsedMs(session));
+    return (
+      '<div class="quiz-sidecard__statgrid quiz-sidecard__statgrid--timescore">' +
+        '<div class="quiz-sidecard__stat is-time">' +
+          '<span class="quiz-sidecard__stat-ic quiz-sidecard__stat-ic--time" aria-hidden="true">' +
+          IC.timeClock +
+          "</span>" +
+          '<span class="quiz-sidecard__stat-name">Time</span>' +
+          '<strong class="quiz-sidecard__stat-val"><span data-quiz-live-time>' +
+          timeText +
+          "</span></strong>" +
+        "</div>" +
+        '<div class="quiz-sidecard__stat is-score">' +
+          '<span class="quiz-sidecard__stat-ic" aria-hidden="true">' +
+          IC.scoreStat +
+          "</span>" +
+          '<span class="quiz-sidecard__stat-name">Current Score</span>' +
+          '<strong class="quiz-sidecard__stat-val"><span data-quiz-live-score>' +
+          session.score +
+          "</span></strong>" +
+        "</div>" +
+      "</div>"
+    );
   }
 
   function renderQuizOverviewPanel(session) {
@@ -944,6 +1620,7 @@
       '<div class="quiz-index-grid">' + session.questions.map(function (item, index) {
         var result = session.submitted[item.id];
         var classes = "quiz-index-btn";
+        var statusIcon = "";
         if (index === session.currentIndex) {
           if (result) {
             classes += " is-current-submitted";
@@ -952,7 +1629,10 @@
             classes += " is-current";
           }
         } else if (result) classes += result.isCorrect ? " is-correct" : " is-wrong";
-        return '<button type="button" class="' + classes + '" data-quiz-jump="' + index + '">' + (index + 1) + '</button>';
+        if (result) {
+          statusIcon = '<span class="quiz-index-btn__status" aria-hidden="true">' + (result.isCorrect ? IC.correctMini : IC.wrongMini) + '</span>';
+        }
+        return '<button type="button" class="' + classes + '" data-quiz-jump="' + index + '"><span class="quiz-index-btn__number">' + (index + 1) + '</span>' + statusIcon + '</button>';
       }).join("") + '</div>' +
       '<div class="quiz-overview-stats"><span>Answered:</span><strong>' + answered + ' / ' + session.questions.length + '</strong></div>' +
     '</section>';
@@ -975,11 +1655,7 @@
           '<strong class="quiz-sidecard__stat-val">' + Math.max(Object.keys(session.submitted).length - session.correctCount, 0) + '</strong>' +
         '</div>' +
       '</div>' +
-      '<div class="quiz-sidecard__scorebox">' +
-        '<span class="quiz-sidecard__stat-ic" aria-hidden="true">' + IC.scoreStat + '</span>' +
-        '<span class="quiz-sidecard__stat-name">Current Score</span>' +
-        '<strong class="quiz-sidecard__stat-val">' + session.score + '</strong>' +
-      '</div>' +
+      renderQuizLiveTimeScoreRow(session) +
     '</section>';
   }
 
@@ -987,9 +1663,30 @@
     return '<button type="button" class="quiz-nav-btn ' + (extraClass || "") + '" data-quiz-action="' + action + '"' + (disabled ? " disabled" : "") + '>' + label + '</button>';
   }
 
+  function buildResultBadgeMarkup(badgeName) {
+    return (
+      '<div class="result-badge-wrap">' +
+        '<div class="result-badge-icon"><svg viewBox="0 0 48 48" aria-hidden="true" width="52" height="52">' +
+          '<path d="M11.5 32.5L9 44.5L22 38.8L24 45L26 38.8L39 44.5L36.5 32.5L24 34.2Z" fill="var(--color-primary)" opacity="0.93"/>' +
+          '<circle cx="24" cy="18" r="13" fill="color-mix(in srgb,var(--color-primary) 18%,white)" stroke="var(--color-primary)" stroke-width="2.5"/>' +
+          '<circle cx="24" cy="18" r="8.5" fill="color-mix(in srgb,var(--color-primary) 12%,white)"/>' +
+          '<path d="M24 11.5l2.1 4.25h4.7L27.35 18.9l1.45 4.65L24 20.35l-4.8 3.2 1.45-4.65-3.45-2.15h4.7z" fill="var(--color-primary)"/>' +
+        "</svg></div>" +
+        '<span class="result-badge-name">' + badgeName + "</span>" +
+      "</div>"
+    );
+  }
+
   function renderResultsPage() {
     var params = getParams();
     var result = getResultForPage();
+    if (!result) {
+      rootEl.innerHTML =
+        '<section class="test-hero"><div class="test-kicker">Results unavailable</div><h1 class="test-title">No completed quiz result is available yet.</h1><div class="test-quick-actions">' +
+        renderLinkButton("Back to map", "test.html", "test-link-btn--primary") +
+        "</div></section>";
+      return;
+    }
     var nextLevel = getNextLevel(result.level);
     var unitIndex = getUnitIndexInLevel(result.level, result.unit);
     var nodeNum = getMapNodeNumber(result.chapter, result.level, unitIndex);
@@ -1006,6 +1703,9 @@
     }
     var prevAttempt = currentIdx > 0 ? allAttempts[currentIdx - 1] : null;
     var nextAttempt = currentIdx < allAttempts.length - 1 ? allAttempts[currentIdx + 1] : null;
+    var learnTopics = getLearnTopicsForUnit(result.chapter, result.unit);
+    var learnHref = getPrimaryLearnHref(result.chapter, result.unit);
+    var resultsHintDelaySec = Math.max(0, (result.starsEarned || 0) * 0.28 + 0.42 + 0.06);
 
     applyChapterTheme(result.chapter);
 
@@ -1020,9 +1720,12 @@
           return arr;
         })();
     var miniOvHtml =
-      '<div class="results-mini-ov">' +
+      '<div class="results-mini-ov-wrap">' +
+        '<p class="results-mini-ov__hint" style="animation-delay:' + resultsHintDelaySec.toFixed(2) + 's">Tap a box to review! <span aria-hidden="true">→</span></p>' +
+        '<div class="results-mini-ov">' +
         qResults.map(function (qr, i) {
           var cls = qr.isCorrect === null ? " is-pending" : qr.isCorrect ? " is-correct" : " is-wrong";
+          var statusIcon = qr.isCorrect === null ? "" : '<span class="results-mini-ov__status" aria-hidden="true">' + (qr.isCorrect ? IC.correctMini : IC.wrongMini) + '</span>';
           var browseHref = buildUrl("test-quiz.html", {
             chapter: result.chapter,
             level: result.level,
@@ -1031,11 +1734,12 @@
             browse: "1",
             q: String(i)
           });
-          return '<a class="results-mini-ov__block' + cls + '" href="' + browseHref + '">' + (i + 1) + "</a>";
+          return '<a class="results-mini-ov__block' + cls + '" href="' + browseHref + '"><span class="results-mini-ov__number">' + (i + 1) + '</span>' + statusIcon + "</a>";
         }).join("") +
+        '</div>' +
       '</div>';
 
-    /* attempt switcher bar — only shown when more than 1 attempt */
+    /* attempt switcher bar */
     var attemptBarHtml = allAttempts.length > 1
       ? '<div class="results-attempt-bar">' +
           '<button type="button" class="results-attempt-nav-btn"' +
@@ -1049,7 +1753,12 @@
             (nextAttempt ? ' data-attempt-nav="' + nextAttempt.id + '" data-slide-dir="left"' : ' disabled') +
             ' aria-label="Newer attempt">\u203a</button>' +
         '</div>'
-      : '';
+      : '<div class="results-attempt-bar results-attempt-bar--single">' +
+          '<div class="results-attempt-info">' +
+            '<span class="results-attempt-label">First attempt</span>' +
+            '<span class="results-attempt-date">' + formatDateTime(result.timestamp) + '</span>' +
+          '</div>' +
+        '</div>';
 
     /* stars + badge */
     var starPath = "M24 5l4.9 10.1 11.1 1.6-8 7.8 1.9 11-9.9-5.2-9.9 5.2 1.9-11-8-7.8 11.1-1.6z";
@@ -1063,15 +1772,7 @@
       '</div>';
     }).join("");
     var badgeHtml = result.badgeAwarded
-      ? '<div class="result-badge-wrap" style="animation-delay:' + (3 * 0.28 + 0.3) + 's">' +
-          '<div class="result-badge-icon"><svg viewBox="0 0 48 48" aria-hidden="true" width="52" height="52">' +
-            '<path d="M11.5 32.5L9 44.5L22 38.8L24 45L26 38.8L39 44.5L36.5 32.5L24 34.2Z" fill="var(--color-primary)" opacity="0.93"/>' +
-            '<circle cx="24" cy="18" r="13" fill="color-mix(in srgb,var(--color-primary) 18%,white)" stroke="var(--color-primary)" stroke-width="2.5"/>' +
-            '<circle cx="24" cy="18" r="8.5" fill="color-mix(in srgb,var(--color-primary) 12%,white)"/>' +
-            '<path d="M24 11.5l2.1 4.25h4.7L27.35 18.9l1.45 4.65L24 20.35l-4.8 3.2 1.45-4.65-3.45-2.15h4.7z" fill="var(--color-primary)"/>' +
-          '</svg></div>' +
-          '<span class="result-badge-name">' + result.badgeAwarded + '</span>' +
-        '</div>'
+      ? '<div class="result-badge-wrap result-badge-wrap--slot" id="result-badge-slot" aria-hidden="true"></div>'
       : '';
 
     rootEl.innerHTML =
@@ -1094,22 +1795,36 @@
               renderResultStat("Score", result.score + " / " + result.maxScore) +
               renderResultStat("Accuracy", Math.round(result.accuracy * 100) + "%") +
               renderResultStat("Hints used", result.hintsUsed) +
-              renderResultStat("Best streak", result.bestStreak) +
+              renderResultStat("Time spent", formatElapsedDuration(getResultElapsedMs(result))) +
             '</div>' +
           '</div>' +
           '<div class="results-insights">' +
             '<div class="results-split">' +
-              renderResultsCard("Strengths", '<div class="results-list">' + result.strengths.map(function (item) { return '<div class="results-list__item"><strong>' + item + '</strong><div class="results-copy">Answered confidently enough to keep moving.</div></div>'; }).join("") + "</div>", IC.strengthTitle) +
-              renderResultsCard("Weak Areas", '<div class="results-list">' + result.weakAreas.map(function (item) { return '<div class="results-list__item"><strong>' + item + '</strong><div class="results-copy">Review before trying a harder route.</div></div>'; }).join("") + "</div>", IC.weakTitle) +
+              renderResultsCard("Strengths", renderResultInsightContent(result.strengths, NO_STRENGTH_MESSAGE), IC.strengthTitle) +
+              renderResultsCard("Weak Areas", renderResultInsightContent(result.weakAreas, result.weakAreasEmptyMessage || getNoWeaknessMessage(result.level)), IC.weakTitle) +
+              renderResultsCard("Recommended review topics", renderLearnTopicList(learnTopics), IC.bookTitle) +
             '</div>' +
-            renderResultsCard("Recommended review topics", '<ul class="test-note-list">' + result.reviewTopics.map(function (item) { return "<li>" + item + "</li>"; }).join("") + "</ul>", IC.bookTitle) +
           '</div>' +
         '</div>' +
         '<div class="results-actions-bar">' +
-          renderLinkButton("Retry This Quiz", buildUrl("test-quiz.html", { chapter: result.chapter, level: result.level, unit: result.unit, fresh: "1" }), "test-link-btn--primary") +
-          renderLinkButton("Try Next Quiz", nextLevel ? buildUrl("test.html", { chapter: result.chapter, level: nextLevel.id }) : buildUrl("test.html", { chapter: result.chapter, level: result.level }), "test-link-btn--soft") +
-          renderLinkButton("Review Recommended Topics", "learning.html", "test-link-btn--soft") +
-          '<button type="button" class="test-link-btn test-link-btn--soft" data-share-community="' + result.id + '">Share Reflection to Community</button>' +
+          renderLinkButton(
+            '<span class="label-desktop">Retry This Quiz</span><span class="label-mobile">Retry</span>',
+            buildUrl("test-quiz.html", { chapter: result.chapter, level: result.level, unit: result.unit, fresh: "1" }),
+            "test-link-btn--primary results-action-retry"
+          ) +
+          renderLinkButton(
+            "Reflect",
+            buildUrl("test-quiz.html", { chapter: result.chapter, level: result.level, unit: result.unit, resultId: result.id, browse: "1" }),
+            "test-link-btn--primary results-action-summarize"
+          ) +
+          '<button type="button" class="test-link-btn test-link-btn--primary results-action-share" data-share-community="' + result.id + '">' +
+            '<span class="results-action-share__icon" aria-hidden="true">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">' +
+                '<path d="M16 11c1.93 0 3.5-1.57 3.5-3.5S17.93 4 16 4s-3.5 1.57-3.5 3.5S14.07 11 16 11zm-8 0c1.93 0 3.5-1.57 3.5-3.5S9.93 4 8 4 4.5 5.57 4.5 7.5 6.07 11 8 11zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm8 0c-.29 0-.62.02-.97.05 1.33.96 2.47 2.25 2.47 3.95v2h6v-2c0-2.66-5.33-4-7.5-4z"/>' +
+              "</svg>" +
+            "</span>" +
+            '<span class="label-desktop">Share to Community</span><span class="label-mobile">Share</span>' +
+          "</button>" +
         '</div>' +
       '</div>';
 
@@ -1120,16 +1835,23 @@
     var si;
     for (si = 1; si <= result.starsEarned; si++) {
       (function (n) {
-        setTimeout(function () { playSfx(SFX_STAR, { layers: 3, staggerMs: 20 }); }, n * starStepMs + starPeakMs);
+        setTimeout(function () { playSfx(SFX_STAR); }, n * starStepMs + starPeakMs);
       })(si);
     }
-    if (result.badgeAwarded) {
-      var badgeDelayMs = 3 * starStepMs + 300;
-      var badgePeakMs = Math.round(550 * 0.55);
+    if (result.starsEarned === 3) {
+      var badgeDelayMs = 3 * starStepMs + 180;
+      var badgePeakMs = Math.round(500 * 0.52);
+      var confettiAtMs = badgeDelayMs + badgePeakMs;
       setTimeout(function () {
-        playSfx(SFX_BADGE);
         launchConfetti();
-      }, badgeDelayMs + badgePeakMs);
+        if (result.badgeAwarded) {
+          var slot = document.getElementById("result-badge-slot");
+          if (slot) slot.outerHTML = buildResultBadgeMarkup(result.badgeAwarded);
+          playSfx(SFX_TADA);
+        } else {
+          playSfx(SFX_CONFETTI);
+        }
+      }, confettiAtMs);
     }
   }
 
@@ -1138,8 +1860,8 @@
     var levelFilter = getMistakeLevelFilter();
     var statusFilter = getMistakeStatusFilter();
     var tab = getMistakeTab();
-    var page = getMistakePage();
-    var PER_PAGE = 9;
+    var rawMistakePage = getMistakePage();
+    var PER_PAGE = isTestMistakesNarrowViewport() ? 3 : 9;
 
     // Use the home theme colours, not the chapter override
     mainEl.style.removeProperty("--theme-stop-2");
@@ -1148,8 +1870,8 @@
     mainEl.style.removeProperty("--test-border");
 
     var backUrl = buildUrl("test.html", { chapter: chapterFilter === "all" ? state.selection.chapter : chapterFilter, level: levelFilter === "all" ? state.selection.level : levelFilter });
-    var mkTabUrl = buildUrl("test-mistakes.html", { chapter: chapterFilter === "all" ? "" : chapterFilter, level: levelFilter === "all" ? "" : levelFilter });
-    var flTabUrl = buildUrl("test-mistakes.html", { chapter: chapterFilter === "all" ? "" : chapterFilter, level: levelFilter === "all" ? "" : levelFilter, tab: "flagged" });
+    var mkTabUrl = buildUrl("test-mistakes.html", {});
+    var flTabUrl = buildUrl("test-mistakes.html", { tab: "flagged" });
 
     var allMistakes = getVisibleMistakes(chapterFilter, levelFilter, "all");
     var reviewedCount = allMistakes.filter(function (i) { return i.mastered; }).length;
@@ -1172,17 +1894,19 @@
     var bodyHtml;
     if (tab === "flagged") {
       var fTotalPages = Math.max(1, Math.ceil(allFlagged.length / PER_PAGE));
-      var fPageItems = allFlagged.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      var fPage = Math.min(rawMistakePage, fTotalPages);
+      var fPageItems = allFlagged.slice((fPage - 1) * PER_PAGE, fPage * PER_PAGE);
       bodyHtml =
         renderMistakesToolbar(chapterFilter, levelFilter, null) +
         (fPageItems.length
           ? '<div class="mistake-compact-grid">' + fPageItems.map(renderFlaggedCompactCard).join("") + '</div>'
           : '<div class="mistakes-empty mistakes-empty--stacked"><p class="mistakes-empty__line">No bookmarked questions yet.</p><p class="mistakes-empty__line">Use the <span class="mistakes-empty__ic" aria-hidden="true">' + bookmarkSvg + '</span> button during a quiz to save questions here.</p></div>') +
-        renderPagination(page, fTotalPages, chapterFilter, levelFilter, tab, "");
+        renderPagination(fPage, fTotalPages, chapterFilter, levelFilter, tab, "");
     } else {
       var visible = getVisibleMistakes(chapterFilter, levelFilter, statusFilter);
       var mTotalPages = Math.max(1, Math.ceil(visible.length / PER_PAGE));
-      var mPageItems = visible.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      var mPage = Math.min(rawMistakePage, mTotalPages);
+      var mPageItems = visible.slice((mPage - 1) * PER_PAGE, mPage * PER_PAGE);
       bodyHtml =
         renderMistakesToolbar(chapterFilter, levelFilter, statusFilter) +
         '<div class="mistakes-stats-row">' +
@@ -1195,7 +1919,7 @@
         (mPageItems.length
           ? '<div class="mistake-compact-grid">' + mPageItems.map(renderMistakeCompactCard).join("") + '</div>'
           : '<div class="mistakes-empty">No mistakes match the current filters.</div>') +
-        renderPagination(page, mTotalPages, chapterFilter, levelFilter, tab, statusFilter);
+        renderPagination(mPage, mTotalPages, chapterFilter, levelFilter, tab, statusFilter);
     }
 
     var mainBodyHtml;
@@ -1229,7 +1953,7 @@
             '<div class="mistakes-header__text">' +
               '<div class="test-kicker">Study Tools</div>' +
               '<h1 class="mistakes-title">Question Folder</h1>' +
-              '<p class="mistakes-subtitle">Review missed questions and bookmarked items.</p>' +
+              '<p class="mistakes-subtitle">Review missed and bookmarked questions.</p>' +
             '</div>' +
           '</div>' +
           tabsHtml +
@@ -1283,6 +2007,9 @@
     state.selection.level = levelId;
 
     if (params.fresh !== "1" && state.currentQuiz && state.currentQuiz.baseSignature === baseSignature) {
+      ensureQuizTimerState(state.currentQuiz);
+      normalizeQuizTimerForMode(state.currentQuiz);
+      if (shouldRunQuizTimer(state.currentQuiz)) resumeQuizTimer(state.currentQuiz);
       if (state.currentQuiz.browseOnly && params.browse === "1") {
         var qSync = parseInt(params.q, 10);
         if (!isNaN(qSync) && qSync >= 0 && qSync < state.currentQuiz.questions.length && qSync !== state.currentQuiz.currentIndex) {
@@ -1352,6 +2079,8 @@
       correctInit = typeof browseResult.correctCount === "number" ? browseResult.correctCount : 0;
     }
 
+    var runLiveTimer = !isBrowseReplay && mode !== "review";
+
     state.currentQuiz = {
       baseSignature: baseSignature,
       chapterId: chapterId,
@@ -1367,9 +2096,12 @@
       correctCount: isBrowseReplay && browseResult ? correctInit : 0,
       currentStreak: 0,
       bestStreak: isBrowseReplay && browseResult && typeof browseResult.bestStreak === "number" ? browseResult.bestStreak : 0,
+      elapsedMs: isBrowseReplay && browseResult ? getResultElapsedMs(browseResult) : 0,
+      timerActiveSince: runLiveTimer ? Date.now() : null,
       browseOnly: !!(isBrowseReplay && browseResult),
       reviewResultId: isBrowseReplay && browseResult ? browseResult.id : ""
     };
+    normalizeQuizTimerForMode(state.currentQuiz);
     saveState();
     if (state.currentQuiz && state.currentQuiz.browseOnly) {
       syncBrowseReplayQueryUrl(state.currentQuiz);
@@ -1463,6 +2195,12 @@
       return;
     }
     if (action === "hint") {
+      if (quiz.revealedHints[question.id]) return;
+      quizDialog = { kind: "hint" };
+      renderPage();
+      return;
+    }
+    if (action === "hint-confirm") {
       quiz.revealedHints[question.id] = true;
       playSfx(SFX_HINT);
       saveState();
@@ -1522,10 +2260,15 @@
       quiz.correctCount += 1;
       quiz.currentStreak += 1;
       quiz.bestStreak = Math.max(quiz.bestStreak, quiz.currentStreak);
+      if (quiz.mode === "path") {
+        state.rewards.currentStreak = (typeof state.rewards.currentStreak === "number" ? state.rewards.currentStreak : 0) + 1;
+        state.rewards.streak = Math.max(typeof state.rewards.streak === "number" ? state.rewards.streak : 0, state.rewards.currentStreak);
+      }
       if (quiz.mode === "review") markMistakeReviewed(question.id);
       playSfx(SFX_CORRECT);
     } else {
       quiz.currentStreak = 0;
+      if (quiz.mode === "path") state.rewards.currentStreak = 0;
       upsertMistake(question, quiz, buildMistakeReason(question));
       playSfx(SFX_WRONG);
     }
@@ -1537,12 +2280,13 @@
   function finalizeQuiz() {
     var quiz = state.currentQuiz;
     if (!quiz || quiz.browseOnly) return;
+    pauseQuizTimer(quiz);
     var result = buildResult(quiz);
     state.history.unshift(result);
     state.history = state.history.slice(0, 20);
-    state.lastResult = result;
     updateProgress(result);
     updateRewards(result);
+    state.lastResult = result;
     var auth = getAuthApi();
     var username = getCurrentUsername();
     if (auth && auth.recordActivity && username) {
@@ -1584,14 +2328,16 @@
       totalQuestions: quiz.questions.length,
       hintsUsed: Object.keys(quiz.revealedHints).length,
       starsEarned: Math.max(1, Math.round(accuracy * 3)),
-      badgeAwarded: accuracy >= 0.9 ? buildBadgeName(quiz.chapterId) : null,
+      badgeAwarded: null,
       bestStreak: quiz.bestStreak,
+      elapsedMs: getQuizElapsedMs(quiz),
       questionResults: quiz.questions.map(function (q) {
         var sub = quiz.submitted[q.id] || null;
         return { id: q.id, isCorrect: sub ? sub.isCorrect : null, selected: sub ? sub.selected : null, questionSnapshot: clone(q) };
       }),
-      strengths: unique(strongTopics).slice(0, 3).length ? unique(strongTopics).slice(0, 3) : [quiz.questions[0].topic],
-      weakAreas: unique(weakTopics).slice(0, 3).length ? unique(weakTopics).slice(0, 3) : ["No major weak area detected"],
+      strengths: unique(strongTopics).slice(0, 3).length ? unique(strongTopics).slice(0, 3) : [NO_STRENGTH_MESSAGE],
+      weakAreas: unique(weakTopics).slice(0, 3).length ? unique(weakTopics).slice(0, 3) : [getNoWeaknessMessage(quiz.levelId)],
+      weakAreasEmptyMessage: getNoWeaknessMessage(quiz.levelId),
       reviewTopics: unique(weakTopics).length ? unique(weakTopics) : ["You can progress to the next path or revisit the map for confidence."],
       timestamp: new Date().toISOString()
     };
@@ -1611,8 +2357,14 @@
 
   function updateRewards(result) {
     state.rewards.lifetimePoints = (typeof state.rewards.lifetimePoints === "number" ? state.rewards.lifetimePoints : 0) + result.score;
-    state.rewards.streak = result.accuracy >= 0.7 ? state.rewards.streak + 1 : 1;
-    if (result.badgeAwarded && state.rewards.badges.indexOf(result.badgeAwarded) === -1) state.rewards.badges.push(result.badgeAwarded);
+    var badgeName = buildBadgeName(result.chapter);
+    var currentBadges = Array.isArray(state.rewards.badges) ? state.rewards.badges.slice() : [];
+    var nextBadges = getBadgeInventoryFromHistory(state.history);
+    var newlyUnlocked = nextBadges.indexOf(badgeName) !== -1 && currentBadges.indexOf(badgeName) === -1;
+    var stars3 = typeof result.starsEarned === "number" && result.starsEarned === 3;
+    /* Only flag a "new badge" celebration on this result when 3★; replays / low-star runs never get badgeAwarded */
+    result.badgeAwarded = newlyUnlocked && stars3 ? badgeName : null;
+    state.rewards.badges = nextBadges;
   }
 
   function getUnits(chapterId, levelId) {
@@ -1695,6 +2447,40 @@
     return 1;
   }
 
+  function getUnitStarsFromHistory(history, chapterId, levelId, unitId) {
+    var attempts = (history || []).filter(function (r) { return r.chapter === chapterId && r.level === levelId && r.unit === unitId; });
+    if (!attempts.length) return 0;
+    var best = Math.max.apply(null, attempts.map(function (r) { return r.accuracy; }));
+    if (best === 1) return 3;
+    if (Math.floor(best * 100) >= 60) return 2;
+    return 1;
+  }
+
+  function getChapterLevelBestStars(chapterId, levelId) {
+    return UNIT_TEMPLATES[levelId].reduce(function (sum, template) {
+      return sum + getUnitStars(chapterId, levelId, template.id);
+    }, 0);
+  }
+
+  function getChapterLevelBestStarsFromHistory(history, chapterId, levelId) {
+    return UNIT_TEMPLATES[levelId].reduce(function (sum, template) {
+      return sum + getUnitStarsFromHistory(history, chapterId, levelId, template.id);
+    }, 0);
+  }
+
+  function getBadgeInventoryFromHistory(history) {
+    var badges = [];
+    CHAPTERS.forEach(function (chapter) {
+      LEVEL_ORDER.forEach(function (levelId) {
+        var maxStars = UNIT_TEMPLATES[levelId].length * 3;
+        if (getChapterLevelBestStarsFromHistory(history, chapter.id, levelId) >= maxStars) {
+          badges.push(buildBadgeName(chapter.id));
+        }
+      });
+    });
+    return unique(badges);
+  }
+
   function getTotalBestStarsEarned() {
     var total = 0;
     CHAPTERS.forEach(function (ch) {
@@ -1734,7 +2520,7 @@
 
     return {
       continueHref: currentQuizLink,
-      mistakesHref: buildUrl("test-mistakes.html", { chapter: chapterId, level: levelId }),
+      mistakesHref: buildUrl("test-mistakes.html", {}),
       summaryHref: latest ? buildUrl("test-results.html", { chapter: chapterId, level: levelId, resultId: latest.id }) : "#"
     };
   }
@@ -1748,6 +2534,8 @@
   }
 
   function getUnitQuestions(chapterId, levelId, unitId) {
+    var banked = getBankQuestions(chapterId, levelId, unitId);
+    if (banked.length) return banked;
     if (chapterId === "basics" && levelId === "easy" && unitId === "unit-1") {
       var fixed = [
         makeQuestion("mcq", "Primary colors", "Which one is a primary color in the basic RYB model?", ["Red", "Green", "Purple", "Brown"], "Red", "Primary color groups", chapterId, levelId, unitId),
@@ -1783,6 +2571,108 @@
     return ordered;
   }
 
+  function getBankQuestions(chapterId, levelId, unitId) {
+    var chapter = EXTERNAL_QUESTION_BANK && EXTERNAL_QUESTION_BANK[chapterId];
+    var unit = chapter && chapter.units ? chapter.units[unitId] : null;
+    var rows = unit && unit.levels ? unit.levels[levelId] : null;
+    if (!Array.isArray(rows) || !rows.length) return [];
+    return rows.map(function (row, index) {
+      var question = makeQuestion(
+        row.type,
+        row.topic,
+        row.prompt,
+        row.options,
+        row.correct,
+        row.reviewTopic,
+        chapterId,
+        levelId,
+        unitId
+      );
+      if (row.explanation) question.explanation = row.explanation;
+      if (row.hint) question.hint = row.hint;
+      question.hint = polishQuestionHint(question.hint, question.reviewTopic, question.type);
+      question.explanation = polishQuestionExplanation(question.explanation, question.reviewTopic, question.type);
+      question.id = chapterId + "-" + levelId + "-" + unitId + "-q" + (index + 1);
+      return question;
+    });
+  }
+
+  function polishQuestionHint(hint, reviewTopic, type) {
+    var text = String(hint || "").trim();
+    if (!text) return text;
+
+    text = text
+      .replace(/^Choose the answer about (.+)\.$/i, "Focus on $1.")
+      .replace(/^Choose the option about (.+)\.$/i, "Focus on $1.")
+      .replace(/^Pick the answer about (.+)\.$/i, "Focus on $1.")
+      .replace(/^Pick the answer that (.+)\.$/i, "Focus on the option that $1.")
+      .replace(/^Choose the answer that (.+)\.$/i, "Focus on the option that $1.")
+      .replace(/^Look for the answer about (.+), not (.+)\.$/i, "Use $1 as the deciding idea rather than $2.")
+      .replace(/^Look for the answer connecting (.+) and (.+)\.$/i, "Use the link between $1 and $2 to decide.")
+      .replace(/^This is a (.+) question\.$/i, "Use the core idea of $1 here.")
+      .replace(/^This is an (.+) question\.$/i, "Use the core idea of $1 here.")
+      .replace(/^This is one of the main reasons (.+)\.$/i, "Keep in mind that $1.")
+      .replace(/^Think about (.+)\.$/i, "Use $1 as the main clue.")
+      .replace(/^Choose the answer with (.+)\.$/i, "Use $1 as the deciding clue.")
+      .replace(/^Choose the answer that starts with (.+)\.$/i, "Start from $1 when you compare the options.")
+      .replace(/^Choose the answer that verifies (.+)\.$/i, "Look for the option that checks $1.")
+      .replace(/^Choose the answer that balances (.+)\.$/i, "Look for the option that balances $1.")
+      .replace(/^Choose the answer that keeps (.+)\.$/i, "Keep $1 in view when you decide.")
+      .replace(/^Choose the answer that ties (.+)\.$/i, "Tie $1 back to the decision.")
+      .replace(/^Choose the answer that compares (.+)\.$/i, "Compare the options through $1.")
+      .replace(/^Choose the answer that thinks in (.+)\.$/i, "Think in terms of $1.")
+      .replace(/^Choose the answer that includes (.+)\.$/i, "Look for the option that includes $1.")
+      .replace(/^Choose the answer about verification\.$/i, "Look for the option that verifies the result instead of assuming it.")
+      .replace(/^Choose the answer about context\.$/i, "Use workflow context as the deciding idea.")
+      .replace(/^This is a core accessibility idea\.$/i, "Use readability and contrast as the deciding ideas.")
+      .replace(/^This is a basic colour-management principle\.$/i, "Use cross-device consistency as the key principle.")
+      .replace(/^This is a core HDR distinction\.$/i, "Keep luminance range separate from resolution or gamut.")
+      .replace(/^This is an end-to-end workflow topic\.$/i, "Judge the option by whether the whole workflow supports it.")
+      .replace(/^This is a practical workflow principle\.$/i, "Prefer the option that checks the output before sign-off.")
+      .replace(/^This is a destination-aware workflow question\.$/i, "Use the target destination as the deciding factor.")
+      .replace(/^This is a systems topic\.$/i, "Think about the connected workflow, not one isolated step.")
+      .replace(/^This is a workflow architecture question\.$/i, "Trace how colour is transformed through the system.")
+      .replace(/^This is a predictability question\.$/i, "Prefer the option that makes transformations more predictable.")
+      .replace(/^This is a trade-off question\.$/i, "Think about what the workflow is trying to preserve under constraints.")
+      .replace(/^This is about trade-offs under constraints\.$/i, "Focus on how the workflow manages unavoidable output limits.")
+      .replace(/^This is a practical sign-off principle\.$/i, "Prefer the option that checks the real destination before approval.")
+      .replace(/^This is about measurable values, not guessing\.$/i, "Treat the picker as a source of exact values, not visual memory.")
+      .replace(/^This is a precision question\.$/i, "Use the idea of exact, reusable values as the clue.")
+      .replace(/^This is a handoff-control question\.$/i, "Think about keeping the same value consistent between tools.")
+      .replace(/^This is a pattern-recognition idea\.$/i, "Look for the option that helps compare repeated visual patterns.")
+      .replace(/^This is an evidence question\.$/i, "Prefer the option that adds visible evidence instead of opinion.")
+      .replace(/^This is about choosing the right tool\.$/i, "Match the tool to the problem it is meant to measure.")
+      .replace(/^This is an evidence-versus-guessing question\.$/i, "Prefer measurable feedback over visual guesswork.")
+      .replace(/^This is a diagnosis question\.$/i, "Identify the actual problem before you choose a fix.")
+      .replace(/^This is an integration question\.$/i, "Combine tool choice, context, and visible outcome in your reasoning.")
+      .replace(/^This is a sign-off discipline point\.$/i, "Keep final-context review in the workflow before approval.");
+
+    if (/^Focus on [a-z]/.test(text)) {
+      text = text.replace(/^Focus on ([a-z])/, function (_, c) { return "Focus on " + c.toLowerCase(); });
+    }
+
+    if (type === "true-false" && /^Use /.test(text) === false && /^Focus /.test(text) === false) {
+      text = "Check whether the statement matches the core idea of " + String(reviewTopic || "this topic") + ".";
+    }
+
+    return text;
+  }
+
+  function polishQuestionExplanation(explanation, reviewTopic, type) {
+    var text = String(explanation || "").trim();
+    if (!text) return text;
+    if (type === "true-false" && /^That is /.test(text)) {
+      return text.replace(/^That is /, "That principle is ");
+    }
+    if (text === "The correct answer depends on the key concept in this topic.") {
+      return "The answer follows from the core idea behind " + String(reviewTopic || "this topic") + ".";
+    }
+    if (text === "This sequence matters because the process becomes easier to repeat and explain once the order is clear.") {
+      return "This order matters because the workflow becomes easier to apply and explain once each step is in the right place.";
+    }
+    return text;
+  }
+
   function makeQuestion(type, topic, prompt, options, correct, reviewTopic, chapterId, levelId, unitId) {
     return {
       type: type,
@@ -1808,12 +2698,24 @@
 
   function hasAnswer(question, draft) { return question.type === "sort" ? Array.isArray(draft) && draft.length === question.correct.length : typeof draft === "string" && draft.length > 0; }
   function evaluate(question, draft) { return question.type === "sort" ? JSON.stringify(draft) === JSON.stringify(question.correct) : draft === question.correct; }
+  function getQuestionOptionId(option) { return option && typeof option === "object" && Object.prototype.hasOwnProperty.call(option, "id") ? option.id : option; }
+  function getQuestionOptionLabel(option) { return option && typeof option === "object" && Object.prototype.hasOwnProperty.call(option, "label") ? option.label : String(option); }
+  function findQuestionOptionById(question, id) {
+    var opts = Array.isArray(question.options) ? question.options : [];
+    for (var i = 0; i < opts.length; i++) {
+      if (getQuestionOptionId(opts[i]) === id) return opts[i];
+    }
+    return null;
+  }
   /** Plain-text suffix after "The correct answer is: " for wrong-answer feedback (quiz + solo). */
   function formatCorrectAnswerForFeedback(question) {
     var opts = Array.isArray(question.options) ? question.options : [];
     var cor = question.correct;
     if (question.type === "sort" && Array.isArray(cor)) {
-      return cor.join(" \u2192 ");
+      return cor.map(function (id) {
+        var option = findQuestionOptionById(question, id);
+        return option ? getQuestionOptionLabel(option) : String(id);
+      }).join(" \u2192 ");
     }
     if (question.type === "image") {
       for (var ii = 0; ii < opts.length; ii++) {
@@ -1862,23 +2764,30 @@
       return '<div class="quiz-image-options">' + opts.map(function (option) {
         var sel = draft === option.id;
         var cls = "quiz-image-option" + (sel ? " is-selected" : "");
-        return '<button type="button" class="' + cls + '"' + (isSubmitted ? ' disabled' : ' data-answer-value="' + option.id + '"') + '>' + renderImagePreview(option) + '<strong class="quiz-image-option__label">' + option.label + "</strong></button>";
+        return '<button type="button" class="' + cls + '"' + (isSubmitted ? ' disabled' : ' data-answer-value="' + option.id + '"') + '>' + renderImagePreview(option) + (option.hideLabel ? "" : '<strong class="quiz-image-option__label">' + option.label + "</strong>") + '</button>';
       }).join("") + "</div>";
     }
     if (question.type === "sort") {
       var selected = Array.isArray(draft) ? draft : [];
-      var remaining = opts.filter(function (item) { return selected.indexOf(item) === -1; });
+      var remaining = opts.filter(function (item) { return selected.indexOf(getQuestionOptionId(item)) === -1; });
       var poolHtml = remaining.length
         ? remaining.map(function (item) {
-            return '<button type="button" class="quiz-sort-chip"' + (isSubmitted ? ' disabled' : ' data-sort-add="' + item + '"') + '>' + item + '</button>';
+            var itemId = getQuestionOptionId(item);
+            var itemLabel = getQuestionOptionLabel(item);
+            if (item && typeof item === "object" && item.preview) {
+              return '<button type="button" class="quiz-image-option quiz-image-option--sort"' + (isSubmitted ? ' disabled' : ' data-sort-add="' + itemId + '"') + '>' + renderImagePreview(item) + (item.hideLabel ? "" : '<strong class="quiz-image-option__label">' + itemLabel + '</strong>') + '</button>';
+            }
+            return '<button type="button" class="quiz-sort-chip"' + (isSubmitted ? ' disabled' : ' data-sort-add="' + itemId + '"') + '>' + itemLabel + '</button>';
           }).join("")
         : '<span class="quiz-sort-pool-empty">All items placed below</span>';
       var rankHtml = question.correct.map(function (item, index) {
         var filled = !!selected[index];
+        var selectedOption = filled ? findQuestionOptionById(question, selected[index]) : null;
+        var selectedLabel = selectedOption ? getQuestionOptionLabel(selectedOption) : (filled ? String(selected[index]) : "");
         return '<div class="quiz-rank-row' + (filled ? ' is-filled' : '') + '">' +
           '<span class="quiz-rank-num">' + (index + 1) + '</span>' +
           (filled
-            ? '<span class="quiz-rank-label">' + selected[index] + '</span>' +
+            ? '<span class="quiz-rank-label">' + selectedLabel + '</span>' +
               (!isSubmitted ? '<button type="button" class="quiz-rank-remove" data-sort-remove="' + index + '" aria-label="Remove">\u00d7</button>' : '')
             : '<span class="quiz-rank-placeholder">Click an item above to place it here</span>') +
         '</div>';
@@ -1933,19 +2842,21 @@
     var explanationOpen = !!mistake.showExplanation;
     return '<article class="mistake-card mistake-card--review"><div class="mistake-item__header"><div><div class="test-inline-meta"><span class="mistake-tag">' + getLevel(mistake.level).name + '</span><span class="mistake-tag">' + mistake.topic + '</span><span class="mistake-tag">' + (mistake.mastered ? "Reviewed" : "Pending") + '</span></div><h3 class="mistake-card__title">' + mistake.prompt + '</h3></div></div><div class="mistake-answer-panels"><div class="mistake-answer-panel is-wrong"><span class="mistake-answer-panel__label">Your answer</span><strong>' + getMistakeUserAnswer(mistake) + '</strong></div><div class="mistake-answer-panel is-correct"><span class="mistake-answer-panel__label">Correct answer</span><strong>' + getMistakeCorrectAnswer(mistake) + '</strong></div></div>' + (explanationOpen ? '<div class="mistake-explanation"><strong>Explanation:</strong> ' + mistake.correctConcept + '<br /><span class="test-card-copy">' + mistake.mistakeReason + '</span></div>' : "") + '<div class="mistake-item__footer"><div class="mistake-item__meta"><span>Attempts: ' + (mistake.attemptCount || 1) + '</span><span>Last attempt: ' + formatDate(mistake.lastWrongAt) + '</span></div><div class="mistake-item__controls"><button type="button" class="test-inline-btn" data-toggle-explanation="' + mistake.id + '">' + (explanationOpen ? "Hide explanation" : "View explanation") + '</button><button type="button" class="test-action test-action--primary" data-mark-mastered="' + mistake.id + '">' + (mistake.mastered ? "Mark as pending" : "Mark reviewed") + '</button></div></div></article>';
   }
-  function renderSidebarCard(title, inner, iconHtml) {
+  function renderSidebarCard(title, inner, iconHtml, dockPanelId) {
     var head = iconHtml
       ? '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + iconHtml + '</span><span class="test-card-title__text">' + title + "</span></h3>"
       : '<h3 class="test-card-title">' + title + "</h3>";
-    return "<section class=\"test-sidebar-card\">" + head + inner + "</section>";
+    var dockAttr = dockPanelId ? ' data-map-dock-panel="' + dockPanelId + '" id="map-dock-panel-' + dockPanelId + '"' : "";
+    return "<section class=\"test-sidebar-card\"" + dockAttr + ">" + head + inner + "</section>";
   }
   function renderSidebarLinkCard(title, inner, href) { return '<a class="test-sidebar-card test-sidebar-card--link" href="' + href + '"><h3 class="test-card-title">' + title + "</h3>" + inner + "</a>"; }
-  function renderReviewCard(chapterId, levelId) {
-    var mistakesUrl = buildUrl("test-mistakes.html", { chapter: chapterId, level: levelId });
-    var savedUrl = buildUrl("test-mistakes.html", { chapter: chapterId, level: levelId, tab: "flagged" });
+  function renderReviewCard(chapterId, levelId, dockPanelId) {
+    var mistakesUrl = buildUrl("test-mistakes.html", {});
+    var savedUrl = buildUrl("test-mistakes.html", { tab: "flagged" });
     var mistakeSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 13.59L14.59 17 12 14.41 9.41 17 8 15.59l2.59-2.59L8 10.41 9.41 9 12 11.59 14.59 9 16 10.41l-2.59 2.59L16 15.59z"/></svg>';
     var bookmarkSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-    return '<section class="test-sidebar-card">' +
+    var dockAttr = dockPanelId ? ' data-map-dock-panel="' + dockPanelId + '" id="map-dock-panel-' + dockPanelId + '"' : "";
+    return '<section class="test-sidebar-card"' + dockAttr + ">" +
       '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + IC.folderTitle + '</span><span class="test-card-title__text">Question Folder</span></h3>' +
       '<div class="review-btn-row">' +
         '<a class="review-btn review-btn--mistakes" href="' + mistakesUrl + '">' + mistakeSvg + '<span>Mistakes</span></a>' +
@@ -1953,11 +2864,35 @@
       '</div>' +
     '</section>';
   }
-  function renderRewardsCard(totalScore) {
+  function badgeRewardTagInlineStyle(chapterId) {
+    var ch = getChapter(chapterId) || CHAPTERS[0];
+    var p = ch.colors.primary;
+    var rgb = hexToRgb(p);
+    return (
+      "color:" + p + ";" +
+      "border:none;" +
+      "background:rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.11);"
+    );
+  }
+
+  function rewardBadgeMiniSvgHtml() {
+    return (
+      '<svg class="reward-badge-tag__ic" viewBox="0 0 48 48" width="16" height="16" aria-hidden="true">' +
+        '<path d="M11.5 32.5L9 44.5L22 38.8L24 45L26 38.8L39 44.5L36.5 32.5L24 34.2Z" fill="currentColor" opacity="0.9"/>' +
+        '<circle cx="24" cy="18" r="13" fill="currentColor" opacity="0.14"/>' +
+        '<circle cx="24" cy="18" r="13" fill="none" stroke="currentColor" stroke-width="2.2" opacity="0.45"/>' +
+        '<circle cx="24" cy="18" r="8.5" fill="currentColor" opacity="0.1"/>' +
+        '<path d="M24 11.5l2.1 4.25h4.7L27.35 18.9l1.45 4.65L24 20.35l-4.8 3.2 1.45-4.65-3.45-2.15h4.7z" fill="currentColor"/>' +
+      "</svg>"
+    );
+  }
+
+  function renderRewardsCard(totalScore, dockPanelId) {
     var starSvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/></svg>';
     var flameSvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8c0-5.39-2.59-10.2-6.5-13.33zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>';
     var trophySvg = '<svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H9v2h6v-2h-2v-2.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v2.83C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>';
-    return '<section class="test-sidebar-card">' +
+    var dockAttr = dockPanelId ? ' data-map-dock-panel="' + dockPanelId + '" id="map-dock-panel-' + dockPanelId + '"' : "";
+    return '<section class="test-sidebar-card" data-rewards-card' + dockAttr + ">" +
       '<h3 class="test-card-title test-card-title--with-icon"><span class="test-card-title__icon">' + IC.rewardsTitle + '</span><span class="test-card-title__text">Rewards</span></h3>' +
       '<div class="reward-grid">' +
         '<div class="reward-item">' +
@@ -1968,7 +2903,7 @@
         '<div class="reward-item">' +
           '<div class="reward-item__icon reward-item__icon--streak">' + flameSvg + '</div>' +
           '<strong class="reward-item__value">' + state.rewards.streak + '</strong>' +
-          '<span class="reward-item__label">Streak</span>' +
+          '<span class="reward-item__label">Max streak</span>' +
         '</div>' +
         '<div class="reward-item">' +
           '<div class="reward-item__icon reward-item__icon--score">' + trophySvg + '</div>' +
@@ -1976,7 +2911,24 @@
           '<span class="reward-item__label">Total pts</span>' +
         '</div>' +
       '</div>' +
-      (state.rewards.badges.length ? '<div class="reward-badges">' + state.rewards.badges.map(function (b) { return '<span class="test-tag">' + b + '</span>'; }).join('') + '</div>' : '') +
+      (state.rewards.badges.length
+        ? '<div class="reward-badges">' +
+            state.rewards.badges.map(function (b) {
+              var cid = getBadgeChapterId(b);
+              return (
+                '<button type="button" class="test-tag badge-reveal-tag reward-badge-tag" style="' +
+                escapeAttr(badgeRewardTagInlineStyle(cid)) +
+                '" data-badge-replay="' +
+                escapeAttr(b) +
+                '">' +
+                rewardBadgeMiniSvgHtml() +
+                '<span class="reward-badge-tag__lbl">' +
+                b +
+                "</span></button>"
+              );
+            }).join('') +
+          '</div>'
+        : '') +
     '</section>';
   }
   function renderResultsCard(title, inner, iconHtml) {
@@ -2042,7 +2994,7 @@
   function renderActionButton(label, action, disabled, locked) { return '<button type="button" class="' + (action === "next" ? "test-action test-action--primary" : "test-action test-action--soft") + '" data-quiz-action="' + action + '"' + (disabled || locked ? " disabled" : "") + ">" + label + "</button>"; }
   function renderMapChapterSelect(current) { return '<select class="test-map-topbar__select" data-map-select="chapter">' + CHAPTERS.map(function (item, index) { return '<option value="' + item.id + '"' + (current === item.id ? " selected" : "") + ">" + (index + 1) + ". " + item.name + "</option>"; }).join("") + "</select>"; }
   function renderMapLevelSelect(current) { return '<select class="test-map-topbar__select" data-map-select="level">' + LEVELS.map(function (item) { return '<option value="' + item.id + '"' + (current === item.id ? " selected" : "") + ">" + item.name + "</option>"; }).join("") + "</select>"; }
-  function renderChapterFilter(current) { return '<select class="test-map-topbar__select" id="mistake-chapter" data-mistake-filter="chapter"><option value="all"' + (current === "all" ? " selected" : "") + '>All Chapters</option>' + CHAPTERS.map(function (item) { return '<option value="' + item.id + '"' + (current === item.id ? " selected" : "") + ">" + item.name + "</option>"; }).join("") + "</select>"; }
+  function renderChapterFilter(current) { return '<select class="test-map-topbar__select" id="mistake-chapter" data-mistake-filter="chapter"><option value="all"' + (current === "all" ? " selected" : "") + '>All Chapters</option>' + CHAPTERS.map(function (item, index) { return '<option value="' + item.id + '"' + (current === item.id ? " selected" : "") + ">" + (index + 1) + ". " + item.name + "</option>"; }).join("") + "</select>"; }
   function renderLevelFilter(current) { return '<select class="test-map-topbar__select" id="mistake-level" data-mistake-filter="level"><option value="all"' + (current === "all" ? " selected" : "") + '>All Levels</option>' + LEVELS.map(function (item) { return '<option value="' + item.id + '"' + (current === item.id ? " selected" : "") + ">" + item.name + "</option>"; }).join("") + "</select>"; }
   function renderStatusFilter(current) { return '<select class="test-map-topbar__select" id="mistake-status" data-mistake-filter="status"><option value="all"' + (current === "all" ? " selected" : "") + '>All Status</option><option value="pending"' + (current === "pending" ? " selected" : "") + '>Pending</option><option value="reviewed"' + (current === "reviewed" ? " selected" : "") + '>Reviewed</option></select>'; }
   function getMistakeChapterFilter() { var params = getParams(); return params.chapter && getChapter(params.chapter) ? params.chapter : "all"; }
@@ -2108,6 +3060,9 @@
   /* ── Question Folder page renderers ── */
   function getMistakeTab() { return getParams().tab === "flagged" ? "flagged" : "mistakes"; }
   function getMistakePage() { return Math.max(1, parseInt(getParams().page, 10) || 1); }
+  function isTestMistakesNarrowViewport() {
+    return typeof window.matchMedia !== "undefined" && window.matchMedia("(max-width: 60rem)").matches;
+  }
 
   function renderMistakesToolbar(chapterFilter, levelFilter, statusFilter) {
     return '<div class="mistakes-toolbar">' +
@@ -2163,7 +3118,6 @@
         (chBorder ? ' style="border-color:' + chBorder + '"' : '') + '>' +
         '<div class="mcc__meta">' +
           '<span class="mcc__source"' + (chColor ? ' style="color:' + chColor + '"' : '') + '>' + chapterName + ' \xb7 ' + nodeNum + '</span>' +
-          '<span class="mcc__status-tag is-flagged">Bookmarked</span>' +
         '</div>' +
         '<p class="mcc__prompt">' + (q.prompt || '\u2014') + '</p>' +
         '<div class="mcc__tags">' +
@@ -2213,12 +3167,12 @@
     var type = params.solo.slice(0, sep);
     var id = params.solo.slice(sep + 1);
     if ((type === "mistake" || type === "flagged") && id) {
-      soloState = { type: type, itemId: id, draft: null, submitted: false, isCorrect: false };
+      soloState = { type: type, itemId: id, draft: null, submitted: false, isCorrect: false, filterSheet: false };
     }
   }
 
   function enterSoloPractice(type, itemId) {
-    soloState = { type: type, itemId: itemId, draft: null, submitted: false, isCorrect: false };
+    soloState = { type: type, itemId: itemId, draft: null, submitted: false, isCorrect: false, filterSheet: false };
     var params = getParams();
     var next = { chapter: params.chapter || "", level: params.level || "", tab: params.tab || "", status: params.status || "", solo: type + ":" + itemId };
     if (window.history && window.history.replaceState) window.history.replaceState(null, "", buildUrl("test-mistakes.html", next));
@@ -2276,6 +3230,7 @@
     var correct = evaluate(question, soloState.draft);
     soloState.submitted = true;
     soloState.isCorrect = correct;
+    soloState.filterSheet = false;
     if (correct) playSfx(SFX_CORRECT);
     else playSfx(SFX_WRONG);
     var now = new Date().toISOString();
@@ -2322,7 +3277,7 @@
     });
     if (!inList && listItems.length > 0) {
       var firstId = tab === "flagged" ? listItems[0].questionId : listItems[0].id;
-      soloState = { type: type, itemId: firstId, draft: null, submitted: false, isCorrect: false };
+      soloState = { type: type, itemId: firstId, draft: null, submitted: false, isCorrect: false, filterSheet: false };
       itemId = firstId;
       item = getSoloItem(type, itemId);
     }
@@ -2333,10 +3288,28 @@
         '</div>'
       : renderSoloLeft(item, type);
 
+    var narrowSolo = isTestMistakesNarrowViewport();
+    if (!narrowSolo && soloState.filterSheet) soloState.filterSheet = false;
+
+    var listHtml = renderSoloRight(itemId, tab, listItems, type);
+    if (narrowSolo) {
+      var filterOpen = !!soloState.filterSheet;
+      var menuBtn =
+        '<button type="button" class="solo-filter-menu-btn" data-solo-toggle-filter aria-expanded="' +
+        (filterOpen ? "true" : "false") +
+        '" aria-label="' +
+        (filterOpen ? "Back to question" : "Questions in this filter") +
+        '">' +
+        '<svg class="solo-filter-menu-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14"/></svg>' +
+        "</button>";
+      var mainInner = '<div class="solo-narrow-main-wrap">' + menuBtn + (filterOpen ? listHtml : emptyMain) + "</div>";
+      return '<div class="solo-workbench solo-workbench--narrow">' + '<div class="solo-workbench__main">' + mainInner + "</div>" + "</div>";
+    }
+
     return '<div class="solo-workbench">' +
       '<div class="solo-workbench__main">' + emptyMain + '</div>' +
-      '<aside class="solo-workbench__sidebar">' + renderSoloRight(itemId, tab, listItems, type) + '</aside>' +
-    '</div>';
+      '<aside class="solo-workbench__sidebar">' + listHtml + "</aside>" +
+    "</div>";
   }
 
   function renderSoloLeft(item, type) {
@@ -2380,7 +3353,6 @@
         (type === "mistake" && !submitted
           ? '<span class="mcc__status-tag' + (item.mastered ? ' is-ok' : '') + '">' + (item.mastered ? 'Reviewed' : 'Pending') + '</span>'
           : '') +
-        (type === "flagged" ? '<span class="mcc__status-tag is-flagged">Bookmarked</span>' : '') +
       '</div>' +
       '<h2 class="solo-panel__prompt">' + question.prompt + '</h2>' +
       renderSoloQuestionBody(question, draft, submitted) +
@@ -2484,7 +3456,37 @@
   function getNextLevel(id) { var index = LEVEL_ORDER.indexOf(id); return index >= 0 && index < LEVEL_ORDER.length - 1 ? getLevel(LEVEL_ORDER[index + 1]) : null; }
   function getUnitFocus(chapterId, levelId, unitId) { var list = getChapter(chapterId).focuses[levelId]; var index = Math.max(0, (Number(unitId.split("-")[1]) || 1) - 1); return list[Math.min(index, list.length - 1)]; }
   function getLatestHistory(chapterId, levelId) { return state.history.find(function (item) { return item.chapter === chapterId && item.level === levelId; }) || null; }
-  function getRecommendedTopics(chapterId, levelId) { return unique((getLatestHistory(chapterId, levelId) ? getLatestHistory(chapterId, levelId).reviewTopics : []).concat(getVisibleMistakes(chapterId, levelId).map(function (item) { return item.reviewTopic; }))).slice(0, 4); }
+  function getLearnTopicsForChapter(chapterId) {
+    var chapter = LEARN_SECTION_MAP[chapterId];
+    return chapter && Array.isArray(chapter.chapterTopics) ? chapter.chapterTopics.slice() : [{ label: "Overview", href: "learning.html#overview" }];
+  }
+  function getLearnTopicsForUnit(chapterId, unitId) {
+    var chapter = LEARN_SECTION_MAP[chapterId];
+    if (!chapter || !chapter.unitTopics) return getLearnTopicsForChapter(chapterId);
+    var topics = chapter.unitTopics[unitId];
+    return Array.isArray(topics) && topics.length ? topics.slice() : getLearnTopicsForChapter(chapterId);
+  }
+  function getPrimaryLearnHref(chapterId, unitId) {
+    var topics = getLearnTopicsForUnit(chapterId, unitId);
+    return topics.length && topics[0].href ? topics[0].href : "learning.html#overview";
+  }
+  function renderLearnTopicList(topics) {
+    var list = Array.isArray(topics) && topics.length ? topics : [{ label: "Overview", href: "learning.html#overview" }];
+    return '<div class="test-learn-rows">' + list.map(function (item) {
+      return '<a class="test-learn-row" href="' + item.href + '"><span class="test-learn-row__label">' + item.label + '</span><span class="test-learn-row__arrow" aria-hidden="true"></span></a>';
+    }).join("") + '</div>';
+  }
+  function renderResultInsightContent(items, emptyMessage) {
+    if (!Array.isArray(items) || !items.length) {
+      return '<p class="test-card-copy">' + emptyMessage + "</p>";
+    }
+    if (items.length === 1 && items[0] === emptyMessage) {
+      return '<p class="test-card-copy">' + emptyMessage + "</p>";
+    }
+    return '<ul class="test-note-list">' + items.map(function (item) {
+      return "<li>" + item + "</li>";
+    }).join("") + "</ul>";
+  }
   function getVisibleMistakes(chapterId, levelId, status) { return state.mistakes.filter(function (item) { var chapterMatch = !chapterId || chapterId === "all" || item.chapter === chapterId; var levelMatch = !levelId || levelId === "all" || item.level === levelId; var statusMatch = !status || status === "all" || (status === "reviewed" ? item.mastered : !item.mastered); return chapterMatch && levelMatch && statusMatch; }); }
   function getNodePalette(chapterId, levelId, unitIndex) { var chapter = getChapter(chapterId) || CHAPTERS[0]; var totalUnits = LEVEL_ORDER.reduce(function (sum, item) { return sum + UNIT_TEMPLATES[item].length; }, 0); var previousUnits = LEVEL_ORDER.slice(0, LEVEL_ORDER.indexOf(levelId)).reduce(function (sum, item) { return sum + UNIT_TEMPLATES[item].length; }, 0); var absoluteIndex = previousUnits + unitIndex; var ratio = totalUnits > 1 ? absoluteIndex / (totalUnits - 1) : 0; var baseHsl = hexToHsl(chapter.colors.secondary); var accent = hslToHex(baseHsl.h, clamp(baseHsl.s - 12 - ratio * 6, 40, 68), clamp(68 - ratio * 16, 48, 68)); return { accent: accent, soft: hslToHex(baseHsl.h, clamp(baseHsl.s - 14 - ratio * 8, 34, 62), clamp(92 - ratio * 10, 80, 92)), strong: hslToHex(baseHsl.h, clamp(baseHsl.s - 8 - ratio * 4, 40, 70), clamp(58 - ratio * 12, 40, 58)), border: hslToHex(baseHsl.h, clamp(baseHsl.s - 16 - ratio * 10, 30, 58), clamp(82 - ratio * 8, 70, 82)) }; }
   function blendHex(hexA, hexB, amount) { var a = hexToRgb(hexA); var b = hexToRgb(hexB); var t = Math.max(0, Math.min(1, amount)); return rgbToHex(Math.round(a.r + (b.r - a.r) * t), Math.round(a.g + (b.g - a.g) * t), Math.round(a.b + (b.b - a.b) * t)); }
@@ -2497,7 +3499,109 @@
   function formatDate(value) { try { return value ? new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "Not yet"; } catch (e) { return value; } }
   function unique(items) { return items.filter(function (item, index) { return item && items.indexOf(item) === index; }); }
   function formatDateTime(value) { try { if (!value) return ""; var d = new Date(value); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) + " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); } catch (e) { return value || ""; } }
-  function buildBadgeName(chapterId) { return chapterId === "basics" ? "Contrast Keeper" : chapterId === "models" ? "Output Strategist" : "Meaning Steward"; }
+  function shouldRunQuizTimer(quiz) {
+    return !!(quiz && !quiz.browseOnly && quiz.mode !== "review");
+  }
+  function normalizeQuizTimerForMode(quiz) {
+    if (!quiz) return;
+    ensureQuizTimerState(quiz);
+    if (!shouldRunQuizTimer(quiz)) quiz.timerActiveSince = null;
+  }
+  function stopQuizLiveTimer() {
+    if (quizLiveTimerId) {
+      clearInterval(quizLiveTimerId);
+      quizLiveTimerId = null;
+    }
+  }
+  function syncQuizLiveDisplays() {
+    var q = state.currentQuiz;
+    if (!q || !rootEl || mainEl.getAttribute("data-test-page") !== "quiz") return;
+    var timeText = formatElapsedDuration(getQuizElapsedMs(q));
+    var scoreText = String(q.score);
+    var ti;
+    var timeNodes = rootEl.querySelectorAll("[data-quiz-live-time]");
+    for (ti = 0; ti < timeNodes.length; ti++) timeNodes[ti].textContent = timeText;
+    var si;
+    var scoreNodes = rootEl.querySelectorAll("[data-quiz-live-score]");
+    for (si = 0; si < scoreNodes.length; si++) scoreNodes[si].textContent = scoreText;
+  }
+  function startQuizLiveTimerIfNeeded() {
+    stopQuizLiveTimer();
+    if (!rootEl || mainEl.getAttribute("data-test-page") !== "quiz") return;
+    var q = state.currentQuiz;
+    syncQuizLiveDisplays();
+    if (!shouldRunQuizTimer(q)) return;
+    quizLiveTimerId = setInterval(syncQuizLiveDisplays, 500);
+  }
+  function ensureQuizTimerState(quiz) {
+    if (!quiz) return;
+    if (typeof quiz.elapsedMs !== "number" || quiz.elapsedMs < 0) quiz.elapsedMs = 0;
+    if (!Object.prototype.hasOwnProperty.call(quiz, "timerActiveSince")) quiz.timerActiveSince = null;
+  }
+  function getQuizElapsedMs(quiz) {
+    if (!quiz) return 0;
+    ensureQuizTimerState(quiz);
+    if (!shouldRunQuizTimer(quiz)) return Math.max(0, Math.round(quiz.elapsedMs));
+    if (!quiz.timerActiveSince) return Math.max(0, Math.round(quiz.elapsedMs));
+    return Math.max(0, Math.round(quiz.elapsedMs + Math.max(0, Date.now() - Number(quiz.timerActiveSince))));
+  }
+  function pauseQuizTimer(quiz) {
+    if (!quiz || !shouldRunQuizTimer(quiz)) return;
+    ensureQuizTimerState(quiz);
+    if (!quiz.timerActiveSince) return;
+    quiz.elapsedMs = getQuizElapsedMs(quiz);
+    quiz.timerActiveSince = null;
+    saveState();
+  }
+  function resumeQuizTimer(quiz) {
+    if (!quiz || !shouldRunQuizTimer(quiz)) return;
+    ensureQuizTimerState(quiz);
+    if (quiz.timerActiveSince) return;
+    quiz.timerActiveSince = Date.now();
+    saveState();
+  }
+  function pauseActiveQuizTimer() {
+    if (!state || !state.currentQuiz) return;
+    pauseQuizTimer(state.currentQuiz);
+  }
+  function getResultElapsedMs(result) {
+    return result && typeof result.elapsedMs === "number" && result.elapsedMs > 0 ? result.elapsedMs : 0;
+  }
+  function formatElapsedDuration(ms) {
+    var totalSeconds = Math.max(0, Math.floor(Number(ms || 0) / 1000));
+    if (totalSeconds >= 3600) {
+      var hours = Math.floor(totalSeconds / 3600);
+      var minutes = Math.floor((totalSeconds % 3600) / 60);
+      return String(hours) + "h" + String(minutes).padStart(2, "0") + "min";
+    }
+    var mins = Math.floor(totalSeconds / 60);
+    var secs = totalSeconds % 60;
+    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+  }
+  function handleDocumentVisibilityChange() {
+    var quiz = state.currentQuiz;
+    if (!quiz || !shouldRunQuizTimer(quiz)) return;
+    if (document.hidden) {
+      pauseQuizTimer(quiz);
+      stopQuizLiveTimer();
+      syncQuizLiveDisplays();
+      return;
+    }
+    if (mainEl.getAttribute("data-test-page") === "quiz") {
+      resumeQuizTimer(quiz);
+      syncQuizLiveDisplays();
+      startQuizLiveTimerIfNeeded();
+    }
+  }
+  function handlePageHide() { pauseActiveQuizTimer(); }
+  function buildBadgeName(chapterId) {
+    return chapterId === "basics" ? "Contrast Keeper"
+      : chapterId === "models" ? "Output Strategist"
+      : chapterId === "meaning" ? "Display Navigator"
+      : chapterId === "workflow" ? "Workflow Steward"
+      : chapterId === "practice" ? "Tool Pathfinder"
+      : "Color Scholar";
+  }
   function createMistakeRecord(question, session, reason, timestamp) { return { id: "mistake-" + question.id, chapter: session.chapterId, level: session.levelId, unit: session.unitId, topic: question.topic, reviewTopic: question.reviewTopic, questionType: question.type, prompt: question.prompt, correctConcept: question.explanation, mistakeReason: reason, mastered: false, questionSnapshot: clone(question), lastWrongAt: timestamp, attemptCount: 1, userAnswer: "", reviewedAt: "", showExplanation: false }; }
   function upsertMistake(question, quiz, reason) { var existing = state.mistakes.find(function (item) { return item.questionSnapshot.id === question.id; }); if (existing) { existing.mastered = false; existing.reviewedAt = ""; existing.lastWrongAt = new Date().toISOString(); existing.mistakeReason = reason; existing.attemptCount = (existing.attemptCount || 1) + 1; existing.userAnswer = stringifyMistakeAnswer(quiz.drafts[question.id]); existing.showExplanation = false; return; } var next = createMistakeRecord(question, quiz, reason, new Date().toISOString()); next.userAnswer = stringifyMistakeAnswer(quiz.drafts[question.id]); state.mistakes.unshift(next); state.mistakes = state.mistakes.slice(0, 40); }
   function markMistakeReviewed(questionId) { var item = state.mistakes.find(function (mistake) { return mistake.questionSnapshot.id === questionId; }); if (item) { item.mastered = true; item.reviewedAt = new Date().toISOString(); } }
@@ -2506,5 +3610,5 @@
   function stringifyMistakeAnswer(answer) { if (Array.isArray(answer)) return answer.join(" -> "); if (answer && typeof answer === "object") return answer.label || answer.id || JSON.stringify(answer); return answer || "No answer recorded"; }
   function getMistakeUserAnswer(mistake) { return mistake.userAnswer || "No answer recorded"; }
   function getMistakeCorrectAnswer(mistake) { return stringifyMistakeAnswer(mistake.questionSnapshot.correct); }
-  function getResultForPage() { var params = getParams(); if (params.resultId) { var match = state.history.find(function (item) { return item.id === params.resultId; }); if (match) return match; } if (params.chapter && params.level) { var filtered = getLatestHistory(params.chapter, params.level); if (filtered) return filtered; } return state.lastResult || state.history[0] || clone(DEFAULT_STATE.lastResult); }
+  function getResultForPage() { var params = getParams(); if (params.resultId) { var match = state.history.find(function (item) { return item.id === params.resultId; }); if (match) return match; } if (params.chapter && params.level) { var filtered = getLatestHistory(params.chapter, params.level); if (filtered) return filtered; } return state.lastResult || state.history[0] || DEFAULT_STATE.lastResult || null; }
 })();

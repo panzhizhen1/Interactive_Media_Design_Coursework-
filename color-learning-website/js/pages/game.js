@@ -147,6 +147,7 @@ const editorTitle=document.getElementById('editor-title');
 const editorCanvas=document.getElementById('editor-canvas');
 const editorCtx=editorCanvas.getContext('2d',{willReadFrequently:true});
 const colorPreview=document.getElementById('color-preview');
+const recentPalette=document.getElementById('recent-palette');
 const backBtn=document.getElementById('back-to-gallery');
 const resetBtn=document.getElementById('reset-drawing');
 const saveBtn=document.getElementById('save-image');
@@ -171,8 +172,11 @@ const sessionTimeEl=document.getElementById('session-time');
 const completionTimeEl=document.getElementById('completion-time');
 const colorAdjustCountEl=document.getElementById('color-adjust-count');
 const editorControlsPanel=document.querySelector('.editor-view .controls');
+const editorStatsEl=document.querySelector('.editor-stats');
+const canvasPane=document.querySelector('.canvas-pane');
 
 let activeDrawingIndex=0;let activeTool='fill';
+let recentColors=[];
 let editorBaselineSnapshot=null;
 let sessionStartMs=0;let sessionTimerId=null;let reachedFullCompletion=false;let completionElapsedMs=null;let colorAdjustCount=0;
 let activeGameMode='standard';
@@ -292,7 +296,12 @@ function clampRange(v,min,max){return Math.min(max,Math.max(min,Number(v)||0));}
 function hsvToRgb(h,s,v){const hh=((h%360)+360)%360,sat=s/100,val=v/100,c=val*sat,x=c*(1-Math.abs((hh/60)%2-1)),m=val-c;let r1=0,g1=0,b1=0;if(hh<60){r1=c;g1=x;}else if(hh<120){r1=x;g1=c;}else if(hh<180){g1=c;b1=x;}else if(hh<240){g1=x;b1=c;}else if(hh<300){r1=x;b1=c;}else{r1=c;b1=x;}return{r:Math.round((r1+m)*255),g:Math.round((g1+m)*255),b:Math.round((b1+m)*255)};}
 function cmykToRgb(c,m,y,k){const cc=c/100,mm=m/100,yy=y/100,kk=k/100;return{r:Math.round(255*(1-cc)*(1-kk)),g:Math.round(255*(1-mm)*(1-kk)),b:Math.round(255*(1-yy)*(1-kk))};}
 function getCurrentRgb(){const model=colorModelSelect.value;if(model==='hsv')return hsvToRgb(Number(hsvInputs.h.value),Number(hsvInputs.s.value),Number(hsvInputs.v.value));if(model==='cmyk')return cmykToRgb(Number(cmykInputs.c.value),Number(cmykInputs.m.value),Number(cmykInputs.y.value),Number(cmykInputs.k.value));return{r:Number(rgbInputs.r.value),g:Number(rgbInputs.g.value),b:Number(rgbInputs.b.value)};}
-function updateColorPreview(){const {r,g,b}=getCurrentRgb();colorPreview.style.background=`rgb(${r}, ${g}, ${b})`;}
+function rgbString({r,g,b}){return `rgb(${r}, ${g}, ${b})`;}
+function colorsEqual(a,b){return a&&b&&a.r===b.r&&a.g===b.g&&a.b===b.b;}
+function applyRgbToInputs(color){if(!color)return;colorModelSelect.value='rgb';setVisibleModelGroup('rgb');rgbInputs.r.value=String(color.r);rgbInputs.rn.value=String(color.r);rgbInputs.g.value=String(color.g);rgbInputs.gn.value=String(color.g);rgbInputs.b.value=String(color.b);rgbInputs.bn.value=String(color.b);updateColorPreview();}
+function renderRecentPalette(){if(!recentPalette)return;recentPalette.innerHTML='';const list=recentColors.slice(0,5);for(let i=0;i<5;i++){const swatch=document.createElement('button');swatch.type='button';swatch.className='palette-swatch';swatch.setAttribute('aria-label',`Recent color ${i+1}`);if(list[i]){swatch.style.background=rgbString(list[i]);swatch.title=rgbString(list[i]);swatch.addEventListener('click',()=>applyRgbToInputs(list[i]));}else{swatch.style.background='#fff';swatch.disabled=true;}recentPalette.appendChild(swatch);}}
+function pushRecentColor(color){if(!color)return;if(recentColors.length&&colorsEqual(recentColors[0],color))return;recentColors=recentColors.filter((c)=>!colorsEqual(c,color));recentColors.unshift({r:color.r,g:color.g,b:color.b});if(recentColors.length>5)recentColors=recentColors.slice(0,5);renderRecentPalette();}
+function updateColorPreview(){const color=getCurrentRgb();colorPreview.style.background=rgbString(color);pushRecentColor(color);}
 
 function bindPair(rangeInput,numberInput){const min=Number(rangeInput.min),max=Number(rangeInput.max);rangeInput.addEventListener('input',()=>{numberInput.value=rangeInput.value;updateColorPreview();});numberInput.addEventListener('input',()=>{numberInput.value=String(clampRange(numberInput.value,min,max));rangeInput.value=numberInput.value;updateColorPreview();});}
 function setVisibleModelGroup(model){modelGroups.rgb.hidden=model!=='rgb';modelGroups.hsv.hidden=model!=='hsv';modelGroups.cmyk.hidden=model!=='cmyk';}
@@ -325,5 +334,6 @@ return;
 if(!editorView.hidden){setupChallengeRound();}
 });
 }
-function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();showGallery();}
+function placeStatsAboveCanvas(){if(!editorStatsEl||!canvasPane)return;const canvasEl=document.getElementById('editor-canvas');if(canvasEl&&editorStatsEl.parentElement!==canvasPane){canvasPane.insertBefore(editorStatsEl,canvasEl);}}
+function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;placeStatsAboveCanvas();drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();showGallery();}
 init();
