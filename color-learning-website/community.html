@@ -50,9 +50,11 @@
 
               <div class="composer-card__tags" role="radiogroup" aria-label="Post tag" data-tag-group>
                 <button type="button" class="tag-pill is-active" data-tag="#Accessibility" aria-pressed="true">#Accessibility</button>
-                <button type="button" class="tag-pill" data-tag="#RGB_HSV" aria-pressed="false">#RGB_HSV</button>
-                <button type="button" class="tag-pill" data-tag="#Theory" aria-pressed="false">#Theory</button>
-                <button type="button" class="tag-pill" data-tag="#Palettes" aria-pressed="false">#Palettes</button>
+                <button type="button" class="tag-pill" data-tag="#Color_Theory" aria-pressed="false">#Color_Theory</button>
+                <button type="button" class="tag-pill" data-tag="#Palette" aria-pressed="false">#Palette</button>
+                <button type="button" class="tag-pill" data-tag="#Reflection" aria-pressed="false">#Reflection</button>
+                <button type="button" class="tag-pill" data-tag="#Contrast" aria-pressed="false">#Contrast</button>
+                <button type="button" class="tag-pill" data-tag="#Project" aria-pressed="false">#Project</button>
               </div>
 
               <div class="composer-card__controls">
@@ -97,9 +99,18 @@
           <div class="feed-filter" aria-label="Feed filters">
             <span class="feed-filter__label">Filter by:</span>
             <button type="button" class="feed-filter__option is-active" data-filter="latest">Latest</button>
-            <button type="button" class="feed-filter__option" data-filter="helpful">Most Helpful</button>
-            <button type="button" class="feed-filter__option" data-filter="my-tags">My Tags</button>
-            <button type="button" class="feed-filter__option" data-filter="#Accessibility">#Accessibility</button>
+            <button type="button" class="feed-filter__option" data-filter="origin:learning">From Learning</button>
+            <button type="button" class="feed-filter__option" data-filter="origin:game">From Game</button>
+            <button type="button" class="feed-filter__option" data-filter="origin:test">From Test</button>
+            <label class="feed-filter__search">
+              <span class="feed-filter__search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M10.8 18.1a7.3 7.3 0 1 1 5.2-2.2l3.7 3.7-1.4 1.4-3.7-3.7a7.3 7.3 0 0 1-3.8.8Zm0-2a5.3 5.3 0 1 0 0-10.6 5.3 5.3 0 0 0 0 10.6Z"></path>
+                </svg>
+              </span>
+              <span class="sr-only">Search posts by tag</span>
+              <input type="search" data-tag-search placeholder="Search tag" autocomplete="off" />
+            </label>
           </div>
 
           <div class="post-preview-head">
@@ -122,15 +133,32 @@
                 <span class="stats-grid__value" data-user-posts>0</span>
               </p>
             </div>
-            <p class="widget-card__note" data-user-streak>Post today to start your streak.</p>
-            <p class="widget-card__note" data-user-goal>Today goal: publish one learning insight.</p>
-            <p class="widget-card__note" data-rank-trend>Weekly rank change: --</p>
+            <div class="progress-note-list" aria-label="Progress reminders">
+              <p class="widget-card__note widget-card__note--streak">
+                <span class="widget-card__note-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8c0-5.39-2.59-10.2-6.5-13.33z"/></svg>
+                </span>
+                <span class="widget-card__note-copy"><span>Streak</span><strong data-user-streak>Start today</strong></span>
+              </p>
+              <p class="widget-card__note widget-card__note--goal">
+                <span class="widget-card__note-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v5.59l3.3 3.3-1.4 1.42L11 13.4V7h2z"/></svg>
+                </span>
+                <span class="widget-card__note-copy"><span>Today</span><strong data-user-goal>1 post</strong></span>
+              </p>
+              <p class="widget-card__note widget-card__note--rank">
+                <span class="widget-card__note-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M7 21h10v-2H7v2zm10-16V3H7v2H2v2c0 2.54 1.92 4.63 4.39 4.94A6.01 6.01 0 0011 16.92V18h2v-1.08a6.01 6.01 0 004.61-4.98C20.08 11.63 22 9.54 22 7V5h-5zM4 7h3v2.82A3.01 3.01 0 014 7zm13 2.82V7h3a3.01 3.01 0 01-3 2.82z"/></svg>
+                </span>
+                <span class="widget-card__note-copy"><span>Rank</span><strong data-rank-trend>--</strong></span>
+              </p>
+            </div>
           </section>
 
           <section class="widget-card widget-card--leaderboard" aria-labelledby="leaderboard-title">
-            <h2 id="leaderboard-title">Weekly Top Learners (7 days)</h2>
+            <h2 id="leaderboard-title">Weekly Top Learners</h2>
             <ol class="leaderboard" data-weekly-leaderboard-list></ol>
-            <p class="widget-card__note">Ranked by points earned in the last 7 days.</p>
+            <p class="widget-card__note widget-card__note--compact">7-day points</p>
           </section>
 
           <section class="widget-card widget-card--leaderboard widget-card--alltime" aria-labelledby="alltime-title">

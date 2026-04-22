@@ -28,9 +28,18 @@
           <div class="feed-filter" aria-label="Feed filters">
             <span class="feed-filter__label">Filter by:</span>
             <button type="button" class="feed-filter__option is-active" data-filter="latest">Latest</button>
-            <button type="button" class="feed-filter__option" data-filter="helpful">Most Helpful</button>
-            <button type="button" class="feed-filter__option" data-filter="my-tags">My Tags</button>
-            <button type="button" class="feed-filter__option" data-filter="#Accessibility">#Accessibility</button>
+            <button type="button" class="feed-filter__option" data-filter="origin:learning">From Learning</button>
+            <button type="button" class="feed-filter__option" data-filter="origin:game">From Game</button>
+            <button type="button" class="feed-filter__option" data-filter="origin:test">From Test</button>
+            <label class="feed-filter__search">
+              <span class="feed-filter__search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M10.8 18.1a7.3 7.3 0 1 1 5.2-2.2l3.7 3.7-1.4 1.4-3.7-3.7a7.3 7.3 0 0 1-3.8.8Zm0-2a5.3 5.3 0 1 0 0-10.6 5.3 5.3 0 0 0 0 10.6Z"></path>
+                </svg>
+              </span>
+              <span class="sr-only">Search posts by tag</span>
+              <input type="search" data-tag-search placeholder="Search tag" autocomplete="off" />
+            </label>
           </div>
           <section class="post-list" aria-live="polite" data-post-list></section>
         </section>

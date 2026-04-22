@@ -801,7 +801,7 @@
     var imageDataUrl = buildResultShareImage(result);
     var draft = {
       content: "Reflection from Test: I scored " + result.score + "/" + result.maxScore + " in " + result.chapterName + " (" + result.levelName + "). My next focus is " + (result.reviewTopics && result.reviewTopics.length ? result.reviewTopics[0] : "reviewing weak topics") + ".",
-      tag: "#Theory",
+      tag: "#Reflection",
       colorHex: "#2b78e4",
       paletteHexes: [],
       includePalette: false,

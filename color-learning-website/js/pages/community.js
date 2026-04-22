@@ -48,7 +48,7 @@
       id: "seed_2",
       author: "studentB",
       content: "HSV helped me quickly compare hue families before locking export values in RGB.",
-      tag: "#RGB_HSV",
+      tag: "#Color_Theory",
       colorHex: "#1e4fb0",
       likes: 8,
       likedBy: [],
@@ -69,6 +69,7 @@
   var state = {
     posts: [],
     filter: DEFAULT_FILTER,
+    tagSearch: "",
     selectedTag: DEFAULT_TAG,
     selectedPostId: "",
     submitLockUntil: 0,
@@ -541,15 +542,32 @@
     return likes * 2 + featuredBoost + originBoost;
   }
 
+  function normalizeTagQuery(value) {
+    return String(value || "").trim().replace(/^#/, "").replace(/[\s-]+/g, "_").toLowerCase();
+  }
+
   function sortPosts(posts) {
     var rows = posts.slice();
     var user = getCurrentUsername();
+    var tagQuery = normalizeTagQuery(state.tagSearch);
+
     if (state.filter === "my-tags") {
       var myTags = getUserTagSet(user);
       if (!myTags.length) return [];
       rows = rows.filter(function (post) { return myTags.indexOf(post.tag) >= 0; });
+    } else if (state.filter.indexOf("origin:") === 0) {
+      var origin = state.filter.split(":")[1] || "";
+      rows = rows.filter(function (post) {
+        return String(post.origin || "community") === origin;
+      });
     } else if (state.filter.charAt(0) === "#") {
       rows = rows.filter(function (post) { return post.tag === state.filter; });
+    }
+
+    if (tagQuery) {
+      rows = rows.filter(function (post) {
+        return normalizeTagQuery(post.tag).indexOf(tagQuery) >= 0;
+      });
     }
 
     rows.sort(function (a, b) {
@@ -921,17 +939,17 @@
     postsEl.textContent = String(postCount);
 
     if (!isLoggedIn()) {
-      streakEl.textContent = "Log in to sync your progress across pages.";
-      goalEl.textContent = "Today goal: log in and post one learning insight.";
-      rankEl.textContent = "Weekly rank change: --";
+      streakEl.textContent = "Sign in";
+      goalEl.textContent = "1 post";
+      rankEl.textContent = "--";
       return;
     }
 
-    streakEl.textContent = streak ? "Keep it up: " + streak + "-day streak active." : "Post today to start your streak.";
+    streakEl.textContent = streak ? streak + " day" : "Start today";
 
     var today = new Date().toISOString().slice(0, 10);
     var postedToday = postsMine.some(function (post) { return String(post.createdAt || "").slice(0, 10) === today; });
-    goalEl.textContent = postedToday ? "Today goal completed. Great work!" : "Today goal: publish one post to keep momentum.";
+    goalEl.textContent = postedToday ? "Done" : "1 post";
 
     var currentWeeklyRank = 0;
     for (var i = 0; i < weeklyRows.length; i += 1) {
@@ -943,13 +961,13 @@
     var snapshot = readRankSnapshot();
     var prevRank = Number(snapshot.weeklyRanks && snapshot.weeklyRanks[user] ? snapshot.weeklyRanks[user] : 0);
     if (!currentWeeklyRank) {
-      rankEl.textContent = "Weekly rank change: --";
+      rankEl.textContent = "--";
     } else if (!prevRank || prevRank === currentWeeklyRank) {
-      rankEl.textContent = "Weekly rank: #" + currentWeeklyRank + " (stable)";
+      rankEl.textContent = "#" + currentWeeklyRank;
     } else if (currentWeeklyRank < prevRank) {
-      rankEl.textContent = "Weekly rank change: ↑ " + (prevRank - currentWeeklyRank) + " (now #" + currentWeeklyRank + ")";
+      rankEl.textContent = "#" + currentWeeklyRank + " up " + (prevRank - currentWeeklyRank);
     } else {
-      rankEl.textContent = "Weekly rank change: ↓ " + (currentWeeklyRank - prevRank) + " (now #" + currentWeeklyRank + ")";
+      rankEl.textContent = "#" + currentWeeklyRank + " down " + (currentWeeklyRank - prevRank);
     }
 
     var nextSnapshot = { weeklyRanks: Object.assign({}, snapshot.weeklyRanks || {}), updatedAt: new Date().toISOString() };
@@ -1001,6 +1019,18 @@
     document.querySelectorAll("[data-filter]").forEach(function (btn) {
       btn.classList.toggle("is-active", btn.getAttribute("data-filter") === state.filter);
     });
+    renderPosts();
+  }
+
+  function syncTagSearchInputs() {
+    document.querySelectorAll("[data-tag-search]").forEach(function (input) {
+      if (input.value !== state.tagSearch) input.value = state.tagSearch;
+    });
+  }
+
+  function setTagSearch(value) {
+    state.tagSearch = String(value || "").trim().replace(/^#/, "");
+    syncTagSearchInputs();
     renderPosts();
   }
 
@@ -1328,6 +1358,12 @@
       });
     });
 
+    document.querySelectorAll("[data-tag-search]").forEach(function (input) {
+      input.addEventListener("input", function () {
+        setTagSearch(input.value);
+      });
+    });
+
     document.querySelectorAll("[data-tag]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         setActiveTag(btn.getAttribute("data-tag"));
@@ -1499,7 +1535,8 @@
         if (handlePostAction(event)) return;
         var tagFilterBtn = event.target.closest("[data-filter-tag]");
         if (tagFilterBtn) {
-          setFilter(tagFilterBtn.getAttribute("data-filter-tag"));
+          setTagSearch(tagFilterBtn.getAttribute("data-filter-tag"));
+          setFilter(DEFAULT_FILTER);
           return;
         }
         var zoomBtn = event.target.closest("[data-image-zoom]");
