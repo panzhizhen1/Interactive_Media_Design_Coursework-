@@ -293,6 +293,11 @@ export const contentData = {
             {
                 heading: 'Additive Colour Models',
                 content: `
+            <figure class="content-figure content-figure--float-right">
+              <img src="assets/images/learning/color_model/rgb-color-model.png" alt="RGB additive color model showing red, green, and blue light mixing to create yellow, magenta, cyan, and white" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 1: RGB Additive Color Model</figcaption>
+            </figure>
+            
             <h3>RGB Colour Model</h3>
             <p><strong>Full Name:</strong> Red, Green, Blue</p>
             
@@ -344,6 +349,11 @@ export const contentData = {
                 </ul>
               </div>
             </div>
+            
+            <figure class="content-figure content-figure--float-right">
+              <img src="assets/images/learning/color_model/hsl-color-model-3d.png" alt="3D cylindrical visualization of HSL color model showing hue, saturation, and lightness dimensions" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 2: HSL/HSV Cylindrical Model</figcaption>
+            </figure>
             
             <h3>HSV/HSL Colour Models</h3>
             <p><strong>Full Names:</strong></p>
@@ -416,6 +426,11 @@ export const contentData = {
             {
                 heading: 'Subtractive Colour Models',
                 content: `
+            <figure class="content-figure content-figure--float-right">
+              <img src="assets/images/learning/color_model/cmyk-color-model.png" alt="CMYK subtractive color model showing cyan, magenta, yellow, and black ink layers mixing" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 3: CMYK Subtractive Model</figcaption>
+            </figure>
+            
             <h3>CMYK Colour Model</h3>
             <p><strong>Full Name:</strong> Cyan, Magenta, Yellow, Key (Black)</p>
             
@@ -472,6 +487,11 @@ export const contentData = {
               <li>Publishing industry</li>
             </ul>
             
+            <figure class="content-figure content-figure--float-right">
+              <img src="assets/images/learning/color_model/lab-color-space.png" alt="CIELAB color space 3D coordinate system showing L, a, and b axes" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 4: CIELAB Color Space</figcaption>
+            </figure>
+            
             <h3>Lab Colour Space</h3>
             <p><strong>Full Name:</strong> CIELAB (Commission Internationale de l'Éclairage LAB)</p>
             
@@ -524,6 +544,11 @@ export const contentData = {
             {
                 heading: 'Colour Model Comparisons',
                 content: `
+            <figure class="content-figure content-figure--wide">
+              <img src="assets/images/learning/color_model/color-models-comparison.png" alt="Comparison overview of RGB, HSV/HSL, CMYK, and Lab color models" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 5: Color Models Comparison Overview</figcaption>
+            </figure>
+            
             <div class="comparison-table-wrapper">
               <table class="comparison-table">
                 <thead>
@@ -642,6 +667,8 @@ export const contentData = {
             </div>
           `
             },
+
+
             {
                 heading: 'Summary and Key Takeaways',
                 content: `
@@ -720,6 +747,11 @@ export const contentData = {
             {
                 heading: 'Introduction to Colour Spaces',
                 content: `
+            <figure class="content-figure content-figure--float-right">
+              <img src="assets/images/learning/color_space/color-space-vs-model.png" alt="Diagram showing relationship between colour models (RGB, CMYK, Lab) and colour spaces (sRGB, Adobe RGB, ProPhoto RGB, DCI-P3)" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 1: Colour Model vs Colour Space Relationship</figcaption>
+            </figure>
+            
             <h3>What is a Colour Space?</h3>
             <p>A colour space is a specific organization of colours within a colour model. While a colour model defines the mathematical framework (like RGB or CMYK), a colour space specifies exactly which colours are included and how they are mapped.</p>
             
@@ -774,6 +806,11 @@ export const contentData = {
             {
                 heading: 'Understanding Colour Space Characteristics',
                 content: `
+            <figure class="content-figure content-figure--float-right">
+              <img src="assets/images/learning/color_space/cie-1931-gamut-comparison.png" alt="CIE 1931 chromaticity diagram showing gamut triangles of sRGB, Adobe RGB, DCI-P3, and ProPhoto RGB color spaces" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 2: CIE 1931 Chromaticity Diagram with Color Space Gamuts</figcaption>
+            </figure>
+            
             <h3>Gamut - The Range of Colours</h3>
             <p><strong>Definition:</strong> Gamut refers to the complete range of colours that a colour space (or device) can represent or reproduce.</p>
             
@@ -859,232 +896,13 @@ export const contentData = {
           `
             },
             {
-                heading: 'Common RGB Colour Spaces',
-                content: `
-            <h3>sRGB (Standard RGB)</h3>
-            
-            <h4>History and Development</h4>
-            <ul>
-              <li>Created by HP and Microsoft in 1996</li>
-              <li>Designed to match typical CRT monitors of the era</li>
-              <li>Became the de facto standard for the internet</li>
-            </ul>
-            
-            <h4>Technical Specifications</h4>
-            <div class="tech-specs">
-              <div class="spec-row">
-                <span class="spec-label">White Point:</span>
-                <span class="spec-value">D65 (6500K)</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamma:</span>
-                <span class="spec-value">Approximately 2.2 (non-linear)</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamut Coverage:</span>
-                <span class="spec-value">~35% of visible spectrum</span>
-              </div>
-            </div>
-            
-            <h4>Applications</h4>
-            <div class="usage-guide">
-              <div class="usage-item usage-item--full">
-                <ul class="usage-list">
-                  <li class="usage-list__yes">Web design and development</li>
-                  <li class="usage-list__yes">Digital displays (monitors, phones, tablets)</li>
-                  <li class="usage-list__yes">Social media and online content</li>
-                  <li class="usage-list__yes">General-purpose digital photography</li>
-                  <li class="usage-list__no">Professional printing</li>
-                  <li class="usage-list__no">High-end photography</li>
-                  <li class="usage-list__no">Wide-gamut displays</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div class="pros-cons">
-              <div class="pros-cons__item pros-cons__item--pros">
-                <h4>Advantages</h4>
-                <ul>
-                  <li>Universal compatibility</li>
-                  <li>Consistent appearance across devices</li>
-                  <li>Well-supported in software and hardware</li>
-                  <li>Efficient file sizes</li>
-                </ul>
-              </div>
-              <div class="pros-cons__item pros-cons__item--cons">
-                <h4>Limitations</h4>
-                <ul>
-                  <li>Limited colour range</li>
-                  <li>Cannot represent many saturated colours</li>
-                  <li>Not suitable for professional print workflows</li>
-                </ul>
-              </div>
-            </div>
-            
-            <h3>Adobe RGB (1998)</h3>
-            
-            <h4>History and Development</h4>
-            <ul>
-              <li>Created by Adobe Systems in 1998</li>
-              <li>Designed to encompass most colours reproducible in CMYK printing</li>
-              <li>Popular among professional photographers and designers</li>
-            </ul>
-            
-            <h4>Technical Specifications</h4>
-            <div class="tech-specs">
-              <div class="spec-row">
-                <span class="spec-label">White Point:</span>
-                <span class="spec-value">D65 (6500K)</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamma:</span>
-                <span class="spec-value">2.2 (same as sRGB)</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamut Coverage:</span>
-                <span class="spec-value">~50% of visible spectrum</span>
-              </div>
-            </div>
-            
-            <h4>Gamut Comparison with sRGB</h4>
-            <ul>
-              <li>Approximately 35% larger gamut than sRGB</li>
-              <li>Significantly better cyan-green coverage</li>
-              <li>Better for printing workflows</li>
-              <li>Can represent more saturated colours</li>
-            </ul>
-            
-            <h4>Applications</h4>
-            <div class="usage-guide">
-              <div class="usage-item usage-item--full">
-                <ul class="usage-list">
-                  <li class="usage-list__yes">Professional photography</li>
-                  <li class="usage-list__yes">Print production and publishing</li>
-                  <li class="usage-list__yes">High-quality image editing</li>
-                  <li class="usage-list__yes">Commercial printing</li>
-                  <li class="usage-list__no">Web-only projects</li>
-                  <li class="usage-list__no">General screen display without management</li>
-                </ul>
-              </div>
-            </div>
-            
-            <h3>ProPhoto RGB</h3>
-            
-            <h4>History and Development</h4>
-            <ul>
-              <li>Created by Kodak for digital photography</li>
-              <li>Designed to encompass virtually all colours a digital camera can capture</li>
-              <li>Also known as ROMM RGB (Reference Output Medium Metric)</li>
-            </ul>
-            
-            <h4>Technical Specifications</h4>
-            <div class="tech-specs">
-              <div class="spec-row">
-                <span class="spec-label">White Point:</span>
-                <span class="spec-value">D50 (5000K)</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamma:</span>
-                <span class="spec-value">1.8 (linear-like)</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamut Coverage:</span>
-                <span class="spec-value">~90% of visible spectrum</span>
-              </div>
-            </div>
-            
-            <h4>Gamut Characteristics</h4>
-            <ul>
-              <li>Extremely wide gamut</li>
-              <li>Encompasses almost all visible colours</li>
-              <li>Includes "imaginary colours" (outside human vision)</li>
-              <li>Designed for editing, not final output</li>
-            </ul>
-            
-            <h4>Applications</h4>
-            <div class="usage-guide">
-              <div class="usage-item usage-item--full">
-                <ul class="usage-list">
-                  <li class="usage-list__yes">Professional photo editing and retouching</li>
-                  <li class="usage-list__yes">High-bit-depth workflows (16-bit or higher)</li>
-                  <li class="usage-list__yes">Archival masters</li>
-                  <li class="usage-list__yes">Maximum editing flexibility</li>
-                  <li class="usage-list__no">Final output or delivery</li>
-                  <li class="usage-list__no">Web or screen display</li>
-                  <li class="usage-list__no">8-bit workflows</li>
-                </ul>
-              </div>
-            </div>
-            
-            <h3>DCI-P3</h3>
-            
-            <h4>History and Development</h4>
-            <ul>
-              <li>Created by Digital Cinema Initiatives (DCI)</li>
-              <li>Standard for digital cinema projection</li>
-              <li>Adopted by Apple for displays (Display P3 variant)</li>
-            </ul>
-            
-            <h4>Technical Specifications</h4>
-            <div class="tech-specs">
-              <div class="spec-row">
-                <span class="spec-label">White Point:</span>
-                <span class="spec-value">D65 (6500K) for Display P3</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamma:</span>
-                <span class="spec-value">2.6 for DCI-P3, 2.2 for Display P3</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-label">Gamut Coverage:</span>
-                <span class="spec-value">~45% of visible spectrum</span>
-              </div>
-            </div>
-            
-            <h4>Gamut Comparison</h4>
-            <ul>
-              <li>Approximately 25% larger than sRGB</li>
-              <li>Significantly better red coverage</li>
-              <li>Better green than sRGB</li>
-              <li>Similar blue to sRGB</li>
-            </ul>
-            
-            <h4>Applications</h4>
-            <div class="usage-guide">
-              <div class="usage-item usage-item--full">
-                <ul class="usage-list">
-                  <li class="usage-list__yes">Digital cinema production</li>
-                  <li class="usage-list__yes">HDR content creation</li>
-                  <li class="usage-list__yes">Apple ecosystem (iPhones, iPads, Macs)</li>
-                  <li class="usage-list__yes">Wide-gamut displays</li>
-                  <li class="usage-list__no">Standard web content</li>
-                  <li class="usage-list__no">Legacy displays</li>
-                </ul>
-              </div>
-            </div>
-            
-            <h3>Display P3</h3>
-            <p>Display P3 is Apple's adaptation of DCI-P3 for consumer displays.</p>
-            
-            <h4>Key Differences from DCI-P3</h4>
-            <ul>
-              <li>Same primaries as DCI-P3</li>
-              <li>Uses D65 white point (vs. DCI's custom white point)</li>
-              <li>Uses sRGB gamma (2.2) instead of DCI's 2.6 gamma</li>
-              <li>Optimized for consumer displays</li>
-            </ul>
-            
-            <h4>Applications</h4>
-            <ul>
-              <li>Apple devices (iPhones, iPads, Macs with Retina displays)</li>
-              <li>iOS and macOS app development</li>
-              <li>Content optimized for Apple ecosystem</li>
-            </ul>
-          `
-            },
-            {
                 heading: 'Colour Space Comparison and Selection',
                 content: `
+            <figure class="content-figure content-figure--wide">
+              <img src="assets/images/learning/color_space/rgb-color-spaces-comparison.png" alt="Comparison overview of sRGB, Adobe RGB, ProPhoto RGB, and DCI-P3 color spaces with key specifications" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 3: RGB Color Spaces Comparison Overview</figcaption>
+            </figure>
+            
             <h3>Comprehensive Comparison Table</h3>
             <div class="comparison-table-wrapper">
               <table class="comparison-table">
@@ -1316,6 +1134,11 @@ export const contentData = {
             {
                 heading: 'Colour Space Management and Conversion',
                 content: `
+            <figure class="content-figure content-figure--float-right">
+              <img src="assets/images/learning/color_space/color-space-conversion-workflow.png" alt="Color space conversion workflow from camera RAW to final output" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 4: Color Space Conversion Workflow</figcaption>
+            </figure>
+            
             <h3>Understanding Colour Space Conversion</h3>
             <p>The process of translating colour values from one colour space to another while preserving visual appearance as much as possible.</p>
             
@@ -1334,6 +1157,11 @@ export const contentData = {
               <li><strong>Appearance Shift:</strong> Different white points and gamma</li>
               <li><strong>Metadata Handling:</strong> Preserving or updating colour profiles</li>
             </ul>
+            
+            <figure class="content-figure content-figure--wide">
+              <img src="assets/images/learning/color_space/rendering-intents-comparison.png" alt="Comparison of four rendering intents: Perceptual, Relative Colorimetric, Absolute Colorimetric, and Saturation" loading="lazy" />
+              <figcaption class="content-figure__caption">Figure 5: Rendering Intents Comparison</figcaption>
+            </figure>
             
             <h3>Rendering Intents</h3>
             <p>Rendering intents are strategies for handling colours during conversion, especially when dealing with gamut mismatches.</p>
@@ -1410,6 +1238,7 @@ export const contentData = {
             </div>
           `
             },
+
             {
                 heading: 'Summary and Key Takeaways',
                 content: `
@@ -1487,7 +1316,7 @@ export const contentData = {
                 <h3>The Three Dimensions of Color</h3>
                 <p>Every color can be described using three fundamental attributes that work together to create the full spectrum of visible colors. Understanding these dimensions gives you precise control over color selection and manipulation.</p>
                 
-                <img src="assets/images/learning/hsl-color-model-3d.png" alt="3D cylindrical representation of HSL color space showing Hue as angle around cylinder, Saturation as distance from center axis, and Lightness as vertical height" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/hsl-color-model-3d.png" alt="3D cylindrical representation of HSL color space showing Hue as angle around cylinder, Saturation as distance from center axis, and Lightness as vertical height" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <h3>Hue - The Color Identity</h3>
                 <p><strong>Hue</strong> is what we typically think of as "color" - red, blue, green, yellow, etc. It represents the position on the color wheel and is measured in degrees (0° to 360°).</p>
@@ -1507,7 +1336,7 @@ export const contentData = {
                 <h3>Saturation - Color Intensity</h3>
                 <p><strong>Saturation</strong> describes the purity or intensity of a color, ranging from 0% (completely gray) to 100% (fully vivid). It determines how much a color differs from a neutral gray of the same lightness.</p>
                 
-                <img src="assets/images/learning/saturation-comparison.png" alt="Horizontal gradient bar showing same hue with saturation varying from 0% (gray) to 100% (vivid), labeled Low Saturation to High Saturation" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/saturation-comparison.png" alt="Horizontal gradient bar showing same hue with saturation varying from 0% (gray) to 100% (vivid), labeled Low Saturation to High Saturation" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <h4>Practical Applications</h4>
                 <ul>
@@ -1524,7 +1353,7 @@ export const contentData = {
                 <h3>Lightness - Brightness Level</h3>
                 <p><strong>Lightness</strong> (also called value) represents how light or dark a color is, ranging from 0% (pure black) through 50% (pure color) to 100% (pure white).</p>
                 
-                <img src="assets/images/learning/tints-shades-tones.png" alt="Grid showing one base color with tints (adding white) in top row, shades (adding black) in middle row, and tones (adding gray) in bottom row" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/tints-shades-tones.png" alt="Grid showing one base color with tints (adding white) in top row, shades (adding black) in middle row, and tones (adding gray) in bottom row" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <h4>Tints, Shades, and Tones</h4>
                 <ul>
@@ -1571,7 +1400,7 @@ export const contentData = {
                 <h3>Contrast - Creating Visual Distinction</h3>
                 <p><strong>Contrast</strong> is the difference between two colors, and it's crucial for readability, visual hierarchy, and accessibility. There are several types of contrast:</p>
                 
-                <img src="assets/images/learning/contrast-types.png" alt="Three pairs of color squares demonstrating: Value contrast (black vs white), Hue contrast (red vs green), Saturation contrast (vivid red vs muted red)" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/contrast-types.png" alt="Three pairs of color squares demonstrating: Value contrast (black vs white), Hue contrast (red vs green), Saturation contrast (vivid red vs muted red)" style="width: 100%; max-width: 600px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <h4>Types of Contrast</h4>
                 <ol>
@@ -1601,7 +1430,7 @@ export const contentData = {
                 <h3>Contrast and Accessibility</h3>
                 <p>Proper contrast is essential for making content accessible to users with visual impairments. The Web Content Accessibility Guidelines (WCAG) define specific contrast ratio requirements:</p>
                 
-                <img src="assets/images/learning/wcag-contrast-standards.png" alt="Infographic showing WCAG contrast ratio requirements: AA level 4.5:1 for normal text, 3:1 for large text; AAA level 7:1 for normal text, 4.5:1 for large text, with checkmark icons" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/wcag-contrast-standards.png" alt="Infographic showing WCAG contrast ratio requirements: AA level 4.5:1 for normal text, 3:1 for large text; AAA level 7:1 for normal text, 4.5:1 for large text, with checkmark icons" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <div class="tech-specs">
                   <div class="spec-row">
@@ -1622,7 +1451,7 @@ export const contentData = {
                   </div>
                 </div>
                 
-                <img src="assets/images/learning/contrast-readability-example.png" alt="Two text samples side by side: left shows high contrast black text on white background (labeled Good Contrast), right shows low contrast light gray text on white background (labeled Poor Contrast)" style="width: 100%; max-width: 700px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/contrast-readability-example.png" alt="Two text samples side by side: left shows high contrast black text on white background (labeled Good Contrast), right shows low contrast light gray text on white background (labeled Poor Contrast)" style="width: 100%; max-width: 700px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <div class="info-box info-box--highlight">
                   <h4>Best Practices for Contrast</h4>
@@ -1647,7 +1476,7 @@ export const contentData = {
                 <h3>Warm and Cool Colors</h3>
                 <p><strong>Color temperature</strong> refers to the perceived warmth or coolness of a color. This concept originates from the color of light emitted by heated objects and has profound effects on mood, perception, and design effectiveness.</p>
                 
-                <img src="assets/images/learning/color-temperature-kelvin-scale.png" alt="Horizontal Kelvin scale from 2000K to 10000K showing color temperature progression: candlelight (2000K, orange), sunrise (3000K, warm yellow), daylight (5500K, neutral white), overcast sky (7000K, cool blue), clear sky (10000K, deep blue)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/color-temperature-kelvin-scale.png" alt="Horizontal Kelvin scale from 2000K to 10000K showing color temperature progression: candlelight (2000K, orange), sunrise (3000K, warm yellow), daylight (5500K, neutral white), overcast sky (7000K, cool blue), clear sky (10000K, deep blue)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <h3>The Kelvin Scale</h3>
                 <p>Color temperature is measured in <strong>Kelvin (K)</strong>, a scientific unit that describes the color characteristics of light sources:</p>
@@ -1672,7 +1501,7 @@ export const contentData = {
                 </div>
                 
                 <h3>Psychological Effects</h3>
-                <img src="assets/images/learning/warm-cool-emotions.png" alt="Split image: left side shows warm colors (red, orange, yellow) with words like energy, warmth, passion; right side shows cool colors (blue, green, purple) with words like calm, trust, professionalism" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/warm-cool-emotions.png" alt="Split image: left side shows warm colors (red, orange, yellow) with words like energy, warmth, passion; right side shows cool colors (blue, green, purple) with words like calm, trust, professionalism" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <div class="pros-cons">
                   <div class="pros-cons__item pros-cons__item--pros">
@@ -1700,7 +1529,7 @@ export const contentData = {
                 <h3>Applications in Design</h3>
                 
                 <h4>Brand Identity</h4>
-                <img src="assets/images/learning/brand-color-temperature.png" alt="Logo examples: fast food brands using warm colors (McDonald's, Burger King) on left, tech companies using cool colors (IBM, Intel, Facebook) on right" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/brand-color-temperature.png" alt="Logo examples: fast food brands using warm colors (McDonald's, Burger King) on left, tech companies using cool colors (IBM, Intel, Facebook) on right" style="width: 100%; max-width: 800px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <ul>
                   <li><strong>Fast Food & Retail:</strong> Warm colors stimulate appetite and create urgency (McDonald's, KFC, Target)</li>
@@ -1710,7 +1539,7 @@ export const contentData = {
                 </ul>
                 
                 <h4>Photography and White Balance</h4>
-                <img src="assets/images/learning/white-balance-comparison.png" alt="Same indoor scene shown three times: left with warm white balance (orange tint, 3000K), center with neutral white balance (natural, 5500K), right with cool white balance (blue tint, 7000K)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
+                <img src="assets/images/learning/color_attribute/white-balance-comparison.png" alt="Same indoor scene shown three times: left with warm white balance (orange tint, 3000K), center with neutral white balance (natural, 5500K), right with cool white balance (blue tint, 7000K)" style="width: 100%; max-width: 900px; margin: var(--space-lg) 0; border-radius: var(--radius-md);" />
                 
                 <p><strong>White balance</strong> is the process of adjusting colors in photography to ensure that white objects appear truly white, compensating for the color temperature of the light source:</p>
                 
@@ -1814,6 +1643,11 @@ export const contentData = {
             {
                 heading: 'Introduction to Bit Depth',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/bitdepth/bit-depth-concept.png" alt="Bit depth concept showing 1-bit, 4-bit, and 8-bit grayscale comparisons with binary values" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 1: Bit Depth Concept - Number of possible values increases exponentially</figcaption>
+                    </figure>
+                    
                     <h3>What is Bit Depth?</h3>
                     <p><strong>Bit depth</strong> (also known as colour depth or pixel depth) refers to the number of bits used to represent the colour information of each pixel in a digital image. It determines the precision and range of colours that can be stored and displayed.</p>
                     
@@ -1903,6 +1737,11 @@ export const contentData = {
                             </ul>
                         </div>
                     </div>
+                    
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/bitdepth/8bit-vs-16bit-gradient.png" alt="Comparison of 8-bit gradient with visible banding vs 16-bit smooth gradient" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 2: 8-bit vs 16-bit Gradient Quality Comparison</figcaption>
+                    </figure>
                     
                     <div class="pros-cons">
                         <div class="pros-cons__item pros-cons__item--pros">
@@ -2022,11 +1861,21 @@ export const contentData = {
                         <li><strong>32-Bit Integer:</strong> Fixed range with high precision (rarely used)</li>
                         <li><strong>32-Bit Floating Point:</strong> Variable precision, essential for HDR</li>
                     </ul>
+                    
+                    <figure class="content-figure content-figure--wide">
+                      <img src="assets/images/learning/bitdepth/bit-depth-levels-comparison.png" alt="Comparison overview of 8-bit, 10-bit, 12-bit, and 16-bit color depth levels" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 3: Bit Depth Levels Comparison Overview</figcaption>
+                    </figure>
                 `
             },
             {
                 heading: 'Understanding Colour Banding',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/bitdepth/color-banding-example.png" alt="Color banding artifacts example showing visible stripes in gradients" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 4: Color Banding Artifacts vs Smooth Gradient</figcaption>
+                    </figure>
+                    
                     <h3>What is Colour Banding?</h3>
                     <p>Visible stripes or bands in what should be smooth gradients, caused by insufficient bit depth.</p>
                     
@@ -2110,6 +1959,11 @@ export const contentData = {
                         </table>
                     </div>
                     
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/bitdepth/bit-depth-file-size-chart.png" alt="Bar chart showing file size comparison for different bit depths" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 5: File Size vs Bit Depth Relationship</figcaption>
+                    </figure>
+                    
                     <h3>Compression Impact</h3>
                     <ul>
                         <li><strong>Lossless compression:</strong> Reduces size, preserves bit depth</li>
@@ -2155,6 +2009,11 @@ export const contentData = {
                         </div>
                     </div>
                     
+                    <figure class="content-figure content-figure--wide">
+                      <img src="assets/images/learning/bitdepth/bit-depth-workflow-guide.png" alt="Professional photography bit depth workflow from capture to delivery" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 6: Recommended Bit Depth Workflow Guide</figcaption>
+                    </figure>
+                    
                     <h3>Recommended Workflows</h3>
                     
                     <div class="workflow-scenarios">
@@ -2186,6 +2045,7 @@ export const contentData = {
                     </div>
                 `
             },
+
             {
                 heading: 'Summary and Key Takeaways',
                 content: `
