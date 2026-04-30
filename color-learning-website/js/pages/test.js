@@ -11,10 +11,6 @@
   var SFX_HINT = SFX_BASE + "hint.mp3";
   var SFX_CORRECT = SFX_BASE + "correct_answer.mp3";
   var SFX_WRONG = SFX_BASE + "wrong_answer.mp3";
-  var SFX_POOL_SIZE = 4;
-  var sfxPoolMap = {};
-  var sfxPoolCursor = {};
-  var sfxUnlocked = false;
   var EXTERNAL_QUESTION_BANK = window.CLWTestQuestionBank || null;
   var LEARN_SECTION_MAP = {
     basics: {
@@ -230,7 +226,9 @@
 
   syncSelectionFromQuery();
   applyChapterTheme(resolveChapterId());
-  initSfxPool();
+  if (window.CLWSound && typeof CLWSound.registerTracks === "function") {
+    CLWSound.registerTracks([SFX_STAR, SFX_CONFETTI, SFX_TADA, SFX_HINT, SFX_CORRECT, SFX_WRONG]);
+  }
   initSoloState();
   bindEvents();
   bindAuthStateSync();
@@ -830,9 +828,6 @@
   function bindEvents() {
     rootEl.addEventListener("click", handleClick);
     rootEl.addEventListener("change", handleChange);
-    document.addEventListener("pointerdown", unlockSfxOnce, { once: true, passive: true });
-    document.addEventListener("touchstart", unlockSfxOnce, { once: true, passive: true });
-    document.addEventListener("click", unlockSfxOnce, { once: true });
     document.addEventListener("visibilitychange", handleDocumentVisibilityChange);
     window.addEventListener("pagehide", handlePageHide);
   }
@@ -3052,74 +3047,10 @@
       : '<h2 class="results-card__title">' + title + "</h2>";
     return "<section class=\"results-card\">" + head + inner + "</section>";
   }
-  function initSfxPool() {
-    var tracks = [SFX_STAR, SFX_CONFETTI, SFX_TADA, SFX_HINT, SFX_CORRECT, SFX_WRONG];
-    var i;
-    var j;
-    for (i = 0; i < tracks.length; i++) {
-      var src = tracks[i];
-      var pool = [];
-      for (j = 0; j < SFX_POOL_SIZE; j++) {
-        try {
-          var a = new Audio(src);
-          a.preload = "auto";
-          pool.push(a);
-        } catch (e) {}
-      }
-      if (pool.length) {
-        sfxPoolMap[src] = pool;
-        sfxPoolCursor[src] = 0;
-      }
-    }
-  }
-  function getPooledSfxAudio(src) {
-    var pool = sfxPoolMap[src];
-    if (!pool || !pool.length) return null;
-    var cursor = Number(sfxPoolCursor[src]) || 0;
-    var audio = pool[cursor % pool.length];
-    sfxPoolCursor[src] = (cursor + 1) % pool.length;
-    return audio;
-  }
-  function unlockSfxOnce() {
-    if (sfxUnlocked) return;
-    sfxUnlocked = true;
-    try {
-      var a = getPooledSfxAudio(SFX_HINT) || new Audio(SFX_HINT);
-      a.volume = 0;
-      try { a.currentTime = 0; } catch (resetError) {}
-      var p = a.play();
-      if (p && typeof p.then === "function") {
-        p.then(function () {
-          try {
-            a.pause();
-            a.currentTime = 0;
-          } catch (e) {}
-        }).catch(function () {});
-      }
-    } catch (e) {}
-  }
   function playSfx(src, opts) {
-    try {
-      var conf = opts || {};
-      var layers = Math.max(1, Number(conf.layers) || 1);
-      var staggerMs = Math.max(0, Number(conf.staggerMs) || 0);
-      var baseVol = typeof conf.volume === "number" ? conf.volume : 1;
-      var i;
-      for (i = 0; i < layers; i++) {
-        (function (idx) {
-          setTimeout(function () {
-            try {
-              var a = getPooledSfxAudio(src);
-              if (!a) a = new Audio(src);
-              a.volume = Math.max(0, Math.min(1, baseVol));
-              try { a.currentTime = 0; } catch (resetError) {}
-              var p = a.play();
-              if (p && typeof p.catch === "function") p.catch(function () {});
-            } catch (e) {}
-          }, idx * staggerMs);
-        })(i);
-      }
-    } catch (e) {}
+    if (window.CLWSound && typeof CLWSound.play === "function") {
+      CLWSound.play(src, opts);
+    }
   }
 
   /* ── Confetti: coloured pieces fall from the top of the viewport ── */
