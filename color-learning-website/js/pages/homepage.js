@@ -10,6 +10,8 @@
   var HOME_TEST_PICK_INDEX_KEY = "clw_home_test_pick_index";
   var HOME_LEARN_PICK_INDEX_KEY = "clw_home_learn_pick_index";
   var HOME_COMMUNITY_PICK_INDEX_KEY = "clw_home_community_pick_index";
+  var COMMUNITY_ACTIVITY_LOG_KEY = "clw_activity_log_v1";
+  var COMMUNITY_ACCOUNTS_KEY = "clw_accounts_v1";
   var AUTH_USER_KEY = "clw_current_user";
   var HOME_COMMUNITY_ROTATE_MS = 6800;
   var HOME_COMMUNITY_SWITCH_OUT_MS = 230;
@@ -107,6 +109,70 @@
     return source.slice(0, maxLength).trimEnd() + "...";
   }
 
+  function sanitizeLearnPreviewHtml(rawHtml) {
+    var wrapper = document.createElement("div");
+    wrapper.innerHTML = String(rawHtml || "");
+    var allowedTags = {
+      p: true,
+      h3: true,
+      ul: true,
+      ol: true,
+      li: true,
+      strong: true,
+      em: true,
+      a: true,
+      br: true,
+      span: true
+    };
+
+    function cleanNode(node) {
+      if (!node || node.nodeType !== 1) return;
+      var children = Array.from(node.children || []);
+      children.forEach(cleanNode);
+
+      var tagName = String(node.tagName || "").toLowerCase();
+      if (!allowedTags[tagName]) {
+        var text = document.createTextNode(" " + (node.textContent || "").trim() + " ");
+        node.parentNode.replaceChild(text, node);
+        return;
+      }
+
+      Array.from(node.attributes || []).forEach(function (attr) {
+        var name = String(attr.name || "").toLowerCase();
+        var value = String(attr.value || "");
+        if (name === "href" && tagName === "a" && (/^https?:\/\//i.test(value) || value.startsWith("#"))) return;
+        node.removeAttribute(attr.name);
+      });
+
+      if (tagName === "a") {
+        node.setAttribute("target", "_self");
+      }
+    }
+
+    Array.from(wrapper.children).forEach(cleanNode);
+    return wrapper.innerHTML.trim();
+  }
+
+  function buildLearnPreviewHtml(rawHtml) {
+    var sanitized = sanitizeLearnPreviewHtml(rawHtml);
+    if (!sanitized) return "";
+    var holder = document.createElement("div");
+    holder.innerHTML = sanitized;
+    var blocks = Array.from(holder.children || []);
+    var pickedBlocks = [];
+    var textBudget = 520;
+    for (var i = 0; i < blocks.length; i += 1) {
+      var block = blocks[i];
+      var blockText = toPlainText(block.textContent || "");
+      if (!blockText) continue;
+      if (pickedBlocks.length >= 4) break;
+      if (textBudget <= 0 && pickedBlocks.length >= 2) break;
+      textBudget -= blockText.length;
+      pickedBlocks.push(block.outerHTML);
+    }
+    return pickedBlocks.join("");
+  }
+
   function parseLearnContentData(source) {
     var normalized = String(source || "").replace(/^\s*export\s+const\s+contentData\s*=\s*/, "return ");
     if (!/^return\s+/.test(normalized)) throw new Error("Missing contentData export");
@@ -152,14 +218,14 @@
           var sectionLocation = getLearnSectionLocation(sectionKey, sectionTitle);
           section.sections.forEach(function (entry) {
             var heading = String(entry && entry.heading ? entry.heading : "").trim();
-            var preview = clipWithEllipsis(toPlainText(entry && entry.content ? entry.content : ""), 185);
-            if (!heading || !preview) return;
+            var previewHtml = buildLearnPreviewHtml(entry && entry.content ? entry.content : "");
+            if (!heading || !previewHtml) return;
             catalog.push({
               sectionKey: sectionKey,
               sectionTitle: sectionTitle,
               location: sectionLocation,
               heading: heading,
-              preview: preview
+              previewHtml: previewHtml
             });
           });
         });
@@ -175,21 +241,68 @@
     var metaEl = document.querySelector("[data-home-learn-meta]");
     if (!linkEl || !titleEl || !topicEl || !snippetEl || !metaEl) return;
 
+    var currentPreviewHtml = "";
+
+    function trimLearnPreviewToWholeBlocks(rawHtml) {
+      var source = String(rawHtml || "").trim();
+      if (!source) {
+        snippetEl.innerHTML = "<p>Explore how color information is represented and used across devices and media...</p>";
+        return;
+      }
+
+      snippetEl.innerHTML = source;
+      if (snippetEl.scrollHeight - snippetEl.clientHeight <= 2) return;
+
+      var nodes = Array.from(snippetEl.children || []);
+      for (var i = nodes.length - 1; i >= 0; i -= 1) {
+        var node = nodes[i];
+        var tag = String(node.tagName || "").toLowerCase();
+
+        if (tag === "ul" || tag === "ol") {
+          var items = Array.from(node.querySelectorAll(":scope > li"));
+          for (var j = items.length - 1; j >= 0; j -= 1) {
+            items[j].remove();
+            if (snippetEl.scrollHeight - snippetEl.clientHeight <= 2) return;
+          }
+        }
+
+        node.remove();
+        if (snippetEl.scrollHeight - snippetEl.clientHeight <= 2) return;
+      }
+
+      snippetEl.innerHTML = "<p>" + escapeHtmlText(clipWithEllipsis(toPlainText(source), 220)) + "</p>";
+    }
+
+    function renderLearnPreviewHtml(rawHtml) {
+      currentPreviewHtml = String(rawHtml || "");
+      window.requestAnimationFrame(function () {
+        trimLearnPreviewToWholeBlocks(currentPreviewHtml);
+      });
+    }
+
+    if (snippetEl.dataset.wholeBlockBound !== "true") {
+      snippetEl.dataset.wholeBlockBound = "true";
+      window.addEventListener("resize", function () {
+        if (!currentPreviewHtml) return;
+        renderLearnPreviewHtml(currentPreviewHtml);
+      });
+    }
+
     titleEl.textContent = "Learn Colors the Smart Way";
     loadLearnTopicCatalog()
       .then(function (catalog) {
         if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty learn catalog");
         var picked = catalog[pickStableSessionIndex(HOME_LEARN_PICK_INDEX_KEY, catalog.length)];
-        if (!picked || !picked.heading || !picked.preview) throw new Error("Invalid learn item");
+        if (!picked || !picked.heading || !picked.previewHtml) throw new Error("Invalid learn item");
         topicEl.textContent = picked.heading;
-        snippetEl.textContent = picked.preview;
+        renderLearnPreviewHtml(picked.previewHtml);
         metaEl.textContent = picked.location;
         linkEl.href = "learning.html#" + encodeURIComponent(String(picked.sectionKey || "overview"));
         linkEl.setAttribute("aria-label", "Open Learn module topic: " + picked.heading);
       })
       .catch(function () {
         topicEl.textContent = "What is Colour Encoding?";
-        snippetEl.textContent = "Explore how color information is represented and used across devices and media...";
+        renderLearnPreviewHtml("");
         metaEl.textContent = "Overview · Colour Encoding Overview";
         linkEl.href = "learning.html#overview";
       });
@@ -260,6 +373,47 @@
       });
   }
 
+  function buildHomeCommunityLeaderboardRows(limit) {
+    var rowsLimit = Math.max(1, Number(limit) || 4);
+    var pointsMap = {
+      studentA: 120,
+      studentB: 95,
+      studentC: 82
+    };
+
+    var activityRows = readStoredJson(COMMUNITY_ACTIVITY_LOG_KEY, []);
+    if (Array.isArray(activityRows)) {
+      activityRows.forEach(function (item) {
+        if (!item || typeof item !== "object") return;
+        if (item.source !== "community") return;
+        var username = item.username ? String(item.username).trim() : "";
+        if (!username) return;
+        var delta = Number(item.pointsDelta || 0);
+        if (Number.isNaN(delta)) return;
+        pointsMap[username] = Number(pointsMap[username] || 0) + delta;
+      });
+    }
+
+    var accountsStore = readStoredJson(COMMUNITY_ACCOUNTS_KEY, { users: {} });
+    var users = accountsStore && accountsStore.users && typeof accountsStore.users === "object" ? accountsStore.users : {};
+    Object.keys(users).forEach(function (username) {
+      var points = Number(users[username] && users[username].stats ? users[username].stats.points || 0 : 0);
+      if (Number.isNaN(points)) points = 0;
+      pointsMap[username] = Number(pointsMap[username] || 0) + points;
+    });
+
+    return Object.keys(pointsMap)
+      .map(function (username) {
+        return { username: username, points: Math.max(0, Math.round(Number(pointsMap[username] || 0))) };
+      })
+      .filter(function (row) { return !!row.username; })
+      .sort(function (a, b) {
+        if (b.points !== a.points) return b.points - a.points;
+        return String(a.username).localeCompare(String(b.username));
+      })
+      .slice(0, rowsLimit);
+  }
+
   function setupHomeCommunitySpotlight() {
     var cardEl = document.querySelector(".home-card--community-spotlight");
     var noticeLinkEl = document.querySelector("[data-home-community-notice-link]");
@@ -272,7 +426,15 @@
     var bubbleEl = postLinkEl ? postLinkEl.querySelector(".home-community__bubble") : null;
     if (!cardEl || !noticeLinkEl || !postLinkEl || !titleEl || !avatarEl || !authorEl || !tagEl || !postEl || !bubbleEl) return;
 
-    function renderCommunityItem(item) {
+    var leaderboardEl = bubbleEl.querySelector(".home-community__leaderboard");
+    if (!leaderboardEl) {
+      leaderboardEl = document.createElement("section");
+      leaderboardEl.className = "home-community__leaderboard";
+      leaderboardEl.setAttribute("aria-label", "Community leaderboard preview");
+      bubbleEl.appendChild(leaderboardEl);
+    }
+
+    function renderCommunityPost(item) {
       if (!item) return;
       var initial = item.author && item.author.charAt(0) ? item.author.charAt(0).toUpperCase() : "U";
       avatarEl.textContent = initial;
@@ -280,6 +442,37 @@
       tagEl.textContent = item.tag || "#Community";
       postEl.textContent = item.content;
       postLinkEl.setAttribute("aria-label", "Open community post list, highlighted from @" + item.author);
+      bubbleEl.classList.remove("home-community__bubble--leaderboard");
+    }
+
+    function renderCommunityLeaderboard(rows) {
+      var list = Array.isArray(rows) ? rows : [];
+      leaderboardEl.innerHTML =
+        '<h4 class="home-community__leaderboard-title">All-time Top Learners</h4>' +
+        '<ol class="home-community__leaderboard-list">' +
+        list
+          .map(function (row, index) {
+            return (
+              '<li class="home-community__leaderboard-item">' +
+              '<span class="home-community__leaderboard-rank">' + String(index + 1) + "</span>" +
+              '<span class="home-community__leaderboard-name">@' + escapeHtmlText(row.username) + "</span>" +
+              '<strong class="home-community__leaderboard-points">' + String(row.points) + " pts</strong>" +
+              "</li>"
+            );
+          })
+          .join("") +
+        "</ol>";
+      postLinkEl.setAttribute("aria-label", "Open community page leaderboard");
+      bubbleEl.classList.add("home-community__bubble--leaderboard");
+    }
+
+    function renderCommunityItem(item) {
+      if (!item || typeof item !== "object") return;
+      if (item.type === "leaderboard") {
+        renderCommunityLeaderboard(item.rows);
+        return;
+      }
+      renderCommunityPost(item);
     }
 
     titleEl.textContent = "👥 Join the Color Community";
@@ -296,12 +489,18 @@
     loadCommunityPostCatalog()
       .then(function (catalog) {
         if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty community catalog");
-        var currentIndex = pickStableSessionIndex(HOME_COMMUNITY_PICK_INDEX_KEY, catalog.length);
-        var picked = catalog[currentIndex];
-        if (!picked || !picked.content) throw new Error("Invalid community item");
+        var items = catalog.slice();
+        var leaderboardRows = buildHomeCommunityLeaderboardRows(4);
+        if (leaderboardRows.length) {
+          items.push({ type: "leaderboard", rows: leaderboardRows });
+        }
+
+        var currentIndex = pickStableSessionIndex(HOME_COMMUNITY_PICK_INDEX_KEY, items.length);
+        var picked = items[currentIndex];
+        if (!picked) throw new Error("Invalid community item");
         renderCommunityItem(picked);
 
-        if (catalog.length < 2) return;
+        if (items.length < 2) return;
         var switching = false;
         window.setInterval(function () {
           if (switching || document.hidden || pauseRotation) return;
@@ -309,8 +508,8 @@
           bubbleEl.classList.remove("home-community__bubble--slide-in");
           bubbleEl.classList.add("home-community__bubble--slide-out");
           window.setTimeout(function () {
-            currentIndex = (currentIndex + 1) % catalog.length;
-            renderCommunityItem(catalog[currentIndex]);
+            currentIndex = (currentIndex + 1) % items.length;
+            renderCommunityItem(items[currentIndex]);
             bubbleEl.classList.remove("home-community__bubble--slide-out");
             bubbleEl.classList.add("home-community__bubble--slide-in");
             window.setTimeout(function () {
