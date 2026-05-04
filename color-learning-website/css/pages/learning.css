@@ -1102,6 +1102,23 @@
   animation: fadeIn 0.3s ease;
 }
 
+.learning-content__title--route-highlight {
+  animation: fadeIn 0.3s ease, learningTitleRouteHighlightFade 1.9s ease-out 1 both;
+  border-radius: 0.35rem;
+}
+
+.section-heading--route-highlight {
+  animation: learningTitleRouteHighlightFade 1.9s ease-out 1 both;
+  border-radius: 0.28rem;
+}
+
+/* Text-fragment target hint: highlight then fade out gently. */
+::target-text {
+  background-color: transparent;
+  color: inherit;
+  animation: targetTextPulseFade 1.9s ease-out 1 both;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1110,6 +1127,44 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes targetTextPulseFade {
+  0% {
+    background-color: color-mix(in srgb, var(--theme-stop-2) 48%, transparent);
+  }
+  42% {
+    background-color: color-mix(in srgb, var(--theme-stop-3) 28%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes learningTitleRouteHighlightFade {
+  0% {
+    background-color: color-mix(in srgb, var(--theme-stop-2) 50%, transparent);
+  }
+  42% {
+    background-color: color-mix(in srgb, var(--theme-stop-3) 26%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::target-text {
+    animation-duration: 0.9s;
+  }
+
+  .learning-content__title--route-highlight {
+    animation-duration: 0.9s;
+  }
+
+  .section-heading--route-highlight {
+    animation-duration: 0.9s;
   }
 }
 
