@@ -5,6 +5,9 @@
 (function () {
   "use strict";
 
+  var FONT_SIZE_STORAGE_KEY = "clw_font_size_by_user_v1";
+  var FONT_SIZE_ATTR = "data-clw-font-size";
+
   /** @type {{ soundEffects: boolean, language: 'zh'|'en', colourMode: 'default'|'accessible', fontSize: 's'|'m'|'l' }} */
   var prefState = {
     soundEffects: true,
@@ -53,25 +56,91 @@
   var ICON_AA =
     '<span class="settings-icon-text" aria-hidden="true">Aa</span>';
 
+  function getUserKey() {
+    if (window.CLWAuth && typeof CLWAuth.isLoggedIn === "function" && CLWAuth.isLoggedIn()) {
+      var u = CLWAuth.getCurrentUsername && CLWAuth.getCurrentUsername();
+      if (u && u !== "Guest") return String(u);
+    }
+    return "__guest__";
+  }
+
+  function readFontSizePrefs() {
+    try {
+      var raw = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+      if (!raw) return {};
+      var parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function writeFontSizeForCurrentUser(fontSize) {
+    var all = readFontSizePrefs();
+    all[getUserKey()] = normalizeFontSize(fontSize);
+    try {
+      localStorage.setItem(FONT_SIZE_STORAGE_KEY, JSON.stringify(all));
+    } catch (e) {}
+  }
+
+  function normalizeFontSize(fontSize) {
+    return fontSize === "s" || fontSize === "l" ? fontSize : "m";
+  }
+
+  function emitFontSizeChanged(fontSize) {
+    document.dispatchEvent(
+      new CustomEvent("clw:font-size-changed", {
+        detail: { fontSize: fontSize, userKey: getUserKey() }
+      })
+    );
+  }
+
+  function applyFontSize(fontSize, options) {
+    var next = normalizeFontSize(fontSize);
+    prefState.fontSize = next;
+    document.documentElement.setAttribute(FONT_SIZE_ATTR, next);
+    if (!options || options.persist !== false) {
+      writeFontSizeForCurrentUser(next);
+    }
+    if (options && options.emit) {
+      emitFontSizeChanged(next);
+    }
+  }
+
+  function syncFontSizeFromStorage() {
+    var all = readFontSizePrefs();
+    var next = Object.prototype.hasOwnProperty.call(all, getUserKey())
+      ? all[getUserKey()]
+      : defaults.fontSize;
+    applyFontSize(next, { persist: false });
+  }
+
+  function tr(key) {
+    if (window.CLWLocale && typeof CLWLocale.translate === "function") {
+      return CLWLocale.translate(key, "global");
+    }
+    return key;
+  }
+
   function buildMarkup() {
     return (
       '<div class="profile-settings-backdrop" data-profile-settings-backdrop tabindex="-1"></div>' +
       '<div class="profile-settings-panel" id="profile-settings-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-settings-title" data-profile-settings-panel>' +
       '  <header class="profile-settings-panel__header">' +
-      '    <h2 class="profile-settings-panel__title" id="profile-settings-title">Profile & Settings</h2>' +
-      '    <button type="button" class="profile-settings-panel__close" data-profile-settings-close aria-label="Close settings">&times;</button>' +
+      '    <h2 class="profile-settings-panel__title" id="profile-settings-title">' + tr("Profile & Settings") + "</h2>" +
+      '    <button type="button" class="profile-settings-panel__close" data-profile-settings-close aria-label="' + tr("Close settings") + '">&times;</button>' +
       "  </header>" +
       '  <div class="profile-settings-panel__body">' +
-      '    <section class="profile-settings-profile" aria-label="Profile" data-profile-settings-profile-card>' +
+      '    <section class="profile-settings-profile" aria-label="' + tr("Profile") + '" data-profile-settings-profile-card>' +
       '      <div class="profile-settings-profile__avatar" data-profile-settings-avatar aria-hidden="true">G</div>' +
       '      <div class="profile-settings-profile__meta">' +
-      '        <p class="profile-settings-profile__name" data-profile-settings-display-name>Guest</p>' +
-      '        <p class="profile-settings-profile__status" data-profile-settings-status><span class="profile-settings-profile__status-dot" data-profile-settings-status-dot aria-hidden="true"></span><span data-profile-settings-status-text>Not logged in</span></p>' +
+      '        <p class="profile-settings-profile__name" data-profile-settings-display-name>' + tr("Guest") + "</p>" +
+      '        <p class="profile-settings-profile__status" data-profile-settings-status><span class="profile-settings-profile__status-dot" data-profile-settings-status-dot aria-hidden="true"></span><span data-profile-settings-status-text>' + tr("Not logged in") + "</span></p>" +
       "      </div>" +
       '      <div class="profile-settings-profile__actions" data-profile-settings-actions>' +
-      '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--logout" data-auth-logout data-profile-auth-when="logged-in" hidden>Log out</button>' +
-      '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--primary" data-profile-settings-login data-profile-auth-when="guest" hidden>Log in</button>' +
-      '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--primary" data-profile-settings-signup data-profile-auth-when="guest" hidden>Create account</button>' +
+      '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--logout" data-auth-logout data-profile-auth-when="logged-in" hidden>' + tr("Log out") + "</button>" +
+      '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--primary" data-profile-settings-login data-profile-auth-when="guest" hidden>' + tr("Log in") + "</button>" +
+      '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--primary" data-profile-settings-signup data-profile-auth-when="guest" hidden>' + tr("Create account") + "</button>" +
       "      </div>" +
       "    </section>" +
       '    <div data-clw-pref-panel="settings">' +
@@ -80,20 +149,20 @@
       ICON_SOUND +
       "</div>" +
       '        <div class="profile-settings-row__text">' +
-      '          <h3 class="profile-settings-row__title">Sound effects</h3>' +
-      '          <p class="profile-settings-row__desc">Play sounds for interactions and feedback.</p>' +
+      '          <h3 class="profile-settings-row__title">' + tr("Sound effects") + "</h3>" +
+      '          <p class="profile-settings-row__desc">' + tr("Play sounds for interactions and feedback.") + "</p>" +
       "        </div>" +
-      '        <button type="button" class="profile-settings-toggle" role="switch" data-clw-pref="sound-effects" aria-checked="true" aria-label="Sound effects"></button>' +
+      '        <button type="button" class="profile-settings-toggle" role="switch" data-clw-pref="sound-effects" aria-checked="true" aria-label="' + tr("Sound effects") + '"></button>' +
       "      </div>" +
       '      <div class="profile-settings-row">' +
       '        <div class="profile-settings-row__icon profile-settings-row__icon--lang">' +
       ICON_GLOBE +
       "</div>" +
       '        <div class="profile-settings-row__text">' +
-      '          <h3 class="profile-settings-row__title">Language</h3>' +
-      '          <p class="profile-settings-row__desc">Choose your preferred language.</p>' +
+      '          <h3 class="profile-settings-row__title">' + tr("Language") + "</h3>" +
+      '          <p class="profile-settings-row__desc">' + tr("Choose your preferred language.") + "</p>" +
       "        </div>" +
-      '        <div class="profile-settings-seg" role="group" aria-label="Language">' +
+      '        <div class="profile-settings-seg" role="group" aria-label="' + tr("Language") + '">' +
       '          <button type="button" class="profile-settings-seg__btn" data-clw-pref="language" data-clw-pref-value="zh" aria-pressed="false">中文</button>' +
       '          <button type="button" class="profile-settings-seg__btn is-selected" data-clw-pref="language" data-clw-pref-value="en" aria-pressed="true">EN</button>' +
       "        </div>" +
@@ -103,12 +172,12 @@
       ICON_PALETTE +
       "</div>" +
       '        <div class="profile-settings-row__text">' +
-      '          <h3 class="profile-settings-row__title">Colour mode</h3>' +
-      '          <p class="profile-settings-row__desc">Improves contrast and uses colour-blind friendly status colours.</p>' +
+      '          <h3 class="profile-settings-row__title">' + tr("Colour mode") + "</h3>" +
+      '          <p class="profile-settings-row__desc">' + tr("Improves contrast and uses colour-blind friendly status colours.") + "</p>" +
       "        </div>" +
-      '        <div class="profile-settings-seg" role="group" aria-label="Colour mode">' +
-      '          <button type="button" class="profile-settings-seg__btn is-selected" data-clw-pref="colour-mode" data-clw-pref-value="default" aria-pressed="true">Default</button>' +
-      '          <button type="button" class="profile-settings-seg__btn" data-clw-pref="colour-mode" data-clw-pref-value="accessible" aria-pressed="false">Accessible</button>' +
+      '        <div class="profile-settings-seg" role="group" aria-label="' + tr("Colour mode") + '">' +
+      '          <button type="button" class="profile-settings-seg__btn is-selected" data-clw-pref="colour-mode" data-clw-pref-value="default" aria-pressed="true">' + tr("Default") + "</button>" +
+      '          <button type="button" class="profile-settings-seg__btn" data-clw-pref="colour-mode" data-clw-pref-value="accessible" aria-pressed="false">' + tr("Accessible") + "</button>" +
       "        </div>" +
       "      </div>" +
       '      <div class="profile-settings-row">' +
@@ -116,10 +185,10 @@
       ICON_AA +
       "</div>" +
       '        <div class="profile-settings-row__text">' +
-      '          <h3 class="profile-settings-row__title">Font size</h3>' +
-      '          <p class="profile-settings-row__desc">Adjust text size for easier reading.</p>' +
+      '          <h3 class="profile-settings-row__title">' + tr("Font size") + "</h3>" +
+      '          <p class="profile-settings-row__desc">' + tr("Adjust text size for easier reading.") + "</p>" +
       "        </div>" +
-      '        <div class="profile-settings-seg" role="group" aria-label="Font size">' +
+      '        <div class="profile-settings-seg" role="group" aria-label="' + tr("Font size") + '">' +
       '          <button type="button" class="profile-settings-seg__btn" data-clw-pref="font-size" data-clw-pref-value="s" aria-pressed="false">S</button>' +
       '          <button type="button" class="profile-settings-seg__btn is-selected" data-clw-pref="font-size" data-clw-pref-value="m" aria-pressed="true">M</button>' +
       '          <button type="button" class="profile-settings-seg__btn" data-clw-pref="font-size" data-clw-pref-value="l" aria-pressed="false">L</button>' +
@@ -133,11 +202,7 @@
       '        <path d="M18.4 7.2A7 7 0 1 0 19.2 15.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
       '        <path d="M16.4 10.4L20.6 10.6L20.4 6.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
       '      </svg>' +
-      '      Reset to defaults' +
-      '    </button>' +
-      '    <button type="button" class="profile-settings-footer__save" data-profile-settings-save>' +
-      '      <span class="profile-settings-footer__save-icon" aria-hidden="true">✓</span>' +
-      "      Save changes" +
+      "      " + tr("Reset to defaults") +
       "    </button>" +
       "  </footer>" +
       "</div>"
@@ -180,11 +245,11 @@
     var btnUp = rootEl.querySelector("[data-profile-settings-signup]");
 
     if (av) av.textContent = p.initial;
-    if (nm) nm.textContent = p.displayName;
+    if (nm) nm.textContent = p.loggedIn ? p.displayName : tr("Guest");
     if (dot) {
       dot.classList.toggle("profile-settings-profile__status-dot--on", p.loggedIn);
     }
-    if (st) st.textContent = p.loggedIn ? "Logged in" : "Not logged in";
+    if (st) st.textContent = p.loggedIn ? tr("Logged in") : tr("Not logged in");
 
     if (btnOut) btnOut.hidden = !p.loggedIn;
     if (btnIn) btnIn.hidden = p.loggedIn;
@@ -220,6 +285,28 @@
     });
   }
 
+  function rebuildPanelContent() {
+    if (!rootEl) return;
+    rootEl.innerHTML = buildMarkup();
+    delete rootEl.dataset.bound;
+    backdropEl = rootEl.querySelector("[data-profile-settings-backdrop]");
+    panelEl = rootEl.querySelector("[data-profile-settings-panel]");
+    bindPanelEvents();
+    refreshProfileCard();
+    applyPrefStateToDom();
+    if (isOpen) {
+      backdropEl.classList.add("is-open");
+      panelEl.classList.add("is-open");
+      positionPanel();
+    }
+  }
+
+  function syncLocaleFromCLW() {
+    if (window.CLWLocale && typeof CLWLocale.getLocale === "function") {
+      prefState.language = CLWLocale.getLocale();
+    }
+  }
+
   function resetPrefs() {
     prefState.soundEffects = defaults.soundEffects;
     prefState.language = defaults.language;
@@ -228,6 +315,10 @@
     if (window.CLWSound && typeof CLWSound.setSoundEffectsEnabled === "function") {
       CLWSound.setSoundEffectsEnabled(defaults.soundEffects);
     }
+    if (window.CLWLocale && typeof CLWLocale.setLocale === "function") {
+      CLWLocale.setLocale(defaults.language);
+    }
+    applyFontSize(defaults.fontSize, { emit: true });
     applyPrefStateToDom();
   }
 
@@ -270,7 +361,9 @@
     }
     refreshProfileCard();
     syncSoundFromCLW();
+    syncLocaleFromCLW();
     applyPrefStateToDom();
+    var closeBtn = rootEl.querySelector("[data-profile-settings-close]");
     if (closeBtn) closeBtn.focus();
   }
 
@@ -334,24 +427,18 @@
         var val = seg.getAttribute("data-clw-pref-value");
         if (key === "language" && (val === "zh" || val === "en")) {
           prefState.language = val;
+          if (window.CLWLocale && typeof CLWLocale.setLocale === "function") {
+            CLWLocale.setLocale(val);
+          }
         } else if (key === "colour-mode" && (val === "default" || val === "accessible")) {
           prefState.colourMode = val;
         } else if (key === "font-size" && (val === "s" || val === "m" || val === "l")) {
-          prefState.fontSize = val;
+          applyFontSize(val, { emit: true });
         }
         applyPrefStateToDom();
       }
       if (t.closest("[data-profile-settings-reset]")) {
         resetPrefs();
-      }
-      if (t.closest("[data-profile-settings-save]")) {
-        var save = t.closest("[data-profile-settings-save]");
-        if (save) {
-          save.classList.add("is-pressed");
-          window.setTimeout(function () {
-            save.classList.remove("is-pressed");
-          }, 160);
-        }
       }
       if (t.closest("[data-profile-settings-login]")) {
         closePanel();
@@ -398,14 +485,28 @@
     bindTrigger();
     refreshProfileCard();
     syncSoundFromCLW();
+    syncLocaleFromCLW();
+    syncFontSizeFromStorage();
     applyPrefStateToDom();
   }
+
+  syncFontSizeFromStorage();
 
   document.addEventListener("site:components-ready", init);
   document.addEventListener("clw:auth-changed", function () {
     refreshProfileCard();
     syncSoundFromCLW();
+    syncLocaleFromCLW();
+    syncFontSizeFromStorage();
     applyPrefStateToDom();
+  });
+  document.addEventListener("clw:locale-changed", function (ev) {
+    var loc = ev.detail && ev.detail.locale;
+    if (loc === "zh" || loc === "en") {
+      prefState.language = loc;
+      rebuildPanelContent();
+      applyPrefStateToDom();
+    }
   });
   document.addEventListener("clw:sound-prefs-changed", function () {
     syncSoundFromCLW();
@@ -422,6 +523,10 @@
     /** Read-only snapshot for future persistence hooks */
     getPreferenceState: function () {
       return Object.assign({}, prefState);
+    },
+    setFontSize: function (fontSize) {
+      applyFontSize(fontSize, { emit: true });
+      applyPrefStateToDom();
     }
   };
 })();
