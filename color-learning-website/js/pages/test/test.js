@@ -2228,6 +2228,11 @@ function tx(str) {
       if (!isNaN(qParam)) startIndex = qParam;
       if (startIndex < 0) startIndex = 0;
       if (startIndex >= questions.length) startIndex = questions.length - 1;
+    } else {
+      var homeQuestionIndex = parseInt(params.hq, 10);
+      if (!isNaN(homeQuestionIndex)) startIndex = homeQuestionIndex;
+      if (startIndex < 0) startIndex = 0;
+      if (startIndex >= questions.length) startIndex = questions.length - 1;
     }
 
     var drafts = {};
@@ -2262,6 +2267,14 @@ function tx(str) {
       });
       scoreInit = typeof browseResult.score === "number" ? browseResult.score : 0;
       correctInit = typeof browseResult.correctCount === "number" ? browseResult.correctCount : 0;
+    }
+    if (!isBrowseReplay && mode === "path") {
+      var homeOptionIndex = parseInt(params.ho, 10);
+      var startQuestion = questions[startIndex];
+      var prefilledOption = resolveHomePickedOption(startQuestion, homeOptionIndex);
+      if (startQuestion && startQuestion.id && prefilledOption !== null && prefilledOption !== undefined) {
+        drafts[startQuestion.id] = prefilledOption;
+      }
     }
 
     var runLiveTimer = !isBrowseReplay && mode !== "review";
@@ -2306,6 +2319,13 @@ function tx(str) {
     }
 
     return state.currentQuiz;
+  }
+
+  function resolveHomePickedOption(question, optionIndex) {
+    if (!question || question.type === "sort" || isNaN(optionIndex)) return null;
+    var options = Array.isArray(question.options) ? question.options : [];
+    if (optionIndex < 0 || optionIndex >= options.length) return null;
+    return getQuestionOptionId(options[optionIndex]);
   }
 
   function setDraftAnswer(value) {

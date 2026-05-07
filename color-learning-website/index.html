@@ -17,13 +17,18 @@
     <main id="main-content" class="page-home">
       <section class="home-hero" aria-label="Intro banner">
         <p class="home-hero__tagline">Explore the world of colors!</p>
+        <p class="home-hero__slogan">Learn color. See beauty. Think in systems.</p>
+        <div class="home-hero__divider" aria-hidden="true"></div>
       </section>
 
       <section class="home-row home-row--2" aria-label="Learn and test">
         <a class="home-card home-card--learn-spotlight" href="learning.html" data-home-learn-link aria-label="Explore learn module">
           <p class="home-card__text home-card__text--learn" data-home-learn-title>Learn Colors the Smart Way</p>
-          <p class="home-learn__topic" data-home-learn-topic>Loading a random topic...</p>
-          <p class="home-learn__snippet" data-home-learn-snippet>Loading knowledge preview...</p>
+          <p class="home-learn__sub" data-home-learn-sub>Learn a Color Concept!</p>
+          <div class="home-learn__note">
+            <p class="home-learn__topic" data-home-learn-topic>Loading a random topic...</p>
+            <div class="home-learn__snippet" data-home-learn-snippet>Loading knowledge preview...</div>
+          </div>
           <p class="home-learn__meta" data-home-learn-meta>Preparing section route...</p>
         </a>
         <a class="home-card home-card--test-spotlight" href="test.html" data-home-test-link aria-label="Open random test question">
@@ -38,14 +43,22 @@
 
       <section class="home-row home-row--3" aria-label="Game and community">
         <a class="home-card home-card--game-spotlight" href="game.html" data-home-game-link aria-label="Start your color challenge in Game">
-          <p class="home-card__text home-card__text--game">Start your color challenge!</p>
-          <canvas
-            class="home-game-preview"
-            data-home-game-preview
-            width="280"
-            height="200"
-            aria-label="Random game drawing preview"
-          ></canvas>
+          <div class="home-game__head">
+            <div class="home-game__titles">
+              <p class="home-card__text home-card__text--game">Start your color challenge!</p>
+              <p class="home-game__sub">Shape &amp; Color Game</p>
+            </div>
+          </div>
+          <div class="home-game__frame">
+            <canvas
+              class="home-game-preview"
+              data-home-game-preview
+              width="280"
+              height="200"
+              aria-label="Random game drawing preview"
+            ></canvas>
+          </div>
+          <span class="home-game__cta">Start challenge &#8250;</span>
         </a>
         <section class="home-card home-card--community-spotlight" aria-label="Community preview card">
           <p class="home-card__text home-card__text--community" data-home-community-title>👥 Join the Color Community</p>

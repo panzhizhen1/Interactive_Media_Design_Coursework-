@@ -76,6 +76,42 @@
     toastTimer: 0
   };
 
+  function getQueryParams() {
+    var search = window.location.search.replace(/^\?/, "");
+    if (!search) return {};
+    return search.split("&").reduce(function (acc, pair) {
+      if (!pair) return acc;
+      var parts = pair.split("=");
+      var key = decodeURIComponent(parts[0] || "");
+      if (!key) return acc;
+      acc[key] = decodeURIComponent(parts.slice(1).join("=") || "");
+      return acc;
+    }, {});
+  }
+
+  function applyHomeRouteState() {
+    var params = getQueryParams();
+    var view = getCommunityView();
+    if (params.from !== "home-community") return;
+    if (view === "all" && params.postId) {
+      state.selectedPostId = String(params.postId);
+      return;
+    }
+  }
+
+  function jumpToHomeRouteTarget() {
+    var params = getQueryParams();
+    if (params.from !== "home-community") return;
+    if (getCommunityView() !== "preview") return;
+    if (params.focus !== "leaderboard") return;
+    var leaderboardSection = document.querySelector("[data-total-leaderboard-list]");
+    if (!leaderboardSection) return;
+    var target = leaderboardSection.closest(".widget-card") || leaderboardSection;
+    window.requestAnimationFrame(function () {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   function readJSON(key, fallback) {
     try {
       var raw = localStorage.getItem(key);
@@ -1565,6 +1601,7 @@
     if (document.body.dataset.communityReady === "1") return;
     document.body.dataset.communityReady = "1";
     state.posts = readPosts();
+    applyHomeRouteState();
     setActiveTag(DEFAULT_TAG);
     setFilter(DEFAULT_FILTER);
     setComposerPalette([DEFAULT_COLOR], false);
@@ -1572,6 +1609,7 @@
     bindEvents();
     applyDraftToComposer();
     refreshAll();
+    jumpToHomeRouteTarget();
     updateOverlayScrollLock();
   }
 
