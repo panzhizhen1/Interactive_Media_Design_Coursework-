@@ -17,9 +17,10 @@
     <main id="main-content" class="community-page community-page--all">
       <section class="community-hero" aria-labelledby="community-title">
         <h1 class="page-title community-hero__title" id="community-title">All Community Posts</h1>
-        <p class="lead community-hero__lead">Browse the full feed and inspect each post in detail.</p>
+        <p class="lead community-hero__lead">Browse the full feed, inspect post details, and trace each discussion back to Learning, Game, or Test.</p>
         <div class="community-hero__actions">
-          <a class="community-hero__cta community-hero__cta--ghost" href="community.html">Back to Community Home</a>
+          <a class="community-hero__cta community-hero__cta--ghost" href="community.html">Back to Community</a>
+          <button type="button" class="community-hero__cta community-hero__cta--ghost" data-open-guidelines>Community Guidelines</button>
         </div>
       </section>
 
@@ -41,6 +42,7 @@
               <input type="search" data-tag-search placeholder="Search tag" autocomplete="off" />
             </label>
           </div>
+          <div class="feed-status" data-feed-status aria-live="polite"></div>
           <section class="post-list" aria-live="polite" data-post-list></section>
         </section>
 
@@ -50,6 +52,24 @@
         </aside>
       </section>
     </main>
+
+    <div class="community-modal-backdrop" data-guidelines-modal hidden>
+      <section class="community-modal" role="dialog" aria-modal="true" aria-labelledby="guidelines-title">
+        <div class="community-modal__head">
+          <h2 id="guidelines-title">Community Guidelines</h2>
+          <button type="button" class="community-modal__close" data-close-guidelines aria-label="Close guidelines">×</button>
+        </div>
+        <ul class="community-modal__list">
+          <li>Share constructive learning reflections, not only final answers.</li>
+          <li>Use respectful language and explain why a color decision works.</li>
+          <li>Do not spam repeated posts or irrelevant links.</li>
+          <li>If you see problematic content, use Report to flag it.</li>
+        </ul>
+        <div class="community-modal__actions">
+          <button type="button" class="community-hero__cta" data-close-guidelines>Got it</button>
+        </div>
+      </section>
+    </div>
 
     <div class="community-toast" data-community-toast hidden>
       <p class="community-toast__message" data-community-toast-message></p>

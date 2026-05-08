@@ -17,9 +17,10 @@
     <main id="main-content" class="community-page">
       <section class="community-hero" aria-labelledby="community-title">
         <h1 class="page-title community-hero__title" id="community-title">Color Learning Community</h1>
-        <p class="lead community-hero__lead">Share your color palettes and learning notes with peers.</p>
+        <p class="lead community-hero__lead">Publish reflections, palettes, and visual results from Learning, Game, and Test in one shared learning space.</p>
+        <p class="community-hero__note">Why this page matters: Community turns practice from other pages into visible learning evidence your team can review and discuss.</p>
         <div class="community-hero__actions">
-          <button type="button" class="community-hero__cta" data-scroll-composer>+ Create New Post</button>
+          <button type="button" class="community-hero__cta" data-scroll-composer>+ Create Post</button>
           <button type="button" class="community-hero__cta community-hero__cta--ghost" data-open-guidelines>Community Guidelines</button>
         </div>
       </section>
@@ -31,6 +32,7 @@
             <p class="composer-card__prompt">
               Learning Prompt: How does this color choice impact users with color vision deficiency?
             </p>
+            <p class="composer-card__hint">Explain why your color decision works, what changed your thinking, or what you want feedback on.</p>
 
             <form id="post-form" data-post-form>
               <label class="sr-only" for="post-content">Post content</label>
@@ -47,6 +49,7 @@
                 <p class="composer-card__counter" data-char-counter>0 / 500</p>
                 <p class="composer-card__origin" data-draft-origin hidden></p>
               </div>
+              <p class="composer-card__rules">Text is required. Palette and image are optional. Publishing a post adds +5 community points.</p>
 
               <div class="composer-card__tags" role="radiogroup" aria-label="Post tag" data-tag-group>
                 <button type="button" class="tag-pill is-active" data-tag="#Accessibility" aria-pressed="true">#Accessibility</button>
@@ -77,22 +80,29 @@
                   <input type="checkbox" data-include-image checked />
                   <span>Publish image</span>
                 </label>
-                <label class="composer-upload" for="attach-image">
-                  <span class="composer-upload__title">Attach Image</span>
-                  <span class="composer-upload__hint">From game share or local upload</span>
-                  <input id="attach-image" type="file" accept="image/*" data-image-input />
-                </label>
-              </div>
-              <div class="composer-card__image-preview" data-image-preview-wrap hidden>
-                <img src="" alt="Selected post attachment preview" data-image-preview />
-                <div class="composer-card__image-actions">
-                  <button type="button" class="post-action-btn post-action-btn--danger" data-image-clear>Remove image</button>
+                <div class="composer-image-block">
+                  <div class="composer-image-block__upload" data-upload-area>
+                    <label class="composer-upload" for="attach-image">
+                      <svg class="composer-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path d="M12 16V4m0 0L7 9m5-5 5 5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+                      </svg>
+                      <span class="composer-upload__title">Attach Image</span>
+                      <span class="composer-upload__hint">Tap to upload</span>
+                      <input id="attach-image" type="file" accept="image/*" data-image-input />
+                    </label>
+                  </div>
+                  <div class="composer-image-block__preview" data-image-preview-wrap hidden>
+                    <img src="" alt="Selected post attachment preview" data-image-preview />
+                    <div class="composer-image-block__actions">
+                      <button type="button" class="post-action-btn post-action-btn--danger" data-image-clear>Remove</button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <p class="composer-card__feedback sr-only" data-community-feedback role="status" aria-live="polite"></p>
             </form>
             <div class="feed-submit-wrap">
-              <button type="submit" form="post-form" class="btn-post feed-submit-btn">Post and Earn 5 points</button>
+              <button type="submit" form="post-form" class="btn-post feed-submit-btn">Publish Post</button>
             </div>
           </article>
 
@@ -112,10 +122,19 @@
               <input type="search" data-tag-search placeholder="Search tag" autocomplete="off" />
             </label>
           </div>
+          <div class="feed-status" data-feed-status aria-live="polite"></div>
+
+          <section class="featured-posts" data-featured-section hidden aria-labelledby="featured-posts-title">
+            <div class="post-preview-head post-preview-head--featured">
+              <h2 class="post-preview-head__title" id="featured-posts-title">Featured Learning Picks</h2>
+              <span class="post-preview-head__caption">Teacher-highlighted demo posts</span>
+            </div>
+            <div class="post-list" data-featured-list></div>
+          </section>
 
           <div class="post-preview-head">
-            <h2 class="post-preview-head__title">Post Preview (Latest 3)</h2>
-            <a class="post-preview-head__btn" href="community-posts.html">View Full Posts</a>
+            <h2 class="post-preview-head__title">Latest Posts</h2>
+            <a class="post-preview-head__btn" href="community-posts.html" data-view-all-posts>Browse All Posts</a>
           </div>
           <section class="post-list" aria-live="polite" data-post-list></section>
         </section>
@@ -164,6 +183,7 @@
           <section class="widget-card widget-card--leaderboard widget-card--alltime" aria-labelledby="alltime-title">
             <h2 id="alltime-title">All-time Top Learners</h2>
             <ol class="leaderboard" data-total-leaderboard-list></ol>
+            <p class="widget-card__note widget-card__note--compact widget-card__note--muted">Includes demo seed learners for showcase.</p>
           </section>
         </aside>
       </div>

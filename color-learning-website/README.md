@@ -55,6 +55,19 @@ A simple front-end sign-in system is included as a placeholder (`localStorage` o
 - `studentB` / `StudentB123!`
 - `studentC` / `StudentC123!`
 
+`studentA` is also used as the demo moderator account for Community highlight actions during showcase.
+
+---
+
+## Community Demo Notes
+
+The `community` flow is a local front-end simulation, not a real multi-device social platform.
+
+- Posts, likes, hidden items, reports, drafts, and ranking snapshots are stored in browser `localStorage`.
+- Login, points, posts, streaks, and leaderboard activity are coordinated through `CLWAuth`.
+- `Learning`, `Game`, and `Test` can all send a draft into `Community` through the shared key `clw_community_draft_v1`.
+- The weekly leaderboard uses recent recorded activity; the all-time leaderboard includes demo seed learners for showcase purposes.
+
 ---
 
 ## Breadcrumb

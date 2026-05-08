@@ -586,18 +586,33 @@ input[type="color"] {
 }
 
 .composer-upload {
+  position: relative;
   display: grid;
   gap: 0.35rem;
+  justify-items: start;
   padding: 0.85rem 1rem;
   border: 1px dashed rgba(0, 0, 0, 0.1);
   border-radius: 0.85rem;
   background: #fbfbfd;
+  cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.composer-upload__icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: #86868b;
 }
 
 .composer-upload:hover {
   border-color: rgba(0, 0, 0, 0.18);
   background: #f5f5f7;
+}
+
+.composer-upload:focus-within {
+  border-color: rgba(0, 125, 250, 0.3);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 125, 250, 0.18);
 }
 
 .composer-upload__title {
@@ -612,41 +627,11 @@ input[type="color"] {
 }
 
 .composer-upload input[type="file"] {
-  width: 100%;
-  color: #424245;
-  font-size: 0.84rem;
-}
-
-.composer-upload input[type="file"]::file-selector-button {
-  border: none;
-  border-radius: 0.6rem;
-  background: #ffffff;
-  color: var(--color-primary);
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  margin-right: 0.6rem;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  transition:
-    background-color 0.15s ease,
-    transform 0.12s ease;
-}
-
-.composer-upload input[type="file"]::-webkit-file-upload-button {
-  border: none;
-  border-radius: 0.6rem;
-  background: #ffffff;
-  color: var(--color-primary);
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  margin-right: 0.6rem;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-}
-
-.composer-upload input[type="file"]::file-selector-button:hover {
-  background: #f5f5f7;
-  transform: translateY(-1px);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .composer-card__image-preview {

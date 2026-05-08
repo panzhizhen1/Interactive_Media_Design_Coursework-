@@ -465,7 +465,7 @@
   }
 
   function previewImage(alt, eyebrow, background) {
-    return { type: "image", src: "", alt: alt, eyebrow: eyebrow || "Preview pending", background: background || "#e2e8f0" };
+    return { type: "image", src: "", alt: alt, eyebrow: eyebrow || "", background: background || "#e2e8f0" };
   }
 
   function createDefaultState() {
@@ -2852,10 +2852,14 @@
   }
   function buildMistakeReason(question) { return question.type === "sort" ? "The sequence needs another pass before the process feels automatic." : question.type === "image" ? "Review which visual option best supports the communication goal." : question.type === "true-false" ? "Slow down and check the principle hidden inside the statement." : "Revisit the key distinction in this topic before the next attempt."; }
 
+  function previewPlaceholderIcon() {
+    return '<span class="quiz-image-option__placeholder" aria-hidden="true"><svg class="quiz-image-option__placeholder-icon" viewBox="0 0 48 48" focusable="false"><path d="M10 36.5h28a2.5 2.5 0 0 0 2.5-2.5V14A2.5 2.5 0 0 0 38 11.5H10A2.5 2.5 0 0 0 7.5 14v20a2.5 2.5 0 0 0 2.5 2.5Zm1.5-7.2 7.2-7.7 5.4 5.8 3.9-4.1 8.5 9.1H11.5v-3.1Zm22.2-9.8a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4Z"/></svg></span>';
+  }
+
   function renderImagePreview(option) {
     var preview = option && option.preview ? option.preview : null;
     if (!preview || !preview.type) {
-      return '<span class="quiz-image-option__preview quiz-image-option__preview--empty"><span class="quiz-image-option__placeholder">Preview missing</span></span>';
+      return '<span class="quiz-image-option__preview quiz-image-option__preview--empty">' + previewPlaceholderIcon() + '</span>';
     }
     if (preview.type === "text-on-bg") {
       return '<span class="quiz-image-option__preview quiz-image-option__preview--text" style="background:' + (preview.background || "#ffffff") + ';color:' + (preview.color || "#0f172a") + ';"><span class="quiz-image-option__preview-copy">' + (preview.text || option.label || "Preview") + '</span><span class="quiz-image-option__preview-subcopy">' + (preview.subtext || "Read this sample") + '</span></span>';
@@ -2867,9 +2871,9 @@
       if (preview.src) {
         return '<span class="quiz-image-option__preview quiz-image-option__preview--image"><img src="' + preview.src + '" alt="' + (preview.alt || option.label || "") + '" class="quiz-image-option__img"></span>';
       }
-      return '<span class="quiz-image-option__preview quiz-image-option__preview--image-empty" style="background:' + (preview.background || "#e2e8f0") + ';"><span class="quiz-image-option__placeholder">' + (preview.eyebrow || "Preview pending") + '</span></span>';
+      return '<span class="quiz-image-option__preview quiz-image-option__preview--image-empty" style="background:' + (preview.background || "#e2e8f0") + ';">' + previewPlaceholderIcon() + '</span>';
     }
-    return '<span class="quiz-image-option__preview quiz-image-option__preview--empty"><span class="quiz-image-option__placeholder">Unsupported preview</span></span>';
+    return '<span class="quiz-image-option__preview quiz-image-option__preview--empty">' + previewPlaceholderIcon() + '</span>';
   }
 
   function renderQuestionBody(question, draft, submitted) {
