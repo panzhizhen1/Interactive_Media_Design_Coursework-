@@ -985,6 +985,7 @@
     var likes = Number(post.likes || 0);
     var points = Number(post.pointsAwarded || POINTS_PER_POST);
     var liked = hasLiked(post);
+    var hidden = isPostHiddenForUser(post.id, currentUser);
     panel.innerHTML =
       '<article class="post-detail-card' + (post.featured ? " is-featured" : "") + '">' +
         '<div class="post-detail-card__eyebrow">Post details</div>' +
@@ -995,10 +996,10 @@
           "</div>" +
           renderDetailFactsHtml(post) +
         "</div>" +
-        '<p class="post-detail-card__content">' + escapeHtml(post.content) + "</p>" +
-        renderOriginMetaHtml(post) +
-        renderImageHtml(post, true) +
-        renderPaletteHtml(post) +
+        '<p class="post-detail-card__content">' + escapeHtml(hidden ? "This post is hidden for your account. Use Show Again to restore it." : post.content) + "</p>" +
+        (hidden ? "" : renderOriginMetaHtml(post)) +
+        (hidden ? "" : renderImageHtml(post, true)) +
+        (hidden ? "" : renderPaletteHtml(post)) +
         '<div class="post-detail-card__footer">' +
           '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? 'Liked ' : 'Like ') + likes + '</button>' +
           '<span class="post-points">Community reward +' + points + ' pts</span>' +
@@ -1440,6 +1441,16 @@
     state.posts = state.posts.filter(function (post) { return post.id !== postId; });
     writePosts(state.posts);
     if (state.selectedPostId === postId) state.selectedPostId = "";
+    var auth = getAuthApi();
+    if (auth && auth.getUserStats && auth.updateUserStats) {
+      var stats = auth.getUserStats(target.author);
+      auth.updateUserStats(target.author, {
+        points: Number(stats && stats.points ? stats.points : 0),
+        postCount: Math.max(0, Number(stats && stats.postCount ? stats.postCount : 0) - 1),
+        streakDays: Number(stats && stats.streakDays ? stats.streakDays : 0),
+        lastActiveDate: stats && stats.lastActiveDate ? stats.lastActiveDate : ""
+      });
+    }
     setFeedback("Post deleted from this local community feed.", "success");
     refreshAll();
   }
