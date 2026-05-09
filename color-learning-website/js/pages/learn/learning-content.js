@@ -2118,6 +2118,11 @@ export const contentData = {
             {
                 heading: 'Introduction to ICC Profiles',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/color_profiles/icc-profile-workflow.png" alt="ICC profile workflow showing color transformation from device A through PCS to device B" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 1: ICC Profile Color Transformation Workflow</figcaption>
+                    </figure>
+                    
                     <h3>What are ICC Profiles?</h3>
                     <p>An <strong>ICC profile</strong> (International Color Consortium profile) is a standardized set of data that characterizes a colour input or output device, or a colour space, according to standards promulgated by the International Color Consortium (ICC).</p>
                     
@@ -2190,6 +2195,11 @@ export const contentData = {
             {
                 heading: 'ICC Profile Structure and Components',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/color_profiles/pcs-xyz-lab.png" alt="Comparison of CIEXYZ and CIELAB Profile Connection Spaces" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 2: PCS Reference Spaces - XYZ vs LAB</figcaption>
+                    </figure>
+                    
                     <h3>Profile Header Information</h3>
                     <p>Every ICC profile contains essential header data that identifies and describes the profile:</p>
                     
@@ -2318,6 +2328,11 @@ export const contentData = {
                         </table>
                     </div>
                     
+                    <figure class="content-figure content-figure--wide">
+                      <img src="assets/images/learning/color_profiles/icc-profile-versions.png" alt="ICC Profile versions timeline and comparison" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 3: ICC Profile Versions Evolution Timeline</figcaption>
+                    </figure>
+                    
                     <h4>Key Differences: v2 vs v4</h4>
                     <ul>
                         <li><strong>v2:</strong> Allows more flexibility but less consistency</li>
@@ -2329,6 +2344,11 @@ export const contentData = {
             {
                 heading: 'Types of ICC Profiles',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/color_profiles/device-profile-types.png" alt="Three types of device ICC profiles: Input, Display, and Output profiles" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 4: Device Profile Types Classification</figcaption>
+                    </figure>
+                    
                     <h3>Device Profiles</h3>
                     <p>Device profiles characterize specific input, display, or output devices. There are three main categories:</p>
                     
@@ -2466,6 +2486,12 @@ export const contentData = {
                         
                         <div class="framework-step">
                             <h4>2. Hardware Calibration (Recommended)</h4>
+                            
+                            <figure class="content-figure content-figure--float-right">
+                              <img src="assets/images/learning/color_profiles/hardware-calibration-process.png" alt="Hardware calibration process for creating ICC profiles" loading="lazy" />
+                              <figcaption class="content-figure__caption">Figure 5: Hardware Calibration Process</figcaption>
+                            </figure>
+                            
                             <p><strong>Process:</strong></p>
                             <ol>
                                 <li>Use dedicated colorimeter or spectrophotometer</li>
@@ -2587,6 +2613,11 @@ export const contentData = {
             {
                 heading: 'Rendering Intents and Advanced Topics',
                 content: `
+                    <figure class="content-figure content-figure--wide">
+                      <img src="assets/images/learning/color_profiles/rendering-intents-four-types.png" alt="Comparison of four rendering intents: Perceptual, Relative Colorimetric, Absolute Colorimetric, and Saturation" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 6: Four Rendering Intents Comparison</figcaption>
+                    </figure>
+                    
                     <h3>Rendering Intents</h3>
                     <p>Rendering intents are strategies for handling colour transformations, especially when dealing with gamut mismatches.</p>
                     
@@ -2758,6 +2789,11 @@ export const contentData = {
             {
                 heading: 'Introduction to Gamma Correction',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/gamma_correction/gamma-curve-diagram.png" alt="Gamma curve diagram showing linear, gamma 2.2, and gamma 0.4545 encoding curves" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 1: Gamma Correction Curves - Linear vs Non-Linear Encoding</figcaption>
+                    </figure>
+                    
                     <h3>What is Gamma Correction?</h3>
                     <p><strong>Gamma correction</strong> is a non-linear operation used to encode and decode luminance or tristimulus values in video or still image systems. It compensates for the non-linear relationship between pixel values and perceived brightness.</p>
                     
@@ -2849,6 +2885,11 @@ export const contentData = {
             {
                 heading: 'The Science of Gamma',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/gamma_correction/human-visual-sensitivity.png" alt="Human visual sensitivity distribution across shadows, midtones, and highlights" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 2: Human Visual Sensitivity Distribution</figcaption>
+                    </figure>
+                    
                     <h3>Human Visual Perception</h3>
                     <p>Human perception of brightness follows a logarithmic relationship rather than linear, known as the Weber-Fechner Law.</p>
                     
@@ -2950,6 +2991,11 @@ export const contentData = {
                         </table>
                     </div>
                     
+                    <figure class="content-figure content-figure--wide">
+                      <img src="assets/images/learning/gamma_correction/linear-vs-gamma-comparison.png" alt="Comparison of linear encoding vs gamma encoding bit depth allocation" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 3: Linear vs Gamma Encoding - Bit Depth Efficiency</figcaption>
+                    </figure>
+                    
                     <h3>Linear vs. Non-Linear Colour Spaces</h3>
                     
                     <div class="pros-cons">
@@ -2995,6 +3041,11 @@ export const contentData = {
             {
                 heading: 'Gamma in Practice',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/gamma_correction/gamma-workflow-pipeline.png" alt="Complete gamma encoding and decoding workflow pipeline" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 4: Gamma Workflow Pipeline - Encoding to Decoding</figcaption>
+                    </figure>
+                    
                     <h3>Gamma in Digital Photography</h3>
                     
                     <div class="workflow-scenarios">
@@ -3161,6 +3212,11 @@ export const contentData = {
                     <p>Standard gamma is insufficient for extreme brightness ranges in HDR content. Need to encode 0.0001 to 10,000 nits (or more).</p>
                     
                     <h4>HDR Transfer Functions</h4>
+                    
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/gamma_correction/pq-vs-hlg-curves.png" alt="Comparison of PQ and HLG HDR transfer function curves" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 5: PQ vs HLG HDR Transfer Functions</figcaption>
+                    </figure>
                     
                     <div class="pros-cons">
                         <div class="pros-cons__item">
@@ -3336,6 +3392,11 @@ export const contentData = {
                             </ul>
                         </div>
                     </div>
+                    
+                    <figure class="content-figure content-figure--wide">
+                      <img src="assets/images/learning/gamma_correction/gamma-calibration-best-practices.png" alt="Gamma calibration best practices guide with frequency and target settings" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 6: Gamma Calibration Best Practices Guide</figcaption>
+                    </figure>
                     
                     <h3>Common Pitfalls to Avoid</h3>
                     
@@ -3524,6 +3585,11 @@ export const contentData = {
                             </tbody>
                         </table>
                     </div>
+                    
+                    <figure class="content-figure content-figure--wide">
+                      <img src="assets/images/learning/hdr_color/sdr-vs-hdr-comparison.png" alt="Visual comparison between SDR and HDR showing brightness range and color differences" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 1: SDR vs HDR - Visual and Technical Comparison</figcaption>
+                    </figure>
                     
                     <h3>Visual Differences</h3>
                     
@@ -3734,12 +3800,22 @@ export const contentData = {
                             </tbody>
                         </table>
                     </div>
+                    
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/hdr_color/hdr-formats-overview.png" alt="Overview comparison of HDR10, Dolby Vision, HLG, and HDR10+ formats" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 2: HDR Formats Comparison Overview</figcaption>
+                    </figure>
                 `
             },
             {
                 heading: 'HDR Technical Foundations',
                 content: `
                     <h3>Transfer Functions</h3>
+                    
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/hdr_color/pq-hlg-transfer-functions.png" alt="Comparison of PQ and HLG transfer function curves" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 3: PQ vs HLG Transfer Functions</figcaption>
+                    </figure>
                     
                     <div class="pros-cons">
                         <div class="pros-cons__item">
@@ -3795,6 +3871,11 @@ export const contentData = {
                         </ul>
                         <p><strong>Types:</strong> Dolby Vision (proprietary), HDR10+ (open standard)</p>
                     </div>
+                    
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/hdr_color/hdr-color-gamut-coverage.png" alt="HDR color gamut coverage comparison showing sRGB, DCI-P3, and Rec.2020" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 4: HDR Color Gamut Coverage Comparison</figcaption>
+                    </figure>
                     
                     <h3>HDR Colour Spaces</h3>
                     
@@ -3948,6 +4029,11 @@ export const contentData = {
                             </ul>
                         </div>
                         
+                        <figure class="content-figure content-figure--wide">
+                          <img src="assets/images/learning/hdr_color/hdr-video-production-workflow.png" alt="Complete HDR video production workflow from pre-production to delivery" loading="lazy" />
+                          <figcaption class="content-figure__caption">Figure 5: HDR Video Production Workflow</figcaption>
+                        </figure>
+                        
                         <div class="framework-step">
                             <h4>Post-Production</h4>
                             <div class="workflow-steps">
@@ -4046,6 +4132,11 @@ export const contentData = {
             {
                 heading: 'Advanced Topics and Best Practices',
                 content: `
+                    <figure class="content-figure content-figure--float-right">
+                      <img src="assets/images/learning/hdr_color/hdr-display-technologies.png" alt="Comparison of HDR display technologies: OLED, Mini-LED, and MicroLED" loading="lazy" />
+                      <figcaption class="content-figure__caption">Figure 6: HDR Display Technologies Comparison</figcaption>
+                    </figure>
+                    
                     <h3>HDR Grading Techniques</h3>
                     
                     <div class="module-cards">

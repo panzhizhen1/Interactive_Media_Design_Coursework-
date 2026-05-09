@@ -1,12 +1,42 @@
 // Learning page scripts
 
-import { contentData } from './learn/learning-content.js';
-import { ColorPicker } from './learn/interaction-color-picker.js';
-import { VisualExample } from './learn/ineraction-visual-example.js';
-import { InteractionTools } from './learn/interaction-tools.js';
-
 (function() {
   'use strict';
+
+  let contentData = null;
+  let ColorPicker = null;
+  let VisualExample = null;
+  let InteractionTools = null;
+
+  async function loadContentModule() {
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    if (currentPage === 'learning-zh.html') {
+      const module = await import('./learn-zh/learning-content.js');
+      contentData = module.contentData;
+      
+      const colorPickerModule = await import('./learn/interaction-color-picker.js');
+      ColorPicker = colorPickerModule.ColorPicker;
+      
+      const visualExampleModule = await import('./learn/ineraction-visual-example.js');
+      VisualExample = visualExampleModule.VisualExample;
+      
+      const interactionToolsModule = await import('./learn/interaction-tools.js');
+      InteractionTools = interactionToolsModule.InteractionTools;
+    } else {
+      const module = await import('./learn/learning-content.js');
+      contentData = module.contentData;
+      
+      const colorPickerModule = await import('./learn/interaction-color-picker.js');
+      ColorPicker = colorPickerModule.ColorPicker;
+      
+      const visualExampleModule = await import('./learn/ineraction-visual-example.js');
+      VisualExample = visualExampleModule.VisualExample;
+      
+      const interactionToolsModule = await import('./learn/interaction-tools.js');
+      InteractionTools = interactionToolsModule.InteractionTools;
+    }
+  }
 
   // DOM elements
   const sidebar = document.getElementById('learning-sidebar');
@@ -27,14 +57,39 @@ import { InteractionTools } from './learn/interaction-tools.js';
   const HOME_LEARN_HIGHLIGHT_PARAM = 'from';
   const HOME_LEARN_HIGHLIGHT_VALUE = 'home-learn';
 
+  function getCurrentLocale() {
+    if (window.CLWLocale && typeof CLWLocale.getLocale === 'function') {
+      return CLWLocale.getLocale();
+    }
+    return 'en';
+  }
+
+  function switchLanguagePage(newLocale) {
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.split('/').pop();
+    
+    if (newLocale === 'zh' && currentPage !== 'learning-zh.html') {
+      const searchParams = window.location.search;
+      const hash = window.location.hash;
+      window.location.href = 'learning-zh.html' + searchParams + hash;
+    } else if (newLocale === 'en' && currentPage !== 'learning.html') {
+      const searchParams = window.location.search;
+      const hash = window.location.hash;
+      window.location.href = 'learning.html' + searchParams + hash;
+    }
+  }
+
   // Initialize
-  function init() {
+  async function init() {
+    await loadContentModule();
+    
     setupSidebarToggle();
     setupAccordionMenu();
     setupNavigationLinks();
     handleInitialRoute();
     setupHashChangeListener();
     setupCommunityShare();
+    setupLanguageSwitchListener();
   }
 
   function getRouteFocusHints() {
@@ -526,6 +581,18 @@ import { InteractionTools } from './learn/interaction-tools.js';
           }
           expandParentMenus(targetLink);
         }
+      }
+    });
+  }
+
+  function setupLanguageSwitchListener() {
+    document.addEventListener('clw:locale-changed', function(event) {
+      var newLocale = event && event.detail && event.detail.locale 
+        ? String(event.detail.locale) 
+        : getCurrentLocale();
+      
+      if (newLocale === 'zh' || newLocale === 'en') {
+        switchLanguagePage(newLocale);
       }
     });
   }
