@@ -326,7 +326,7 @@ const drawing=drawings[activeDrawingIndex];
 const palette=recentColors.length?recentColors.slice(0,6).map(rgbToHex):[rgbToHex(getCurrentRgb())];
 const draft={
 content:`Game artwork: I painted ${drawing.name} and want to discuss my color choices.`,
-tag:"#Palettes",
+tag:"#Palette",
 colorHex:palette[0]||"#2b78e4",
 paletteHexes:palette,
 includePalette:true,

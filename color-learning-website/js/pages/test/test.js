@@ -493,7 +493,7 @@ function tx(str) {
   }
 
   function previewImage(alt, eyebrow, background) {
-    return { type: "image", src: "", alt: alt, eyebrow: eyebrow || "Preview pending", background: background || "#e2e8f0" };
+    return { type: "image", src: "", alt: alt, eyebrow: eyebrow || "", background: background || "#e2e8f0" };
   }
 
   function createDefaultState() {
@@ -829,7 +829,7 @@ function tx(str) {
     var imageDataUrl = buildResultShareImage(result);
     var draft = {
       content: "Reflection from Test: I scored " + result.score + "/" + result.maxScore + " in " + result.chapterName + " (" + result.levelName + "). My next focus is " + (result.reviewTopics && result.reviewTopics.length ? result.reviewTopics[0] : "reviewing weak topics") + ".",
-      tag: "#Theory",
+      tag: "#Reflection",
       colorHex: "#2b78e4",
       paletteHexes: [],
       includePalette: false,
@@ -2956,10 +2956,14 @@ function tx(str) {
     );
   }
 
+  function previewPlaceholderIcon() {
+    return '<span class="quiz-image-option__placeholder" aria-hidden="true"><svg class="quiz-image-option__placeholder-icon" viewBox="0 0 48 48" focusable="false"><path d="M10 36.5h28a2.5 2.5 0 0 0 2.5-2.5V14A2.5 2.5 0 0 0 38 11.5H10A2.5 2.5 0 0 0 7.5 14v20a2.5 2.5 0 0 0 2.5 2.5Zm1.5-7.2 7.2-7.7 5.4 5.8 3.9-4.1 8.5 9.1H11.5v-3.1Zm22.2-9.8a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4Z"/></svg></span>';
+  }
+
   function renderImagePreview(option) {
     var preview = option && option.preview ? option.preview : null;
     if (!preview || !preview.type) {
-      return '<span class="quiz-image-option__preview quiz-image-option__preview--empty"><span class="quiz-image-option__placeholder">' + tx("Preview missing") + "</span></span>";
+      return '<span class="quiz-image-option__preview quiz-image-option__preview--empty">' + previewPlaceholderIcon() + '</span>';
     }
     if (preview.type === "text-on-bg") {
       return '<span class="quiz-image-option__preview quiz-image-option__preview--text" style="background:' + (preview.background || "#ffffff") + ';color:' + (preview.color || "#0f172a") + ';"><span class="quiz-image-option__preview-copy">' + (preview.text || option.label || tx("Preview")) + '</span><span class="quiz-image-option__preview-subcopy">' + tx(preview.subtext || "Read this sample") + '</span></span>';
@@ -2971,9 +2975,9 @@ function tx(str) {
       if (preview.src) {
         return '<span class="quiz-image-option__preview quiz-image-option__preview--image"><img src="' + preview.src + '" alt="' + escapeAttr(preview.alt || option.label || "") + '" class="quiz-image-option__img"></span>';
       }
-      return '<span class="quiz-image-option__preview quiz-image-option__preview--image-empty" style="background:' + (preview.background || "#e2e8f0") + ';"><span class="quiz-image-option__placeholder">' + tx(preview.eyebrow || "Preview pending") + '</span></span>';
+      return '<span class="quiz-image-option__preview quiz-image-option__preview--image-empty" style="background:' + (preview.background || "#e2e8f0") + ';">' + previewPlaceholderIcon() + '</span>';
     }
-    return '<span class="quiz-image-option__preview quiz-image-option__preview--empty"><span class="quiz-image-option__placeholder">' + tx("Unsupported preview") + "</span></span>";
+    return '<span class="quiz-image-option__preview quiz-image-option__preview--empty">' + previewPlaceholderIcon() + '</span>';
   }
 
   function renderQuestionBody(question, draft, submitted) {

@@ -172,7 +172,7 @@ import { InteractionTools } from './learn/interaction-tools.js';
       const sectionTitle = contentTitle ? contentTitle.textContent : 'Learning note';
       const draft = {
         content: note,
-        tag: '#Theory',
+        tag: '#Color_Theory',
         colorHex: '#2b78e4',
         paletteHexes: ['#2b78e4', '#93c5fd', '#0f172a'],
         origin: 'learning',
