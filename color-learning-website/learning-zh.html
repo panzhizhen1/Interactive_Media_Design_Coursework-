@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>学习 — 色彩学习</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/pages/learning.css" />
+</head>
+<body>
+<header class="site-header" role="banner">
+    <div id="site-navbar" aria-live="polite"></div>
+</header>
+
+<main id="main-content" class="page-learning">
+    <div class="learning-layout">
+        <aside class="learning-sidebar" id="learning-sidebar" aria-label="学习导航">
+            <button class="learning-sidebar__toggle" id="sidebar-toggle" aria-expanded="false" aria-controls="sidebar-menu" aria-label="切换导航菜单">
+                <span class="learning-sidebar__toggle-icon"></span>
+            </button>
+            <nav class="learning-sidebar__nav" id="sidebar-menu">
+                <ul class="learning-menu">
+                    <li class="learning-menu__item">
+                        <a href="#overview" class="learning-menu__link" data-section="overview">概述</a>
+                    </li>
+                    <li class="learning-menu__item learning-menu__item--has-children">
+                        <button class="learning-menu__toggle" aria-expanded="false" data-parent="learning-module">
+                            <span>学习模块</span>
+                            <span class="learning-menu__arrow" aria-hidden="true">▾</span>
+                        </button>
+                        <ul class="learning-menu__sub" id="submenu-learning-module">
+                            <li class="learning-menu__item learning-menu__item--has-children">
+                                <button class="learning-menu__toggle" aria-expanded="false" data-parent="basic">
+                                    <span>基础</span>
+                                    <span class="learning-menu__arrow" aria-hidden="true">▾</span>
+                                </button>
+                                <ul class="learning-menu__sub" id="submenu-basic">
+                                    <li class="learning-menu__item">
+                                        <a href="#basic-color-models" class="learning-menu__link" data-section="basic-color-models">色彩模型</a>
+                                    </li>
+                                    <li class="learning-menu__item">
+                                        <a href="#basic-color-spaces" class="learning-menu__link" data-section="basic-color-spaces">色彩空间</a>
+                                    </li>
+                                    <li class="learning-menu__item">
+                                        <a href="#basic-color-attributes" class="learning-menu__link" data-section="basic-color-attributes">色彩属性与感知</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="learning-menu__item learning-menu__item--has-children">
+                                <button class="learning-menu__toggle" aria-expanded="false" data-parent="encoding-concepts">
+                                    <span>编码概念</span>
+                                    <span class="learning-menu__arrow" aria-hidden="true">▾</span>
+                                </button>
+                                <ul class="learning-menu__sub" id="submenu-encoding-concepts">
+                                    <li class="learning-menu__item">
+                                        <a href="#encoding-bit-depth" class="learning-menu__link" data-section="encoding-bit-depth">位深度</a>
+                                    </li>
+                                    <li class="learning-menu__item">
+                                        <a href="#encoding-color-profiles" class="learning-menu__link" data-section="encoding-color-profiles">色彩配置文件</a>
+                                    </li>
+                                    <li class="learning-menu__item">
+                                        <a href="#encoding-gamma-correction" class="learning-menu__link" data-section="encoding-gamma-correction">伽马校正</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="learning-menu__item learning-menu__item--has-children">
+                                <button class="learning-menu__toggle" aria-expanded="false" data-parent="advance-topics">
+                                    <span>高级主题</span>
+                                    <span class="learning-menu__arrow" aria-hidden="true">▾</span>
+                                </button>
+                                <ul class="learning-menu__sub" id="submenu-advance-topics">
+                                    <li class="learning-menu__item">
+                                        <a href="#advance-hdr-color" class="learning-menu__link" data-section="advance-hdr-color">HDR 色彩</a>
+                                    </li>
+                                    <li class="learning-menu__item">
+                                        <a href="#advance-wide-gamut" class="learning-menu__link" data-section="advance-wide-gamut">广色域</a>
+                                    </li>
+                                    <li class="learning-menu__item">
+                                        <a href="#advance-color-management" class="learning-menu__link" data-section="advance-color-management">色彩管理</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="learning-menu__item learning-menu__item--has-children">
+                        <button class="learning-menu__toggle" aria-expanded="false" data-parent="interaction">
+                            <span>交互</span>
+                            <span class="learning-menu__arrow" aria-hidden="true">▾</span>
+                        </button>
+                        <ul class="learning-menu__sub" id="submenu-interaction">
+                            <li class="learning-menu__item">
+                                <a href="#interaction-color-picker" class="learning-menu__link" data-section="interaction-color-picker">颜色选择器</a>
+                            </li>
+                            <li class="learning-menu__item">
+                                <a href="#interaction-visual-example" class="learning-menu__link" data-section="interaction-visual-example">视觉示例</a>
+                            </li>
+                            <li class="learning-menu__item">
+                                <a href="#interaction-interactive-tools" class="learning-menu__link" data-section="interaction-interactive-tools">交互工具</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="learning-menu__item">
+                        <a href="#relative-information" class="learning-menu__link" data-section="relative-information">相关信息</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <section class="learning-content" id="learning-content" aria-label="学习内容">
+            <div class="learning-content__inner">
+                <h1 class="learning-content__title" id="content-title">欢迎来到色彩学习</h1>
+                <p class="learning-content__description" id="content-description">从侧边栏选择一个主题，开始你迷人的色彩之旅。</p>
+                <section class="learning-share-card" aria-label="分享学习笔记">
+                    <h2 class="learning-share-card__title">发送笔记到社区</h2>
+                    <p class="learning-share-card__desc">写下本节的一个收获，并在社区中继续讨论。</p>
+                    <label class="sr-only" for="learning-community-note">学习笔记</label>
+                    <textarea id="learning-community-note" class="learning-share-card__textarea" data-learning-note placeholder="例如：在本节中我学到了..."></textarea>
+                    <div class="learning-share-card__actions">
+                        <button type="button" class="learning-share-card__btn" data-learning-share>发送到社区草稿</button>
+                        <p class="learning-share-card__status" role="status" aria-live="polite" data-learning-share-status></p>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+    <div id="site-footer"></div>
+</footer>
+
+<script src="js/theme.js" defer></script>
+<script src="js/clw-locales.js" defer></script>
+<script src="js/clw-translations-zh.js" defer></script>
+<script src="js/main.js" defer></script>
+<script src="js/navbar.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/clw-sound.js" defer></script>
+<script src="js/profile-settings-panel.js" defer></script>
+<script src="js/pages/learning.js" type="module" defer></script>
+<script src="js/pages/learn-zh/learning-content.js" type="module" defer></script>
+</body>
+</html>

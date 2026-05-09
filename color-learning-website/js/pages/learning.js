@@ -27,6 +27,28 @@ import { InteractionTools } from './learn/interaction-tools.js';
   const HOME_LEARN_HIGHLIGHT_PARAM = 'from';
   const HOME_LEARN_HIGHLIGHT_VALUE = 'home-learn';
 
+  function getCurrentLocale() {
+    if (window.CLWLocale && typeof CLWLocale.getLocale === 'function') {
+      return CLWLocale.getLocale();
+    }
+    return 'en';
+  }
+
+  function switchLanguagePage(newLocale) {
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.split('/').pop();
+    
+    if (newLocale === 'zh' && currentPage !== 'learning-zh.html') {
+      const searchParams = window.location.search;
+      const hash = window.location.hash;
+      window.location.href = 'learning-zh.html' + searchParams + hash;
+    } else if (newLocale === 'en' && currentPage !== 'learning.html') {
+      const searchParams = window.location.search;
+      const hash = window.location.hash;
+      window.location.href = 'learning.html' + searchParams + hash;
+    }
+  }
+
   // Initialize
   function init() {
     setupSidebarToggle();
@@ -35,6 +57,7 @@ import { InteractionTools } from './learn/interaction-tools.js';
     handleInitialRoute();
     setupHashChangeListener();
     setupCommunityShare();
+    setupLanguageSwitchListener();
   }
 
   function getRouteFocusHints() {
@@ -526,6 +549,18 @@ import { InteractionTools } from './learn/interaction-tools.js';
           }
           expandParentMenus(targetLink);
         }
+      }
+    });
+  }
+
+  function setupLanguageSwitchListener() {
+    document.addEventListener('clw:locale-changed', function(event) {
+      var newLocale = event && event.detail && event.detail.locale 
+        ? String(event.detail.locale) 
+        : getCurrentLocale();
+      
+      if (newLocale === 'zh' || newLocale === 'en') {
+        switchLanguagePage(newLocale);
       }
     });
   }
