@@ -70,6 +70,8 @@
 
   var state = {
     posts: [],
+    activityLog: [],
+    reports: [],
     filter: DEFAULT_FILTER,
     tagSearch: "",
     selectedTag: DEFAULT_TAG,
@@ -139,6 +141,46 @@
     return window.CLWAuth || null;
   }
 
+  function getCloudApi() {
+    return window.CLWCommunityCloud || null;
+  }
+
+  function isCloudEnabled() {
+    var cloud = getCloudApi();
+    return !!(cloud && cloud.isConfigured && cloud.isConfigured());
+  }
+
+  function getLocale() {
+    if (window.CLWLocale && typeof window.CLWLocale.getLocale === "function") {
+      return window.CLWLocale.getLocale() === "zh" ? "zh" : "en";
+    }
+    return "en";
+  }
+
+  function isZhLocale() {
+    return getLocale() === "zh";
+  }
+
+  function tr(key) {
+    if (window.CLWLocale && typeof window.CLWLocale.translate === "function") {
+      return window.CLWLocale.translate(String(key || ""), "global");
+    }
+    return String(key || "");
+  }
+
+  function localizeSourceLabel(source) {
+    var normalized = String(source || "community").toLowerCase();
+    if (normalized === "learning") return tr("From Learning");
+    if (normalized === "game") return tr("From Game");
+    if (normalized === "test") return tr("From Test");
+    return tr("Community");
+  }
+
+  function setDocumentLocaleChrome() {
+    document.documentElement.lang = isZhLocale() ? "zh-CN" : "en";
+    document.title = getCommunityView() === "all" ? tr("All Community Posts — Color Learning") : tr("Community — Color Learning");
+  }
+
   function isLoggedIn() {
     return !!(getAuthApi() && getAuthApi().isLoggedIn && getAuthApi().isLoggedIn());
   }
@@ -165,6 +207,24 @@
       return { users: {} };
     }
     return raw;
+  }
+
+  function readLocalActivityLog() {
+    var rows = readJSON(STORAGE.activityLog, []);
+    return Array.isArray(rows) ? rows : [];
+  }
+
+  function writeLocalActivityLog(rows) {
+    writeJSON(STORAGE.activityLog, Array.isArray(rows) ? rows.slice(0, 1000) : []);
+  }
+
+  function readLocalReports() {
+    var rows = readJSON(STORAGE.reports, []);
+    return Array.isArray(rows) ? rows : [];
+  }
+
+  function writeLocalReports(rows) {
+    writeJSON(STORAGE.reports, Array.isArray(rows) ? rows.slice(0, 400) : []);
   }
 
   function normalizeHex(value) {
@@ -260,24 +320,24 @@
     if (!row) return;
     var palette = normalizePaletteList(colors, DEFAULT_COLOR);
     row.innerHTML =
-      '<div class="palette-strip" role="list" aria-label="Palette colors">' +
+      '<div class="palette-strip" role="list" aria-label="' + tr("Post palette colors") + '">' +
       palette
         .map(function (hex, index) {
           var displayHex = normalizeHex(hex).replace("#", "").toUpperCase();
           var textColor = getContrastText(hex);
           return (
             '<div class="palette-strip__cell" role="listitem" data-palette-cell="' + index + '">' +
-              '<button type="button" class="palette-strip__block" data-palette-block="' + index + '" style="background:' + hex + ';color:' + textColor + '" aria-label="Edit color ' + hex + '">' +
+              '<button type="button" class="palette-strip__block" data-palette-block="' + index + '" style="background:' + hex + ';color:' + textColor + '" aria-label="' + (isZhLocale() ? ("编辑颜色 " + hex) : ("Edit color " + hex)) + '">' +
                 '<span class="palette-strip__hex">' + displayHex + "</span>" +
               "</button>" +
               '<div class="palette-strip__actions" style="color:' + textColor + '">' +
-                '<button type="button" class="palette-strip__action palette-strip__action--danger" data-palette-delete="' + index + '" aria-label="Delete color ' + hex + '">Delete</button>' +
+                '<button type="button" class="palette-strip__action palette-strip__action--danger" data-palette-delete="' + index + '" aria-label="' + (isZhLocale() ? ("删除颜色 " + hex) : ("Delete color " + hex)) + '">' + tr("Remove") + "</button>" +
               "</div>" +
             "</div>"
           );
         })
         .join("") +
-      '<button type="button" class="palette-strip__add" role="listitem" data-palette-add aria-label="Add palette color">+</button>' +
+      '<button type="button" class="palette-strip__add" role="listitem" data-palette-add aria-label="' + (isZhLocale() ? "添加配色" : "Add palette color") + '">+</button>' +
       "</div>";
   }
 
@@ -425,20 +485,20 @@
 
   function timeAgo(isoString) {
     var ts = Date.parse(isoString);
-    if (Number.isNaN(ts)) return "just now";
+    if (Number.isNaN(ts)) return tr("just now");
     var diffMs = Date.now() - ts;
     var mins = Math.floor(diffMs / 60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return mins + "m ago";
+    if (mins < 1) return tr("just now");
+    if (mins < 60) return isZhLocale() ? mins + tr("m ago") : mins + "m ago";
     var hours = Math.floor(mins / 60);
-    if (hours < 24) return hours + "h ago";
-    return Math.floor(hours / 24) + "d ago";
+    if (hours < 24) return isZhLocale() ? hours + tr("h ago") : hours + "h ago";
+    return isZhLocale() ? Math.floor(hours / 24) + tr("d ago") : Math.floor(hours / 24) + "d ago";
   }
 
   function formatAbsoluteDate(isoString) {
     var ts = Date.parse(isoString || "");
-    if (Number.isNaN(ts)) return "Recently";
-    return new Date(ts).toLocaleString("en-GB", {
+    if (Number.isNaN(ts)) return tr("Recently");
+    return new Date(ts).toLocaleString(isZhLocale() ? "zh-CN" : "en-GB", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -539,21 +599,41 @@
     map[username] = list;
     writeHiddenMap(map);
   }
-  function reportPost(postId) {
+  async function reportPost(postId) {
     var reporter = getCurrentUsername();
     if (!reporter || reporter === "Guest") return false;
-    var rows = readJSON(STORAGE.reports, []);
-    rows = Array.isArray(rows) ? rows : [];
+    var rows = Array.isArray(state.reports) && state.reports.length ? state.reports.slice() : readLocalReports();
     for (var i = 0; i < rows.length; i += 1) {
       if (rows[i].postId === postId && rows[i].reporter === reporter) return false;
     }
-    rows.unshift({
+    var entry = {
       id: "report_" + Date.now() + "_" + Math.random().toString(16).slice(2, 6),
       postId: postId,
       reporter: reporter,
       createdAt: new Date().toISOString()
-    });
-    writeJSON(STORAGE.reports, rows.slice(0, 400));
+    };
+    if (isCloudEnabled()) {
+      try {
+        var cloud = getCloudApi();
+        var exists = await cloud.hasReport(postId, reporter);
+        if (exists && exists.error) {
+          console.warn("[community.js] report lookup failed:", exists.error);
+          return false;
+        }
+        if (exists && exists.data) return false;
+        var result = await cloud.insertReport(entry);
+        if (result && result.error) {
+          console.warn("[community.js] report save failed:", result.error);
+          return false;
+        }
+      } catch (error) {
+        console.warn("[community.js] report save failed:", error);
+        return false;
+      }
+    }
+    rows.unshift(entry);
+    state.reports = rows.slice(0, 400);
+    writeLocalReports(state.reports);
     return true;
   }
 
@@ -616,10 +696,10 @@
   }
 
   function getFilterLabel(filterValue) {
-    if (filterValue === "origin:learning") return "From Learning";
-    if (filterValue === "origin:game") return "From Game";
-    if (filterValue === "origin:test") return "From Test";
-    return "Latest";
+    if (filterValue === "origin:learning") return tr("From Learning");
+    if (filterValue === "origin:game") return tr("From Game");
+    if (filterValue === "origin:test") return tr("From Test");
+    return tr("Latest");
   }
 
   function syncRouteQuery() {
@@ -679,8 +759,8 @@
   }
 
   function getActivityLog() {
-    var rows = readJSON(STORAGE.activityLog, []);
-    return Array.isArray(rows) ? rows : [];
+    if (Array.isArray(state.activityLog) && state.activityLog.length) return state.activityLog.slice();
+    return readLocalActivityLog();
   }
 
   function getWeeklyPointsMap() {
@@ -699,19 +779,56 @@
 
   function getTotalPointsMap() {
     var map = {};
-    var accounts = getAccountsStore();
     Object.keys(baseLeaderboard).forEach(function (username) {
       map[username] = Number(baseLeaderboard[username] || 0);
     });
-    Object.keys(accounts.users).forEach(function (username) {
-      var points = Number(accounts.users[username] && accounts.users[username].stats ? accounts.users[username].stats.points || 0 : 0);
-      map[username] = Number(map[username] || 0) + (Number.isNaN(points) ? 0 : points);
+    getActivityLog().forEach(function (item) {
+      if (!item || !item.username) return;
+      var delta = Number(item.pointsDelta || 0);
+      if (Number.isNaN(delta)) return;
+      map[item.username] = Number(map[item.username] || 0) + delta;
     });
     state.posts.forEach(function (post) {
       if (!post || !post.author) return;
       if (!map[post.author]) map[post.author] = Number(baseLeaderboard[post.author] || 0);
     });
     return map;
+  }
+
+  function getUserActivityStats(username) {
+    var rows = getActivityLog().filter(function (item) {
+      return !!(item && item.username === username);
+    });
+    var dayMap = {};
+    var points = 0;
+    rows.forEach(function (item) {
+      var delta = Number(item.pointsDelta || 0);
+      if (!Number.isNaN(delta)) points += delta;
+      var day = String(item.createdAt || "").slice(0, 10);
+      if (day) dayMap[day] = true;
+    });
+    var days = Object.keys(dayMap).sort();
+    var streakDays = 0;
+    var lastActiveDate = days.length ? days[days.length - 1] : "";
+    if (lastActiveDate) {
+      streakDays = 1;
+      var cursor = Date.parse(lastActiveDate + "T00:00:00.000Z");
+      for (var i = days.length - 2; i >= 0; i -= 1) {
+        var check = Date.parse(days[i] + "T00:00:00.000Z");
+        if (cursor - check === 86400000) {
+          streakDays += 1;
+          cursor = check;
+          continue;
+        }
+        break;
+      }
+    }
+    return {
+      points: Math.max(0, points),
+      postCount: state.posts.filter(function (post) { return post.author === username; }).length,
+      streakDays: streakDays,
+      lastActiveDate: lastActiveDate
+    };
   }
 
   function toSortedRows(pointsMap, limit) {
@@ -732,6 +849,134 @@
     el.textContent = message || "";
     if (kind === "error" || kind === "success") el.classList.add("is-" + kind);
     showToast(message, kind);
+  }
+
+  function applyStaticLocale() {
+    setDocumentLocaleChrome();
+    var feedRegion = document.querySelector(".community-feed");
+    if (feedRegion) feedRegion.setAttribute("aria-label", tr("Community feed"));
+    var sideRegion = document.querySelector(".community-side");
+    if (sideRegion) sideRegion.setAttribute("aria-label", tr("Community insights"));
+    var feedGrid = document.querySelector(".community-feed-grid");
+    if (feedGrid) feedGrid.setAttribute("aria-label", tr("All posts and details"));
+    var isAllView = getCommunityView() === "all";
+    var title = document.getElementById("community-title");
+    if (title) title.textContent = isAllView ? tr("All Community Posts") : tr("Color Learning Community");
+    var lead = document.querySelector(".community-hero__lead");
+    if (lead) {
+      lead.textContent = isAllView
+        ? tr("Browse the full feed, inspect post details, and trace each discussion back to Learning, Game, or Test.")
+        : tr("Publish reflections, palettes, and visual results from Learning, Game, and Test in one shared learning space.");
+    }
+    var note = document.querySelector(".community-hero__note");
+    if (note) note.textContent = tr("Why this page matters: Community turns practice from other pages into visible learning evidence your team can review and discuss.");
+
+    var heroCreate = document.querySelector(".community-hero__actions [data-scroll-composer]");
+    if (heroCreate) heroCreate.textContent = tr("+ Create Post");
+    var heroGuide = document.querySelector(".community-hero__actions [data-open-guidelines]");
+    if (heroGuide) heroGuide.textContent = tr("Community Guidelines");
+    var heroBack = document.querySelector('.community-hero__actions a[href="community.html"]');
+    if (heroBack) heroBack.textContent = tr("Back to Community");
+
+    var composerTitle = document.getElementById("composer-title");
+    if (composerTitle) composerTitle.textContent = tr("Create a new post");
+    var prompt = document.querySelector(".composer-card__prompt");
+    if (prompt) prompt.textContent = tr("Learning Prompt: How does this color choice impact users with color vision deficiency?");
+    var hint = document.querySelector(".composer-card__hint");
+    if (hint) hint.textContent = tr("Explain why your color decision works, what changed your thinking, or what you want feedback on.");
+    var textarea = document.querySelector("[data-post-content]");
+    if (textarea) {
+      textarea.placeholder = tr("Write your learning note here...");
+      textarea.setAttribute("aria-label", tr("Post content"));
+    }
+    var rules = document.querySelector(".composer-card__rules");
+    if (rules) rules.textContent = tr("Text is required. Palette and image are optional. Publishing a post adds +5 community points.");
+
+    var toggleLabels = document.querySelectorAll(".composer-toggle span");
+    if (toggleLabels[0]) toggleLabels[0].textContent = tr("Publish palette");
+    if (toggleLabels[1]) toggleLabels[1].textContent = tr("Publish image");
+    var paletteBtn = document.querySelector("[data-palette-from-image]");
+    if (paletteBtn) paletteBtn.textContent = tr("Extract Palette from Image");
+    var uploadTitle = document.querySelector(".composer-upload__title");
+    if (uploadTitle) uploadTitle.textContent = tr("Attach Image");
+    var uploadHint = document.querySelector(".composer-upload__hint");
+    if (uploadHint) uploadHint.textContent = tr("Tap to upload");
+    var imageClear = document.querySelector("[data-image-clear]");
+    if (imageClear) imageClear.textContent = tr("Remove");
+    var imagePreview = document.querySelector("[data-image-preview]");
+    if (imagePreview) imagePreview.alt = tr("Selected post attachment preview");
+
+    var filterLabel = document.querySelector(".feed-filter__label");
+    if (filterLabel) filterLabel.textContent = tr("Filter by:");
+    document.querySelectorAll(".feed-filter").forEach(function (el) {
+      el.setAttribute("aria-label", tr("Feed filters"));
+    });
+    document.querySelectorAll("[data-filter]").forEach(function (btn) {
+      var value = btn.getAttribute("data-filter");
+      if (value === "latest") btn.textContent = tr("Latest");
+      if (value === "origin:learning") btn.textContent = tr("From Learning");
+      if (value === "origin:game") btn.textContent = tr("From Game");
+      if (value === "origin:test") btn.textContent = tr("From Test");
+    });
+    var tagSearch = document.querySelector("[data-tag-search]");
+    if (tagSearch) {
+      tagSearch.placeholder = tr("Search tag");
+      tagSearch.setAttribute("aria-label", tr("Search posts by tag"));
+    }
+
+    var featuredTitle = document.getElementById("featured-posts-title");
+    if (featuredTitle) featuredTitle.textContent = tr("Featured Learning Picks");
+    var featuredCaption = document.querySelector(".post-preview-head__caption");
+    if (featuredCaption) featuredCaption.textContent = tr("Showcase-highlighted demo posts");
+    var latestTitle = document.querySelector(".post-preview-head:not(.post-preview-head--featured) .post-preview-head__title");
+    if (latestTitle) latestTitle.textContent = tr("Latest Posts");
+    var viewAll = document.querySelector("[data-view-all-posts]");
+    if (viewAll) viewAll.textContent = tr("Browse All Posts");
+
+    var progressTitle = document.getElementById("progress-title");
+    if (progressTitle) progressTitle.textContent = tr("My Learning Progress");
+    var statLabels = document.querySelectorAll(".stats-grid__label");
+    if (statLabels[0]) statLabels[0].textContent = tr("Total Points");
+    if (statLabels[1]) statLabels[1].textContent = tr("Posts");
+    var progressMeta = document.querySelectorAll(".widget-card__note-copy span");
+    if (progressMeta[0]) progressMeta[0].textContent = tr("Streak");
+    if (progressMeta[1]) progressMeta[1].textContent = tr("Today");
+    if (progressMeta[2]) progressMeta[2].textContent = tr("Rank");
+    var leaderboardTitle = document.getElementById("leaderboard-title");
+    if (leaderboardTitle) leaderboardTitle.textContent = tr("Weekly Top Learners");
+    var compact = document.querySelectorAll(".widget-card__note--compact");
+    if (compact[0]) compact[0].textContent = tr("7-day points");
+    var alltimeTitle = document.getElementById("alltime-title");
+    if (alltimeTitle) alltimeTitle.textContent = tr("All-time Top Learners");
+    if (compact[1]) compact[1].textContent = tr("Includes demo seed learners for showcase.");
+
+    var detail = document.querySelector("[data-post-detail]");
+    if (detail && !detail.querySelector(".post-detail-card")) {
+      detail.innerHTML = "<h2>" + tr("Select a post") + "</h2><p>" + tr("Choose a post on the left to preview full details here.") + "</p>";
+    }
+
+    var guideTitle = document.getElementById("guidelines-title");
+    if (guideTitle) guideTitle.textContent = tr("Community Guidelines");
+    var guideItems = document.querySelectorAll(".community-modal__list li");
+    var guideTextKeys = [
+      "Share constructive learning reflections, not only final answers.",
+      "Use respectful language and explain why a color decision works.",
+      "Do not spam repeated posts or irrelevant links.",
+      "If you see problematic content, use Report to flag it."
+    ];
+    guideItems.forEach(function (item, index) {
+      if (guideTextKeys[index]) item.textContent = tr(guideTextKeys[index]);
+    });
+    document.querySelectorAll("[data-close-guidelines]").forEach(function (btn) {
+      if (btn.textContent.trim() !== "×") btn.textContent = tr("Got it");
+      btn.setAttribute("aria-label", tr("Close guidelines"));
+    });
+    var toastClose = document.querySelector("[data-community-toast-close]");
+    if (toastClose) toastClose.setAttribute("aria-label", tr("Close message"));
+    var imageClose = document.querySelector("[data-close-image-lightbox]");
+    if (imageClose) imageClose.setAttribute("aria-label", tr("Close image preview"));
+    var lightbox = document.querySelector("[data-lightbox-image]");
+    if (lightbox) lightbox.alt = tr("Expanded post preview");
   }
 
   function hideToast() {
@@ -781,16 +1026,15 @@
       updateComposerContext("");
       return;
     }
-    var title = draft.origin.charAt(0).toUpperCase() + draft.origin.slice(1);
     el.hidden = false;
     if (draft.origin === "test") {
-      el.textContent = "Imported from " + title + ". Focus on your result image and reflection. Palette is optional.";
+      el.textContent = tr("Imported from Test. Focus on your result image and reflection. Palette is optional.");
     } else if (draft.origin === "game") {
-      el.textContent = "Imported from " + title + ". Your image and palette are ready to publish together.";
+      el.textContent = tr("Imported from Game. Your image and palette are ready to publish together.");
     } else if (draft.origin === "learning") {
-      el.textContent = "Imported from " + title + ". Refine the note, choose a tag, and publish your takeaway.";
+      el.textContent = tr("Imported from Learning. Refine the note, choose a tag, and publish your takeaway.");
     } else {
-      el.textContent = "Draft imported from " + title + ".";
+      el.textContent = tr("Draft imported from ") + draft.origin + ".";
     }
     updateComposerContext(draft.origin);
   }
@@ -838,7 +1082,7 @@
     var button = document.querySelector(".btn-post");
     if (!button) return;
     button.disabled = !isLoggedIn();
-    button.textContent = isLoggedIn() ? "Publish Post" : "Log in to Publish";
+    button.textContent = isLoggedIn() ? tr("Publish Post") : tr("Log in to Publish");
   }
 
   function updateComposerContext(origin) {
@@ -861,10 +1105,10 @@
 
   function formatOrigin(post) {
     var source = post.origin || "community";
-    var label = source.charAt(0).toUpperCase() + source.slice(1);
+    var label = localizeSourceLabel(source).replace(/^来自\s*/, "");
     var extra = "";
     if (source === "test" && post.originMeta && typeof post.originMeta.score === "number") {
-      extra = "score " + post.originMeta.score;
+      extra = tr("score ") + post.originMeta.score;
     } else if (source === "game" && post.originMeta && post.originMeta.drawingName) {
       extra = post.originMeta.drawingName;
     } else if (source === "learning" && post.originMeta && post.originMeta.section) {
@@ -876,16 +1120,16 @@
   function renderOriginMetaHtml(post) {
     if (!post || !post.originMeta) return "";
     if (post.origin === "test") {
-      var chapter = post.originMeta.chapter ? escapeHtml(String(post.originMeta.chapter)) : "Test";
+      var chapter = post.originMeta.chapter ? escapeHtml(String(post.originMeta.chapter)) : tr("Test");
       var score = Number(post.originMeta.score || 0);
       var maxScore = Number(post.originMeta.maxScore || 0);
       var accuracy = Number(post.originMeta.accuracy || 0);
       var accuracyText = post.originMeta.zeroAccuracy ? "00%" : accuracy + "%";
-      var zeroFlag = post.originMeta.zeroAccuracy ? '<span class="post-origin-meta__flag">00% accuracy</span>' : "";
-      return '<div class="post-origin-meta"><strong>Test Result:</strong> ' + chapter + " · Score " + score + "/" + maxScore + " · Accuracy " + accuracyText + zeroFlag + "</div>";
+      var zeroFlag = post.originMeta.zeroAccuracy ? '<span class="post-origin-meta__flag">' + tr("00% accuracy") + "</span>" : "";
+      return '<div class="post-origin-meta"><strong>' + tr("Test Result:") + '</strong> ' + chapter + " · " + tr("Score ") + score + "/" + maxScore + " · " + tr("Accuracy ") + accuracyText + zeroFlag + "</div>";
     }
     if (post.origin === "game" && post.originMeta.drawingName) {
-      return '<div class="post-origin-meta"><strong>Game Artwork:</strong> ' + escapeHtml(String(post.originMeta.drawingName)) + "</div>";
+      return '<div class="post-origin-meta"><strong>' + tr("Game Artwork:") + '</strong> ' + escapeHtml(String(post.originMeta.drawingName)) + "</div>";
     }
     return "";
   }
@@ -894,7 +1138,7 @@
     if (post && post.includePalette === false) return "";
     var palette = normalizePaletteList(post && post.paletteHexes ? post.paletteHexes : [post.colorHex], post.colorHex);
     return (
-      '<div class="post-palette" role="list" aria-label="Post palette colors">' +
+      '<div class="post-palette" role="list" aria-label="' + tr("Post palette colors") + '">' +
       palette.map(function (hex, index) {
         var displayHex = normalizeHex(hex).replace("#", "").toUpperCase();
         var textColor = getContrastText(hex);
@@ -917,7 +1161,7 @@
     return (
       '<figure class="post-image' + (detailMode ? " post-image--detail" : "") + '">' +
       '<button type="button" class="post-image__zoom" data-image-zoom="' + image + '">' +
-      '<img src="' + image + '" alt="Shared attachment for this post">' +
+      '<img src="' + image + '" alt="' + tr("Shared attachment for this post") + '">' +
       "</button>" +
       "</figure>"
     );
@@ -928,14 +1172,14 @@
     if (isDemoModerator()) {
       actions.push(
         '<button type="button" class="post-action-btn' + (post.featured ? ' is-active' : '') + '" data-post-action="feature" data-post-id="' + post.id + '">' +
-        (post.featured ? "Highlighted" : "Demo Highlight") +
+        (post.featured ? tr("Highlighted") : tr("Demo Highlight")) +
         "</button>"
       );
     }
-    actions.push('<button type="button" class="post-action-btn" data-post-action="hide" data-post-id="' + post.id + '">' + (isPostHiddenForUser(post.id, currentUser) ? "Show Again" : "Hide for Me") + "</button>");
-    actions.push('<button type="button" class="post-action-btn" data-post-action="report" data-post-id="' + post.id + '">Report for Review</button>');
+    actions.push('<button type="button" class="post-action-btn" data-post-action="hide" data-post-id="' + post.id + '">' + (isPostHiddenForUser(post.id, currentUser) ? tr("Show Again") : tr("Hide for Me")) + "</button>");
+    actions.push('<button type="button" class="post-action-btn" data-post-action="report" data-post-id="' + post.id + '">' + tr("Report for Review") + "</button>");
     if (isPostOwner(post)) {
-      actions.push('<button type="button" class="post-action-btn post-action-btn--danger" data-post-action="delete" data-post-id="' + post.id + '">Delete Post</button>');
+      actions.push('<button type="button" class="post-action-btn post-action-btn--danger" data-post-action="delete" data-post-id="' + post.id + '">' + tr("Delete Post") + "</button>");
     }
     return '<div class="post-actions">' + actions.join("") + "</div>";
   }
@@ -969,19 +1213,19 @@
           '<p class="post-user__name">' + username + '</p>' +
           '<div class="post-meta">' +
           '<button type="button" class="post-tag post-tag--button" data-filter-tag="' + tag + '">' + tag + '</button>' +
-          '<span class="post-origin"><strong>From:</strong> ' + originText + '</span>' +
+          '<span class="post-origin"><strong>' + tr("From:") + '</strong> ' + originText + '</span>' +
           '</div>' +
           '</div>' +
           '</div>' +
           '<span class="post-time">' + timeAgo(post.createdAt) + '</span>' +
           '</header>' +
-          '<p class="post-content">' + (hidden ? 'This post is hidden for your account.' : content) + '</p>' +
+          '<p class="post-content">' + (hidden ? tr("This post is hidden for your account.") : content) + '</p>' +
           originMetaHtml +
           imageHtml +
           paletteHtml +
           '<footer class="post-footer">' +
-          '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? 'Liked ' : 'Like ') + likes + '</button>' +
-          '<span class="post-points">Community reward +' + points + ' pts</span>' +
+          '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? tr("Liked ") : tr("Like ")) + likes + '</button>' +
+          '<span class="post-points">' + tr("Community reward +") + points + " " + tr("pts") + "</span>" +
           buildPostActionsHtml(post, currentUser) +
           '</footer>' +
           '</article>'
@@ -993,7 +1237,7 @@
   function renderDetailFactsHtml(post) {
     if (!post) return "";
     var facts = [
-      '<span class="detail-chip detail-chip--source">From ' + escapeHtml((post.origin || "community").charAt(0).toUpperCase() + (post.origin || "community").slice(1)) + "</span>",
+      '<span class="detail-chip detail-chip--source">' + tr("From:") + " " + escapeHtml(localizeSourceLabel(post.origin || "community").replace(/^来自\s*/, "")) + "</span>",
       '<span class="detail-chip detail-chip--tag">' + escapeHtml(post.tag || DEFAULT_TAG) + "</span>"
     ];
     if (post.origin === "learning" && post.originMeta && post.originMeta.section) {
@@ -1001,12 +1245,12 @@
     }
     if (post.origin === "game" && post.originMeta) {
       if (post.originMeta.drawingName) facts.push('<span class="detail-chip">' + escapeHtml(String(post.originMeta.drawingName)) + "</span>");
-      if (post.originMeta.mode) facts.push('<span class="detail-chip">Mode: ' + escapeHtml(String(post.originMeta.mode)) + "</span>");
+      if (post.originMeta.mode) facts.push('<span class="detail-chip">' + tr("Mode: ") + escapeHtml(String(post.originMeta.mode)) + "</span>");
       if (post.originMeta.fillProgress) facts.push('<span class="detail-chip">' + escapeHtml(String(post.originMeta.fillProgress)) + "</span>");
     }
     if (post.origin === "test" && post.originMeta) {
-      facts.push('<span class="detail-chip">Score ' + Number(post.originMeta.score || 0) + "/" + Number(post.originMeta.maxScore || 0) + "</span>");
-      facts.push('<span class="detail-chip">Accuracy ' + (post.originMeta.zeroAccuracy ? "00%" : Number(post.originMeta.accuracy || 0) + "%") + "</span>");
+      facts.push('<span class="detail-chip">' + tr("Score ") + Number(post.originMeta.score || 0) + "/" + Number(post.originMeta.maxScore || 0) + "</span>");
+      facts.push('<span class="detail-chip">' + tr("Accuracy ") + (post.originMeta.zeroAccuracy ? "00%" : Number(post.originMeta.accuracy || 0) + "%") + "</span>");
     }
     return '<div class="detail-chip-row">' + facts.join("") + "</div>";
   }
@@ -1015,7 +1259,7 @@
     var panel = document.querySelector("[data-post-detail]");
     if (!panel) return;
     if (!post) {
-      panel.innerHTML = "<h2>Select a post</h2><p>Choose a post on the left to preview full details here.</p>";
+      panel.innerHTML = "<h2>" + tr("Select a post") + "</h2><p>" + tr("Choose a post on the left to preview full details here.") + "</p>";
       return;
     }
     var likes = Number(post.likes || 0);
@@ -1024,7 +1268,7 @@
     var hidden = isPostHiddenForUser(post.id, currentUser);
     panel.innerHTML =
       '<article class="post-detail-card' + (post.featured ? " is-featured" : "") + '">' +
-        '<div class="post-detail-card__eyebrow">Post details</div>' +
+        '<div class="post-detail-card__eyebrow">' + tr("Post details") + "</div>" +
         '<div class="post-detail-card__header">' +
           '<div>' +
             '<h2>' + escapeHtml(post.author) + "</h2>" +
@@ -1032,13 +1276,13 @@
           "</div>" +
           renderDetailFactsHtml(post) +
         "</div>" +
-        '<p class="post-detail-card__content">' + escapeHtml(hidden ? "This post is hidden for your account. Use Show Again to restore it." : post.content) + "</p>" +
+        '<p class="post-detail-card__content">' + escapeHtml(hidden ? tr("This post is hidden for your account. Use Show Again to restore it.") : post.content) + "</p>" +
         (hidden ? "" : renderOriginMetaHtml(post)) +
         (hidden ? "" : renderImageHtml(post, true)) +
         (hidden ? "" : renderPaletteHtml(post)) +
         '<div class="post-detail-card__footer">' +
-          '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? 'Liked ' : 'Like ') + likes + '</button>' +
-          '<span class="post-points">Community reward +' + points + ' pts</span>' +
+          '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? tr("Liked ") : tr("Like ")) + likes + '</button>' +
+          '<span class="post-points">' + tr("Community reward +") + points + " " + tr("pts") + "</span>" +
         "</div>" +
         buildPostActionsHtml(post, currentUser) +
       "</article>";
@@ -1047,11 +1291,14 @@
   function renderFeedStatus(rows) {
     var el = document.querySelector("[data-feed-status]");
     if (!el) return;
-    var summary = ['Showing ' + rows.length + (rows.length === 1 ? " post" : " posts"), getFilterLabel(state.filter)];
-    if (state.tagSearch) summary.push("Tag #" + escapeHtml(state.tagSearch.replace(/^#/, "")));
+    var summary = [];
+    if (isZhLocale()) summary.push("显示 " + rows.length + " 条帖子");
+    else summary.push("Showing " + rows.length + (rows.length === 1 ? " post" : " posts"));
+    summary.push(getFilterLabel(state.filter));
+    if (state.tagSearch) summary.push((isZhLocale() ? "标签 #" : "Tag #") + escapeHtml(state.tagSearch.replace(/^#/, "")));
     el.innerHTML =
       '<span class="feed-status__text">' + summary.join(" · ") + "</span>" +
-      (state.tagSearch ? '<button type="button" class="feed-status__clear" data-clear-tag-search>Clear tag search</button>' : "");
+      (state.tagSearch ? '<button type="button" class="feed-status__clear" data-clear-tag-search>' + tr("Clear tag search") + "</button>" : "");
   }
 
   function updateViewAllLink() {
@@ -1086,9 +1333,9 @@
     if (!rows.length) {
       var emptyHtml =
         '<article class="post-card post-empty">' +
-        '<h3>Start the first learning thread</h3>' +
-        '<p>Share one insight from Learning, a result from Test, or a palette from Game.</p>' +
-        '<button type="button" class="community-hero__cta" data-scroll-composer>Use this template</button>' +
+        '<h3>' + tr("Start the first learning thread") + "</h3>" +
+        '<p>' + tr("Share one insight from Learning, a result from Test, or a palette from Game.") + "</p>" +
+        '<button type="button" class="community-hero__cta" data-scroll-composer>' + tr("Use this template") + "</button>" +
         '</article>';
       container.innerHTML = emptyHtml;
       renderFeedStatus(rows);
@@ -1133,8 +1380,7 @@
 
   function renderStats(weeklyRows) {
     var user = getCurrentUsername();
-    var auth = getAuthApi();
-    var authStats = auth && auth.getUserStats ? auth.getUserStats(user) : null;
+    var remoteStats = getUserActivityStats(user);
     var postsMine = state.posts.filter(function (post) { return post.author === user; });
     var pointsEl = document.querySelector("[data-user-points]");
     var postsEl = document.querySelector("[data-user-posts]");
@@ -1143,25 +1389,29 @@
     var rankEl = document.querySelector("[data-rank-trend]");
     if (!pointsEl || !postsEl || !streakEl || !goalEl || !rankEl) return;
 
-    var points = Number(authStats && authStats.points ? authStats.points : 0);
-    var postCount = Number(authStats && authStats.postCount ? authStats.postCount : postsMine.length);
-    var streak = Number(authStats && authStats.streakDays ? authStats.streakDays : 0);
+    var points = Number(remoteStats && remoteStats.points ? remoteStats.points : 0);
+    var postCount = Number(remoteStats && remoteStats.postCount ? remoteStats.postCount : postsMine.length);
+    var streak = Number(remoteStats && remoteStats.streakDays ? remoteStats.streakDays : 0);
 
     pointsEl.textContent = String(points);
     postsEl.textContent = String(postCount);
 
     if (!isLoggedIn()) {
-      streakEl.textContent = "Sign in";
-      goalEl.textContent = "1 post";
+      streakEl.textContent = tr("Sign in");
+      goalEl.textContent = tr("1 post");
       rankEl.textContent = "--";
       return;
     }
 
-    streakEl.textContent = streak ? streak + " day" : "Start today";
+    if (streak) {
+      streakEl.textContent = isZhLocale() ? (streak + " 天") : (streak + " " + (streak === 1 ? "day" : "days"));
+    } else {
+      streakEl.textContent = tr("Start today");
+    }
 
     var today = new Date().toISOString().slice(0, 10);
     var postedToday = postsMine.some(function (post) { return String(post.createdAt || "").slice(0, 10) === today; });
-    goalEl.textContent = postedToday ? "Done" : "1 post";
+    goalEl.textContent = postedToday ? tr("Done") : tr("1 post");
 
     var currentWeeklyRank = 0;
     for (var i = 0; i < weeklyRows.length; i += 1) {
@@ -1177,9 +1427,13 @@
     } else if (!prevRank || prevRank === currentWeeklyRank) {
       rankEl.textContent = "#" + currentWeeklyRank;
     } else if (currentWeeklyRank < prevRank) {
-      rankEl.textContent = "#" + currentWeeklyRank + " up " + (prevRank - currentWeeklyRank);
+      rankEl.textContent = isZhLocale()
+        ? ("#" + currentWeeklyRank + " " + tr("up ") + (prevRank - currentWeeklyRank))
+        : ("#" + currentWeeklyRank + " up " + (prevRank - currentWeeklyRank));
     } else {
-      rankEl.textContent = "#" + currentWeeklyRank + " down " + (currentWeeklyRank - prevRank);
+      rankEl.textContent = isZhLocale()
+        ? ("#" + currentWeeklyRank + " " + tr("down ") + (currentWeeklyRank - prevRank))
+        : ("#" + currentWeeklyRank + " down " + (currentWeeklyRank - prevRank));
     }
 
     var nextSnapshot = { weeklyRanks: Object.assign({}, snapshot.weeklyRanks || {}), updatedAt: new Date().toISOString() };
@@ -1197,25 +1451,68 @@
     var currentUser = getCurrentUsername();
     function renderLeaderboardRows(rows, emptyText) {
       if (!rows.length) {
-        return '<li class="leaderboard__item leaderboard__item--empty"><span class="leaderboard__rank">--</span><span class="leaderboard__name">' + emptyText + '</span><strong class="leaderboard__points">0 pts</strong></li>';
+        return '<li class="leaderboard__item leaderboard__item--empty"><span class="leaderboard__rank">--</span><span class="leaderboard__name">' + emptyText + '</span><strong class="leaderboard__points">0 ' + tr("pts") + "</strong></li>";
       }
       return rows.map(function (row, index) {
         var rank = index + 1;
         var isCurrent = currentUser && row.username === currentUser;
         return (
           '<li class="leaderboard__item leaderboard__item--rank-' + rank + (isCurrent ? ' is-current-user' : '') + '">' +
-            '<span class="leaderboard__rank" aria-label="Rank ' + rank + '">' + rank + '</span>' +
+            '<span class="leaderboard__rank" aria-label="' + (isZhLocale() ? (tr("Rank ") + rank + " 名") : ("Rank " + rank)) + '">' + rank + '</span>' +
             '<span class="leaderboard__name">' + escapeHtml(row.username) + '</span>' +
-            '<strong class="leaderboard__points">' + row.points + ' pts</strong>' +
+            '<strong class="leaderboard__points">' + row.points + " " + tr("pts") + "</strong>" +
           '</li>'
         );
       }).join("");
     }
 
-    weeklyEl.innerHTML = renderLeaderboardRows(weeklyRows, "No activity yet");
-    totalEl.innerHTML = renderLeaderboardRows(totalRows, "No users yet");
+    weeklyEl.innerHTML = renderLeaderboardRows(weeklyRows, tr("No activity yet"));
+    totalEl.innerHTML = renderLeaderboardRows(totalRows, tr("No users yet"));
 
     renderStats(weeklyRows);
+  }
+
+  async function syncCommunityStateFromCloud(options) {
+    if (!isCloudEnabled()) return false;
+    try {
+      var cloud = getCloudApi();
+      var silent = !!(options && options.silent);
+      var ensure = await cloud.ensureSeedPosts(seedPosts);
+      if (ensure && ensure.error) {
+        console.warn("[community.js] seed sync failed:", ensure.error);
+      }
+      var results = await Promise.all([
+        cloud.listPosts(),
+        cloud.listActivity(1000),
+        cloud.listReports(400)
+      ]);
+      var postsResult = results[0];
+      var activityResult = results[1];
+      var reportsResult = results[2];
+
+      if (postsResult && postsResult.error) console.warn("[community.js] post sync failed:", postsResult.error);
+      if (activityResult && activityResult.error) console.warn("[community.js] activity sync failed:", activityResult.error);
+      if (reportsResult && reportsResult.error) console.warn("[community.js] report sync failed:", reportsResult.error);
+
+      if (postsResult && Array.isArray(postsResult.data) && postsResult.data.length) {
+        writePosts(postsResult.data);
+      } else if (postsResult && Array.isArray(postsResult.data)) {
+        writePosts([]);
+      }
+      if (activityResult && Array.isArray(activityResult.data)) {
+        state.activityLog = activityResult.data.slice();
+        writeLocalActivityLog(state.activityLog);
+      }
+      if (reportsResult && Array.isArray(reportsResult.data)) {
+        state.reports = reportsResult.data.slice();
+        writeLocalReports(state.reports);
+      }
+      if (!silent) refreshAll();
+      return true;
+    } catch (error) {
+      console.warn("[community.js] cloud sync failed:", error);
+      return false;
+    }
   }
 
   function refreshAll() {
@@ -1340,15 +1637,15 @@
       featured: false
     });
   }
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     var now = Date.now();
     if (now < state.submitLockUntil) {
-      setFeedback("Please wait a moment before publishing another post.", "error");
+      setFeedback(tr("Please wait a moment before publishing another post."), "error");
       return;
     }
     if (!isLoggedIn()) {
-      setFeedback("Log in from the avatar menu before posting.", "error");
+      setFeedback(tr("Log in from the avatar menu before posting."), "error");
       return;
     }
 
@@ -1359,7 +1656,7 @@
     if (!input || !colorPicker || !paletteInput) return;
     var text = input.value.trim();
     if (text.length < MIN_POST_LENGTH) {
-      setFeedback("Write at least " + MIN_POST_LENGTH + " characters so each post has real learning value.", "error");
+      setFeedback((isZhLocale() ? "请至少输入 " + MIN_POST_LENGTH + " 个字符，让每条帖子都有实际学习价值。" : "Write at least " + MIN_POST_LENGTH + " characters so each post has real learning value."), "error");
       input.focus();
       return;
     }
@@ -1371,6 +1668,21 @@
     var includeImage = getIncludeImage();
     var imageDataUrl = includeImage && draft && draft.imageDataUrl ? sanitizeImageDataUrl(draft.imageDataUrl) : "";
     var post = buildPostFromForm(text, colorHex, paletteHexes, imageDataUrl, includePalette, includeImage);
+    if (isCloudEnabled()) {
+      try {
+        var cloudSave = await getCloudApi().savePost(post);
+        if (cloudSave && cloudSave.error) {
+          setFeedback(tr("Could not publish this post to the shared community yet."), "error");
+          console.warn("[community.js] save post failed:", cloudSave.error);
+          return;
+        }
+        post = normalizePost(cloudSave && cloudSave.data ? cloudSave.data : post);
+      } catch (error) {
+        setFeedback(tr("Could not publish this post to the shared community yet."), "error");
+        console.warn("[community.js] save post failed:", error);
+        return;
+      }
+    }
     state.posts.unshift(post);
     writePosts(state.posts);
     writeDraft(null);
@@ -1378,7 +1690,7 @@
 
     var auth = getAuthApi();
     if (auth && auth.recordActivity) {
-      auth.recordActivity(post.author, {
+      await auth.recordActivity(post.author, {
         pointsDelta: POINTS_PER_POST,
         postDelta: 1,
         source: "community",
@@ -1386,6 +1698,7 @@
         refId: post.id
       });
     }
+    state.activityLog = readLocalActivityLog();
 
     input.value = "";
     setComposerPalette([DEFAULT_COLOR], false);
@@ -1396,16 +1709,17 @@
     updateDraftOriginLabel(null);
     setTagSearch("");
     setFilter(DEFAULT_FILTER);
-    setFeedback("Post published. You earned 5 points.", "success");
+    setFeedback(tr("Post published. You earned 5 points."), "success");
+    if (isCloudEnabled()) await syncCommunityStateFromCloud({ silent: true });
     refreshAll();
     document.dispatchEvent(new CustomEvent("clw:post-created", { detail: { post: post } }));
   }
 
-  function handleLikeClick(event) {
+  async function handleLikeClick(event) {
     var btn = event.target.closest("[data-like-id]");
     if (!btn) return false;
     if (!isLoggedIn()) {
-      setFeedback("Log in to like posts and save your reaction.", "error");
+      setFeedback(tr("Log in to like posts and save your reaction."), "error");
       return true;
     }
 
@@ -1418,6 +1732,7 @@
     state.likeLocks[postId] = now;
 
     var addedLike = false;
+    var updatedPost = null;
     state.posts = state.posts.map(function (post) {
       if (post.id !== postId) return post;
       var likedBy = Array.isArray(post.likedBy) ? post.likedBy.slice() : [];
@@ -1431,37 +1746,85 @@
         likes += 1;
         addedLike = true;
       }
-      return Object.assign({}, post, { likes: likes, likedBy: likedBy });
+      updatedPost = Object.assign({}, post, { likes: likes, likedBy: likedBy });
+      return updatedPost;
     });
+    if (isCloudEnabled() && updatedPost) {
+      try {
+        var likeSave = await getCloudApi().savePost(updatedPost);
+        if (likeSave && likeSave.error) {
+          setFeedback(tr("Could not sync your reaction right now."), "error");
+          console.warn("[community.js] like sync failed:", likeSave.error);
+          await syncCommunityStateFromCloud({ silent: true });
+          refreshAll();
+          return true;
+        }
+        updatedPost = normalizePost(likeSave && likeSave.data ? likeSave.data : updatedPost);
+        state.posts = state.posts.map(function (post) {
+          return post.id === postId ? updatedPost : post;
+        });
+      } catch (error) {
+        setFeedback(tr("Could not sync your reaction right now."), "error");
+        console.warn("[community.js] like sync failed:", error);
+        await syncCommunityStateFromCloud({ silent: true });
+        refreshAll();
+        return true;
+      }
+    }
     writePosts(state.posts);
 
     if (addedLike) {
       var auth = getAuthApi();
       if (auth && auth.recordActivity) {
-        auth.recordActivity(actorId, { pointsDelta: 0, postDelta: 0, source: "community", type: "like", refId: postId });
+        await auth.recordActivity(actorId, { pointsDelta: 0, postDelta: 0, source: "community", type: "like", refId: postId });
       }
     }
+    state.activityLog = readLocalActivityLog();
 
     setFeedback("", "");
     refreshAll();
     return true;
   }
 
-  function toggleFeature(postId) {
+  async function toggleFeature(postId) {
     if (!isDemoModerator()) {
-      setFeedback("Demo highlight is reserved for the showcase moderator account.", "error");
+      setFeedback(tr("Demo highlight is reserved for the showcase moderator account."), "error");
       return;
     }
+    var target = null;
     state.posts = state.posts.map(function (post) {
       if (post.id !== postId) return post;
-      return Object.assign({}, post, { featured: !post.featured });
+      target = Object.assign({}, post, { featured: !post.featured });
+      return target;
     });
+    if (isCloudEnabled() && target) {
+      try {
+        var featureSave = await getCloudApi().savePost(target);
+        if (featureSave && featureSave.error) {
+          setFeedback(tr("Could not update demo highlight right now."), "error");
+          console.warn("[community.js] feature sync failed:", featureSave.error);
+          await syncCommunityStateFromCloud({ silent: true });
+          refreshAll();
+          return;
+        }
+        target = normalizePost(featureSave && featureSave.data ? featureSave.data : target);
+        state.posts = state.posts.map(function (post) {
+          return post.id === postId ? target : post;
+        });
+      } catch (error) {
+        setFeedback(tr("Could not update demo highlight right now."), "error");
+        console.warn("[community.js] feature sync failed:", error);
+        await syncCommunityStateFromCloud({ silent: true });
+        refreshAll();
+        return;
+      }
+    }
     writePosts(state.posts);
-    setFeedback("Demo highlight updated for showcase.", "success");
+    setFeedback(tr("Demo highlight updated for showcase."), "success");
     refreshAll();
   }
 
-  function deletePost(postId) {
+  async function deletePost(postId) {
     var target = null;
     for (var i = 0; i < state.posts.length; i += 1) {
       if (state.posts[i].id === postId) {
@@ -1470,10 +1833,24 @@
       }
     }
     if (!target || !isPostOwner(target)) {
-      setFeedback("Only the author can delete this post.", "error");
+      setFeedback(tr("Only the author can delete this post."), "error");
       return;
     }
-    if (!window.confirm("Delete this post permanently from your local community feed?")) return;
+    if (!window.confirm(tr("Delete this post from the shared community feed?"))) return;
+    if (isCloudEnabled()) {
+      try {
+        var removal = await getCloudApi().deletePost(postId);
+        if (removal && removal.error) {
+          setFeedback(tr("Could not delete this post from the shared feed yet."), "error");
+          console.warn("[community.js] delete sync failed:", removal.error);
+          return;
+        }
+      } catch (error) {
+        setFeedback(tr("Could not delete this post from the shared feed yet."), "error");
+        console.warn("[community.js] delete sync failed:", error);
+        return;
+      }
+    }
     state.posts = state.posts.filter(function (post) { return post.id !== postId; });
     writePosts(state.posts);
     if (state.selectedPostId === postId) state.selectedPostId = "";
@@ -1487,7 +1864,7 @@
         lastActiveDate: stats && stats.lastActiveDate ? stats.lastActiveDate : ""
       });
     }
-    setFeedback("Post deleted from this local community feed.", "success");
+    setFeedback(tr("Post deleted from the shared community feed."), "success");
     refreshAll();
   }
 
@@ -1498,27 +1875,31 @@
     var postId = actionBtn.getAttribute("data-post-id");
     if (!postId) return true;
     if (!isLoggedIn()) {
-      setFeedback("Log in to use moderation actions.", "error");
+      setFeedback(tr("Log in to use moderation actions."), "error");
       return true;
     }
 
     if (action === "feature") {
-      toggleFeature(postId);
+      void toggleFeature(postId);
       return true;
     }
     if (action === "hide") {
       toggleHidePost(postId);
-      setFeedback("Visibility preference updated for your account.", "success");
+      setFeedback(tr("Visibility preference updated for your account."), "success");
       refreshAll();
       return true;
     }
     if (action === "report") {
-      var saved = reportPost(postId);
-      setFeedback(saved ? "Thanks. The post was sent for review." : "You already reported this post.", saved ? "success" : "error");
+      reportPost(postId).then(function (saved) {
+        setFeedback(saved ? tr("Thanks. The post was sent for review.") : tr("You already reported this post."), saved ? "success" : "error");
+      }).catch(function (error) {
+        console.warn("[community.js] report action failed:", error);
+        setFeedback(tr("Could not send this report right now."), "error");
+      });
       return true;
     }
     if (action === "delete") {
-      deletePost(postId);
+      void deletePost(postId);
       return true;
     }
     return true;
@@ -1683,17 +2064,17 @@
         var draft = readDraft();
         var image = draft && draft.imageDataUrl ? draft.imageDataUrl : "";
         if (!image) {
-          setFeedback("Please attach an image first, then extract palette.", "error");
+          setFeedback(tr("Please attach an image first, then extract palette."), "error");
           return;
         }
         extractPaletteFromImageDataUrl(image, 6).then(function (colors) {
           if (!colors.length) {
-            setFeedback("Could not extract palette from this image.", "error");
+            setFeedback(tr("Could not extract palette from this image."), "error");
             return;
           }
           var merged = readPaletteFromHiddenInput().concat(colors);
           setComposerPalette(merged, true);
-          setFeedback("Palette extracted from image.", "success");
+          setFeedback(tr("Palette extracted from image."), "success");
         });
       });
     }
@@ -1713,12 +2094,12 @@
           if (!Number.isFinite(deleteIdx)) return;
           var deletePalette = readPaletteFromHiddenInput();
           if (deletePalette.length <= 1) {
-            setFeedback("At least one color is required.", "error");
+            setFeedback(tr("At least one color is required."), "error");
             return;
           }
           deletePalette.splice(deleteIdx, 1);
           setComposerPalette(deletePalette, true);
-          setFeedback("Color removed.", "success");
+          setFeedback(tr("Color removed."), "success");
           return;
         }
         var blockBtn = event.target.closest("[data-palette-block]");
@@ -1737,14 +2118,14 @@
         var file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
         if (!file) return;
         if (!/^image\//.test(file.type)) {
-          setFeedback("Please select a valid image file.", "error");
+          setFeedback(tr("Please select a valid image file."), "error");
           return;
         }
         var reader = new FileReader();
         reader.onload = function () {
           var dataUrl = sanitizeImageDataUrl(reader.result);
           if (!dataUrl) {
-            setFeedback("Could not read this image.", "error");
+            setFeedback(tr("Could not read this image."), "error");
             return;
           }
           var draft = readDraft() || {};
@@ -1761,7 +2142,7 @@
           });
           setComposerIncludeOptions(getIncludePalette(), true);
           setComposerImagePreview(dataUrl);
-          setFeedback("Image attached to your post.", "success");
+          setFeedback(tr("Image attached to your post."), "success");
         };
         reader.readAsDataURL(file);
       });
@@ -1788,8 +2169,14 @@
     function bindPostListClicks(node) {
       if (!node) return;
       node.addEventListener("click", function (event) {
-        if (handleLikeClick(event)) return;
-        if (handlePostAction(event)) return;
+        if (event.target.closest("[data-like-id]")) {
+          void handleLikeClick(event);
+          return;
+        }
+        if (event.target.closest("[data-post-action]")) {
+          handlePostAction(event);
+          return;
+        }
         var tagFilterBtn = event.target.closest("[data-filter-tag]");
         if (tagFilterBtn) {
           setTagSearch(tagFilterBtn.getAttribute("data-filter-tag"));
@@ -1846,19 +2233,38 @@
       refreshAll();
     });
     document.addEventListener("clw:user-data-updated", refreshAll);
-    document.addEventListener("clw:activity-recorded", refreshAll);
+    document.addEventListener("clw:activity-recorded", function () {
+      state.activityLog = readLocalActivityLog();
+      refreshAll();
+    });
     document.addEventListener("clw:community-draft-updated", function () {
       applyDraftToComposer();
-      setFeedback("Draft imported from another page. You can edit and publish it here.", "success");
+      setFeedback(tr("Draft imported from another page. You can edit and publish it here."), "success");
       var composer = document.getElementById("composer");
       if (composer) composer.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+    document.addEventListener("clw:locale-changed", function () {
+      applyStaticLocale();
+      updateDraftOriginLabel(readDraft());
+      refreshAll();
+    });
+    window.addEventListener("focus", function () {
+      if (!isCloudEnabled()) return;
+      void syncCommunityStateFromCloud({ silent: false });
+    });
   }
 
-  function init() {
+  function hydrateLocalState() {
+    state.posts = readPosts();
+    state.activityLog = readLocalActivityLog();
+    state.reports = readLocalReports();
+  }
+
+  async function init() {
     if (document.body.dataset.communityReady === "1") return;
     document.body.dataset.communityReady = "1";
-    state.posts = readPosts();
+    hydrateLocalState();
+    applyStaticLocale();
     applyHomeRouteState();
     setActiveTag(DEFAULT_TAG);
     setComposerPalette([DEFAULT_COLOR], false);
@@ -1871,11 +2277,16 @@
     refreshAll();
     jumpToHomeRouteTarget();
     updateOverlayScrollLock();
+    if (isCloudEnabled()) {
+      await syncCommunityStateFromCloud({ silent: false });
+    }
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", function () {
+      void init();
+    });
   } else {
-    init();
+    void init();
   }
 })();

@@ -43,7 +43,7 @@ Each member mainly works on their own page with separate HTML, CSS, and JS files
 Shared components (e.g. navbar, footer) are loaded using `fetch`.  
 For this reason, it is recommended to run the project via a local server (e.g. Live Server).
 
-Note: The final website remains a static front-end project and does not require a backend server.
+Note: The website remains a static front-end project, but the public Community feed can optionally sync through Supabase for shared multi-device data.
 
 ---
 
@@ -59,14 +59,24 @@ A simple front-end sign-in system is included as a placeholder (`localStorage` o
 
 ---
 
-## Community Demo Notes
+## Community Sync Notes
 
-The `community` flow is a local front-end simulation, not a real multi-device social platform.
+The site still uses front-end demo login (`CLWAuth`) in `localStorage`, but Community public data can now sync through Supabase.
 
-- Posts, likes, hidden items, reports, drafts, and ranking snapshots are stored in browser `localStorage`.
-- Login, points, posts, streaks, and leaderboard activity are coordinated through `CLWAuth`.
-- `Learning`, `Game`, and `Test` can all send a draft into `Community` through the shared key `clw_community_draft_v1`.
-- The weekly leaderboard uses recent recorded activity; the all-time leaderboard includes demo seed learners for showcase purposes.
+- Public/shared data: posts, likes, reports, and activity leaderboard events.
+- Local/private data: current login session, composer draft, hidden-post preference, and some UI preferences.
+- `Learning`, `Game`, and `Test` still send drafts into `Community` through `clw_community_draft_v1`.
+- Weekly leaderboard uses the last 7 days of recorded activity. All-time leaderboard combines Supabase activity totals with showcase seed learners.
+- If Supabase is not configured, Community falls back to the previous `localStorage` behavior.
+
+## Supabase Setup
+
+1. Create a Supabase project.
+2. Open the SQL Editor and run [`supabase/community_schema.sql`](./supabase/community_schema.sql).
+3. Copy your project URL and anon/publishable key into [`js/supabase-config.js`](./js/supabase-config.js).
+4. Redeploy the static site.
+
+After that, Community posts and leaderboard activity will sync across devices and public visitors of the deployed website.
 
 ---
 
