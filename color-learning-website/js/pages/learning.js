@@ -24,6 +24,8 @@ import { InteractionTools } from './learn/interaction-tools.js';
   let colorPickerInstance = null;
   let visualExampleInstance = null;
   let interactionToolsInstance = null;
+  const HOME_LEARN_HIGHLIGHT_PARAM = 'from';
+  const HOME_LEARN_HIGHLIGHT_VALUE = 'home-learn';
 
   // Initialize
   function init() {
@@ -33,6 +35,122 @@ import { InteractionTools } from './learn/interaction-tools.js';
     handleInitialRoute();
     setupHashChangeListener();
     setupCommunityShare();
+  }
+
+  function getRouteFocusHints() {
+    try {
+      const url = new URL(window.location.href);
+      return {
+        fromHomeLearn: url.searchParams.get(HOME_LEARN_HIGHLIGHT_PARAM) === HOME_LEARN_HIGHLIGHT_VALUE,
+        scope: String(url.searchParams.get('focusScope') || '').trim().toLowerCase(),
+        parent: String(url.searchParams.get('focusParent') || '').trim(),
+        child: String(url.searchParams.get('focusChild') || '').trim()
+      };
+    } catch (e) {
+      return { fromHomeLearn: false, scope: '', parent: '', child: '' };
+    }
+  }
+
+  function shouldAnimateHomeJumpTitle() {
+    const hints = getRouteFocusHints();
+    return !!(hints.fromHomeLearn || hints.parent || hints.child);
+  }
+
+  function consumeHomeJumpTitleFlag() {
+    try {
+      const url = new URL(window.location.href);
+      const before = url.toString();
+      url.searchParams.delete(HOME_LEARN_HIGHLIGHT_PARAM);
+      url.searchParams.delete('focusParent');
+      url.searchParams.delete('focusChild');
+      const after = url.toString();
+      if (before !== after) {
+        window.history.replaceState({}, '', after);
+      }
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function normalizeMatchText(text) {
+    return String(text || '')
+      .toLowerCase()
+      .replace(/[\u2018\u2019\u201c\u201d]/g, "'")
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function findBestHeadingMatch(nodes, targetRaw) {
+    const target = normalizeMatchText(targetRaw);
+    if (!target || !Array.isArray(nodes) || !nodes.length) return null;
+    let best = null;
+    nodes.forEach(function(node) {
+      const text = normalizeMatchText(node.textContent || '');
+      if (!text) return;
+      let score = 0;
+      if (text === target) score = 120;
+      else if (text.includes(target)) score = 90 - Math.max(0, text.length - target.length);
+      else if (target.includes(text)) score = 70 - Math.max(0, target.length - text.length);
+      if (!best || score > best.score) best = { node: node, score: score };
+    });
+    return best && best.score > 0 ? best.node : null;
+  }
+
+  function pickRouteHighlightElement() {
+    const hints = getRouteFocusHints();
+    if (hints.scope === 'parent') {
+      return contentTitle || null;
+    }
+    const sectionHeadings = Array.from(document.querySelectorAll('.section-heading'));
+    const parentHeading = findBestHeadingMatch(sectionHeadings, hints.parent);
+
+    if (hints.child) {
+      const localScope = parentHeading && parentHeading.closest('.content-section')
+        ? parentHeading.closest('.content-section')
+        : document;
+      const localSubHeadings = Array.from(localScope.querySelectorAll('.section-content h4, .section-content h3'));
+      const localHit = findBestHeadingMatch(localSubHeadings, hints.child);
+      if (localHit) return localHit;
+
+      const globalSubHeadings = Array.from(document.querySelectorAll('.section-content h4, .section-content h3'));
+      const globalHit = findBestHeadingMatch(globalSubHeadings, hints.child);
+      if (globalHit) return globalHit;
+    }
+
+    if (parentHeading) return parentHeading;
+    return contentTitle || null;
+  }
+
+  function animateCurrentTitleHint() {
+    const target = pickRouteHighlightElement();
+    if (!target) return;
+    if (typeof target.scrollIntoView === 'function') {
+      if (target !== contentTitle) {
+        target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+    const className = target === contentTitle
+      ? 'learning-content__title--route-highlight'
+      : 'section-heading--route-highlight';
+    target.classList.remove(className);
+    window.requestAnimationFrame(function() {
+      window.requestAnimationFrame(function() {
+        target.classList.add(className);
+      });
+    });
+    window.setTimeout(function() {
+      target.classList.remove(className);
+    }, 2100);
+  }
+
+  function getSectionKeyFromHash() {
+    const raw = String(window.location.hash || '').replace(/^#/, '').trim();
+    if (!raw) return '';
+    // Support URLs like "#basic-color-models:~:text=..."
+    const withoutTextFragment = raw.split(':~:')[0];
+    const decoded = decodeURIComponent(withoutTextFragment || '').trim();
+    return decoded;
   }
 
   function setShareStatus(message) {
@@ -50,7 +168,7 @@ import { InteractionTools } from './learn/interaction-tools.js';
         return;
       }
 
-      const sectionKey = window.location.hash ? window.location.hash.substring(1) : 'overview';
+      const sectionKey = getSectionKeyFromHash() || 'overview';
       const sectionTitle = contentTitle ? contentTitle.textContent : 'Learning note';
       const draft = {
         content: note,
@@ -337,7 +455,7 @@ import { InteractionTools } from './learn/interaction-tools.js';
 
   // Handle initial route based on URL hash
   function handleInitialRoute() {
-    const hash = window.location.hash.substring(1);
+    const hash = getSectionKeyFromHash();
 
     if (hash && contentData[hash]) {
       // Find corresponding link
@@ -346,6 +464,12 @@ import { InteractionTools } from './learn/interaction-tools.js';
       if (targetLink) {
         updateActiveLink(targetLink);
         loadContent(hash);
+        if (shouldAnimateHomeJumpTitle()) {
+          window.setTimeout(function() {
+            animateCurrentTitleHint();
+            consumeHomeJumpTitleFlag();
+          }, 90);
+        }
 
         // Expand parent menus
         expandParentMenus(targetLink);
@@ -356,6 +480,12 @@ import { InteractionTools } from './learn/interaction-tools.js';
       if (overviewLink) {
         updateActiveLink(overviewLink);
         loadContent('overview');
+        if (shouldAnimateHomeJumpTitle()) {
+          window.setTimeout(function() {
+            animateCurrentTitleHint();
+            consumeHomeJumpTitleFlag();
+          }, 90);
+        }
       }
     }
   }
@@ -380,7 +510,7 @@ import { InteractionTools } from './learn/interaction-tools.js';
   // Setup hash change listener
   function setupHashChangeListener() {
     window.addEventListener('hashchange', function() {
-      const hash = window.location.hash.substring(1);
+      const hash = getSectionKeyFromHash();
 
       if (hash && contentData[hash]) {
         const targetLink = document.querySelector('[data-section="' + hash + '"]');
@@ -388,6 +518,12 @@ import { InteractionTools } from './learn/interaction-tools.js';
         if (targetLink) {
           updateActiveLink(targetLink);
           loadContent(hash);
+          if (shouldAnimateHomeJumpTitle()) {
+            window.setTimeout(function() {
+              animateCurrentTitleHint();
+              consumeHomeJumpTitleFlag();
+            }, 90);
+          }
           expandParentMenus(targetLink);
         }
       }
