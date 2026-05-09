@@ -1,8 +1,9 @@
 /**
  * Local auth + local user data management (Scheme 1).
- * - Account system stays in localStorage (no backend)
+ * - Account system stays in localStorage (no backend auth yet)
  * - Supports log in + create account
  * - Exposes CLWAuth API for other pages
+ * - Community activity can also sync to Supabase when configured
  */
 (function () {
   "use strict";
@@ -77,6 +78,10 @@
     var list = Array.isArray(raw) ? raw : [];
     list.unshift(entry);
     writeJSON(STORAGE.activityLog, list.slice(0, 500));
+  }
+
+  function getCommunityCloudApi() {
+    return window.CLWCommunityCloud || null;
   }
 
   function ensureSeedAccounts() {
@@ -184,7 +189,7 @@
 
   function recordActivity(username, payload) {
     var name = normalizeUsername(username);
-    if (!name) return buildDefaultStats();
+    if (!name) return Promise.resolve(buildDefaultStats());
     ensureUser(name);
 
     var stats = getUserStats(name);
@@ -223,7 +228,19 @@
     };
     appendActivityLog(detail);
     document.dispatchEvent(new CustomEvent("clw:activity-recorded", { detail: detail }));
-    return nextStats;
+    var cloud = getCommunityCloudApi();
+    if (!cloud || !cloud.isConfigured || !cloud.isConfigured() || !cloud.insertActivity) {
+      return Promise.resolve(nextStats);
+    }
+    return cloud.insertActivity(detail).then(function (result) {
+      if (result && result.error) {
+        console.warn("[auth.js] Supabase activity sync failed:", result.error);
+      }
+      return nextStats;
+    }).catch(function (error) {
+      console.warn("[auth.js] Supabase activity sync failed:", error);
+      return nextStats;
+    });
   }
 
   function createAccount(usernameInput, passwordInput, displayNameInput) {

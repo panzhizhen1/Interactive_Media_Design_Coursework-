@@ -65,3 +65,15 @@
 
   --avatar-size: 2rem;
 }
+
+:root[data-clw-font-size="s"] {
+  font-size: 14px;
+}
+
+:root[data-clw-font-size="m"] {
+  font-size: 16px;
+}
+
+:root[data-clw-font-size="l"] {
+  font-size: 18px;
+}

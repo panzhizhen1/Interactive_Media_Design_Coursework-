@@ -233,6 +233,9 @@
   var HOME_COMMUNITY_PICK_INDEX_KEY = "clw_home_community_pick_index";
   var COMMUNITY_ACTIVITY_LOG_KEY = "clw_activity_log_v1";
   var COMMUNITY_ACCOUNTS_KEY = "clw_accounts_v1";
+  function getCommunityCloudApi() {
+    return window.CLWCommunityCloud || null;
+  }
   var AUTH_USER_KEY = "clw_current_user";
   var HOME_COMMUNITY_ROTATE_MS = 6800;
   var HOME_COMMUNITY_SWITCH_OUT_MS = 230;
@@ -1224,6 +1227,25 @@
   }
 
   function loadCommunityPostCatalog() {
+    var cloud = getCommunityCloudApi();
+    if (cloud && cloud.isConfigured && cloud.isConfigured() && cloud.listPosts) {
+      return cloud.listPosts().then(function (result) {
+        if (result && result.error) throw result.error;
+        var rows = Array.isArray(result && result.data) ? result.data : [];
+        rows = rows.map(normalizeCommunityPost).filter(function (item) { return !!item; });
+        if (rows.length) return rows;
+        return fetch("js/pages/community.js")
+          .then(function (res) {
+            if (!res.ok) throw new Error("Failed to load community module");
+            return res.text();
+          })
+          .then(function (source) {
+            return extractCommunitySeedPosts(source)
+              .map(normalizeCommunityPost)
+              .filter(function (item) { return !!item; });
+          });
+      });
+    }
     var saved = readStoredJson("clw_posts_v3", null);
     if (!Array.isArray(saved) || !saved.length) saved = readStoredJson("clw_posts_v2", null);
     if (!Array.isArray(saved) || !saved.length) saved = readStoredJson("clw_posts_v1", null);
@@ -1253,6 +1275,31 @@
       studentB: 95,
       studentC: 82
     };
+    var cloud = getCommunityCloudApi();
+    if (cloud && cloud.isConfigured && cloud.isConfigured() && cloud.listActivity) {
+      return cloud.listActivity(1000).then(function (result) {
+        if (result && result.error) throw result.error;
+        var rows = Array.isArray(result && result.data) ? result.data : [];
+        rows.forEach(function (item) {
+          if (!item || typeof item !== "object") return;
+          var username = item.username ? String(item.username).trim() : "";
+          if (!username) return;
+          var delta = Number(item.pointsDelta || 0);
+          if (Number.isNaN(delta)) return;
+          pointsMap[username] = Number(pointsMap[username] || 0) + delta;
+        });
+        return Object.keys(pointsMap)
+          .map(function (username) {
+            return { username: username, points: Math.max(0, Math.round(Number(pointsMap[username] || 0))) };
+          })
+          .filter(function (row) { return !!row.username; })
+          .sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            return String(a.username).localeCompare(String(b.username));
+          })
+          .slice(0, rowsLimit);
+      });
+    }
 
     var activityRows = readStoredJson(COMMUNITY_ACTIVITY_LOG_KEY, []);
     if (Array.isArray(activityRows)) {
@@ -1275,7 +1322,7 @@
       pointsMap[username] = Number(pointsMap[username] || 0) + points;
     });
 
-    return Object.keys(pointsMap)
+    return Promise.resolve(Object.keys(pointsMap)
       .map(function (username) {
         return { username: username, points: Math.max(0, Math.round(Number(pointsMap[username] || 0))) };
       })
@@ -1284,7 +1331,7 @@
         if (b.points !== a.points) return b.points - a.points;
         return String(a.username).localeCompare(String(b.username));
       })
-      .slice(0, rowsLimit);
+      .slice(0, rowsLimit));
   }
 
   function setupHomeCommunitySpotlight() {
@@ -1363,11 +1410,12 @@
       pauseRotation = false;
     });
 
-    loadCommunityPostCatalog()
-      .then(function (catalog) {
+    Promise.all([loadCommunityPostCatalog(), buildHomeCommunityLeaderboardRows(4)])
+      .then(function (results) {
+        var catalog = results[0];
+        var leaderboardRows = results[1];
         if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty community catalog");
         var items = catalog.slice();
-        var leaderboardRows = buildHomeCommunityLeaderboardRows(4);
         if (leaderboardRows.length) {
           items.push({ type: "leaderboard", rows: leaderboardRows });
         }
