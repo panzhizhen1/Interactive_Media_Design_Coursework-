@@ -4,6 +4,225 @@
 (function () {
   "use strict";
 
+  var HOME_ZH = {
+    "Home — Color Learning": "首页 — 色彩学习",
+    "Explore the world of colors!": "探索色彩的世界！",
+    "Learn color. See beauty. Think in systems.": "从色彩感知到色彩原理，轻松建立你的色彩理解。",
+    "Learn Colors the Smart Way": "色彩知识随手学",
+    "Learn a Color Concept!": "每天认识一个色彩概念",
+    "See Color in Action!": "拖一拖，理解颜色如何变化",
+    "Try Today’s Challenge!": "今日色彩小测",
+    "Start your color challenge!": "来一场色彩挑战！",
+    "Start your color challenge: ": "来一场色彩挑战：",
+    "Start your color challenge with ": "来一场色彩挑战：",
+    "Shape & Color Game": "用形状和颜色完成挑战！",
+    "Start challenge ›": "开始挑战 ›",
+    "👥 Join the Color Community": "加入社区，分享你的发现与灵感",
+    "New community post +1": "社区新帖子 +1",
+    "Loading a random topic...": "正在加载随机知识点...",
+    "Loading knowledge preview...": "正在加载知识预览...",
+    "Preparing section route...": "正在准备知识点跳转...",
+    "Loading a random question...": "正在加载随机题目...",
+    "Preparing quiz route": "正在准备测验入口",
+    "Loading a community post...": "正在加载社区帖子...",
+    "Explore learn module": "进入学习模块",
+    "Open random test question": "打开随机测试题",
+    "Start your color challenge in Game": "在游戏模块开始色彩挑战",
+    "Open community page": "打开社区页面",
+    "Open community post detail list": "打开社区帖子详情列表",
+    "Open to view options": "点击查看选项",
+    "Tap to jump into a random color challenge question.": "用一道题检验你的色彩理解。",
+    "Test module": "测验模块",
+    "Test": "测验",
+    "Unit": "单元",
+    "Learning": "学习",
+    "Key section": "关键章节",
+    "Learning Module · Interactive · Color Models": "学习模块 · 交互式 · 色彩模型",
+    "What is Colour Encoding?": "什么是色彩编码？",
+    "Key Notes": "关键要点",
+    "Explore how color information is represented and used across devices and media.": "了解色彩信息如何在不同设备与媒体中被表示和应用。",
+    "Overview · Colour Encoding Overview": "概览 · 色彩编码概览",
+    "Key Points": "关键知识点",
+    "Learning Module · Basic": "学习模块 · 基础",
+    "Learning Module · Encoding Concepts": "学习模块 · 编码概念",
+    "Learning Module · Advance Topics": "学习模块 · 进阶主题",
+    "Interaction": "交互",
+    "Relative Information": "相关信息",
+    "Section": "章节",
+    "Overview": "概览",
+    "RGB Interactive Mixer": "RGB 交互调色器",
+    "Adjust channels to preview digital colour output": "调节通道，预览数字色彩输出",
+    "HSV Interactive Mixer": "HSV 交互调色器",
+    "Drag hue, saturation, and value to explore color behavior": "拖动色相、饱和度和明度，探索色彩变化",
+    "CMYK Interactive Mixer": "CMYK 交互调色器",
+    "Adjust cyan, magenta, yellow, and key for print-style color mixing": "调节青、品红、黄和黑，体验印刷式混色",
+    "Current Color": "当前颜色",
+    "Color": "颜色",
+    "Red": "红色",
+    "Orange": "橙色",
+    "Yellow": "黄色",
+    "Green": "绿色",
+    "Cyan": "青色",
+    "Blue": "蓝色",
+    "Purple": "紫色",
+    "Pink": "粉色",
+    "Light Gray": "浅灰色",
+    "Slate Gray": "石板灰",
+    "Soft White": "柔白色",
+    "Deep Black": "深黑色",
+    "Light Red": "浅红色",
+    "Light Orange": "浅橙色",
+    "Light Yellow": "浅黄色",
+    "Light Green": "浅绿色",
+    "Light Cyan": "浅青色",
+    "Light Blue": "浅蓝色",
+    "Light Purple": "浅紫色",
+    "Light Pink": "浅粉色",
+    "Deep Red": "深红色",
+    "Deep Orange": "深橙色",
+    "Deep Yellow": "深黄色",
+    "Deep Green": "深绿色",
+    "Deep Cyan": "深青色",
+    "Deep Blue": "深蓝色",
+    "Deep Purple": "深紫色",
+    "Deep Pink": "深粉色",
+    "All-time Top Learners": "全站总榜学习者",
+    "pts": "分",
+    "Open Learn module interactive color model": "打开学习模块交互色彩模型",
+    "Open Learn module topic: ": "打开学习模块知识点：",
+    "Open test question: ": "打开测试题：",
+    "Open community post list, highlighted from @": "打开社区帖子列表，定位到 @",
+    "Open community page leaderboard": "打开社区排行榜",
+    "Share one color insight, palette, or learning takeaway with peers in the community.": "在社区与同伴分享一个色彩洞察、配色方案或学习收获。"
+  };
+
+  function getHomeLocale() {
+    if (window.CLWLocale && typeof window.CLWLocale.getLocale === "function") {
+      return window.CLWLocale.getLocale() === "zh" ? "zh" : "en";
+    }
+    return "en";
+  }
+
+  function txWithScope(text, scope) {
+    var source = String(text == null ? "" : text);
+    if (window.CLWLocale && typeof window.CLWLocale.translate === "function") {
+      return window.CLWLocale.translate(source, scope || "global");
+    }
+    return source;
+  }
+
+  function txHome(text) {
+    var source = String(text == null ? "" : text);
+    var translated = txWithScope(source, "global");
+    if (translated !== source) return translated;
+    if (getHomeLocale() === "zh" && Object.prototype.hasOwnProperty.call(HOME_ZH, source)) {
+      return HOME_ZH[source];
+    }
+    return source;
+  }
+
+  function txTest(text) {
+    var source = String(text == null ? "" : text);
+    var translated = txWithScope(source, "test");
+    if (translated !== source) return translated;
+    return txHome(source);
+  }
+
+  function setLocalizedText(el, baseText, scope) {
+    if (!el) return;
+    var base = String(baseText == null ? "" : baseText);
+    el.setAttribute("data-home-i18n-base", base);
+    if (scope) el.setAttribute("data-home-i18n-scope", scope);
+    else el.removeAttribute("data-home-i18n-scope");
+    el.textContent = scope === "test" ? txTest(base) : txHome(base);
+  }
+
+  function retranslateLocalizedNodes() {
+    var nodes = document.querySelectorAll("[data-home-i18n-base]");
+    nodes.forEach(function (el) {
+      var base = el.getAttribute("data-home-i18n-base") || "";
+      var scope = el.getAttribute("data-home-i18n-scope") || "";
+      var translated = scope === "test" ? txTest(base) : txHome(base);
+      if (el.classList && el.classList.contains("home-test__option-text")) {
+        translated = clipWithEllipsis(translated, 72);
+      }
+      el.textContent = translated;
+    });
+  }
+
+  function renderLocalizedGameTitle(el, drawingName) {
+    if (!el) return;
+    var name = String(drawingName == null ? "" : drawingName).trim();
+    if (!name) {
+      delete el.dataset.homeGameDrawingBase;
+      setLocalizedText(el, "Start your color challenge!");
+      return;
+    }
+    el.dataset.homeGameDrawingBase = name;
+    el.removeAttribute("data-home-i18n-base");
+    el.removeAttribute("data-home-i18n-scope");
+    el.textContent = txHome("Start your color challenge: ") + txHome(name) + "!";
+  }
+
+  function applyHomepageLocaleChrome() {
+    var locale = getHomeLocale();
+    document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
+    document.title = txHome("Home — Color Learning");
+
+    var taglineEl = document.querySelector(".home-hero__tagline");
+    if (taglineEl) taglineEl.textContent = txHome("Explore the world of colors!");
+    var sloganEl = document.querySelector(".home-hero__slogan");
+    if (sloganEl) sloganEl.textContent = txHome("Learn color. See beauty. Think in systems.");
+
+    var learnTitleEl = document.querySelector("[data-home-learn-title]");
+    if (learnTitleEl) learnTitleEl.textContent = txHome("Learn Colors the Smart Way");
+    var learnSubEl = document.querySelector("[data-home-learn-sub]");
+    if (learnSubEl) {
+      var interactive = document.querySelector(".home-learn__note.home-learn__note--interactive");
+      learnSubEl.textContent = interactive ? txHome("See Color in Action!") : txHome("Learn a Color Concept!");
+    }
+
+    var testTitleEl = document.querySelector(".home-card__text--test");
+    if (testTitleEl) testTitleEl.textContent = txHome("Try Today’s Challenge!");
+    var gameTitleEl = document.querySelector(".home-card__text--game");
+    if (gameTitleEl) {
+      var drawingBase = gameTitleEl.dataset.homeGameDrawingBase;
+      if (drawingBase) renderLocalizedGameTitle(gameTitleEl, drawingBase);
+      else if (!gameTitleEl.getAttribute("data-home-i18n-base")) setLocalizedText(gameTitleEl, "Start your color challenge!");
+    }
+    var gameSubEl = document.querySelector(".home-game__sub");
+    if (gameSubEl) gameSubEl.textContent = txHome("Shape & Color Game");
+    var gameCtaEl = document.querySelector(".home-game__cta");
+    if (gameCtaEl) gameCtaEl.textContent = txHome("Start challenge ›");
+    var communityTitleEl = document.querySelector("[data-home-community-title]");
+    if (communityTitleEl) communityTitleEl.textContent = txHome("👥 Join the Color Community");
+    var communityNoticeEl = document.querySelector("[data-home-community-notice-link]");
+    if (communityNoticeEl) communityNoticeEl.textContent = txHome("New community post +1");
+
+    var learnLinkEl = document.querySelector("[data-home-learn-link]");
+    if (learnLinkEl) learnLinkEl.setAttribute("aria-label", txHome("Explore learn module"));
+    var testLinkEl = document.querySelector("[data-home-test-link]");
+    if (testLinkEl) testLinkEl.setAttribute("aria-label", txHome("Open random test question"));
+    var gameLinkEl = document.querySelector("[data-home-game-link]");
+    if (gameLinkEl) gameLinkEl.setAttribute("aria-label", txHome("Start your color challenge in Game"));
+    if (communityNoticeEl) communityNoticeEl.setAttribute("aria-label", txHome("Open community page"));
+    var communityPostLinkEl = document.querySelector("[data-home-community-post-link]");
+    if (communityPostLinkEl) {
+      communityPostLinkEl.setAttribute("aria-label", txHome("Open community post detail list"));
+    }
+
+    retranslateLocalizedNodes();
+    var modelLabel = document.querySelector(".home-learn-model__name-label");
+    if (modelLabel) modelLabel.textContent = txHome("Current Color");
+
+    var leaderboardTitle = document.querySelector(".home-community__leaderboard-title");
+    if (leaderboardTitle) leaderboardTitle.textContent = txHome("All-time Top Learners");
+    var pointNodes = document.querySelectorAll(".home-community__leaderboard-points");
+    pointNodes.forEach(function (node) {
+      node.textContent = String(node.textContent || "").replace(/\bpts\b/g, txHome("pts"));
+    });
+  }
+
   var MODE_STORAGE_KEY = "clw_theme_mode";
   var WHEEL_COLOR_STORAGE_KEY = "clw_theme_wheel_color";
   var HOME_GAME_PICK_INDEX_KEY = "clw_home_game_pick_index";
@@ -544,8 +763,8 @@
       anchorText: anchorText || subtitle,
       previewHtml: previewHtml,
       containsUnsupportedComponent: componentFound,
-      category: locationParts[0] || "Learning",
-      path: locationParts.slice(1).join(" · ") || "Key section"
+      category: txHome(locationParts[0] || "Learning"),
+      path: txHome(locationParts.slice(1).join(" · ") || "Key section")
     };
   }
 
@@ -575,7 +794,7 @@
     else if (key.indexOf("advance-") === 0) branch = "Learning Module · Advance Topics";
     else if (key.indexOf("interaction-") === 0) branch = "Interaction";
     else if (key === "relative-information") branch = "Relative Information";
-    return branch + " · " + String(sectionTitle || "Section");
+    return txHome(branch) + " · " + txHome(String(sectionTitle || "Section"));
   }
 
   function loadLearnTopicCatalog() {
@@ -634,7 +853,7 @@
       linkEl.addEventListener("click", function (event) {
         if (!interactiveModeActive) return;
         var target = event.target;
-        if (target && target.closest && target.closest(".home-learn-model__range")) {
+        if (target && target.closest && target.closest(".home-learn-model")) {
           event.preventDefault();
         }
       });
@@ -652,7 +871,7 @@
 
     function setLearnSlogan(isInteractive) {
       if (!subEl) return;
-      subEl.textContent = isInteractive ? "See Color in Action!" : "Learn a Color Concept!";
+      subEl.textContent = isInteractive ? txHome("See Color in Action!") : txHome("Learn a Color Concept!");
     }
 
     function hslToHex(h, s, l) {
@@ -794,15 +1013,15 @@
 
       interactiveModeActive = true;
       if (noteEl) noteEl.classList.add("home-learn__note--interactive");
-      topicEl.textContent = model.title;
+      setLocalizedText(topicEl, model.title);
       snippetEl.classList.add("home-learn__snippet--interactive");
       snippetEl.innerHTML =
         '<div class="home-learn-model" data-home-learn-model>' +
-        '<p class="home-learn-model__desc">' + escapeHtmlText(model.subtitle) + "</p>" +
+        '<p class="home-learn-model__desc" data-home-i18n-base="' + escapeHtmlText(model.subtitle) + '">' + escapeHtmlText(txHome(model.subtitle)) + "</p>" +
         '<div class="home-learn-model__head">' +
         '<div class="home-learn-model__swatch" data-home-learn-swatch></div>' +
         '<div class="home-learn-model__name-wrap">' +
-        '<p class="home-learn-model__name-line"><span class="home-learn-model__name-label">Current Color</span><span class="home-learn-model__name" data-home-learn-name>Blue</span></p>' +
+        '<p class="home-learn-model__name-line"><span class="home-learn-model__name-label">' + escapeHtmlText(txHome("Current Color")) + '</span><span class="home-learn-model__name" data-home-learn-name data-home-i18n-base="Blue">' + escapeHtmlText(txHome("Blue")) + "</span></p>" +
         '<p class="home-learn-model__hex" data-home-learn-hex>#000000</p>' +
         "</div>" +
         "</div>" +
@@ -836,25 +1055,73 @@
         var colorHex = rgbToHex(rgb.r, rgb.g, rgb.b);
         swatchEl.style.background = colorHex;
         hexEl.textContent = colorHex.toUpperCase();
-        nameEl.textContent = rgbToColorName(rgb.r, rgb.g, rgb.b);
+        setLocalizedText(nameEl, rgbToColorName(rgb.r, rgb.g, rgb.b));
+      }
+
+      function attachRangeDragSupport(input) {
+        if (!input || input.dataset.dragBound === "true") return;
+        input.dataset.dragBound = "true";
+        var activePointerId = null;
+
+        function updateByPointer(clientX) {
+          var rect = input.getBoundingClientRect();
+          if (!(rect.width > 0)) return;
+          var min = Number(input.min || 0);
+          var max = Number(input.max || 100);
+          if (!(max > min)) return;
+          var ratio = (clientX - rect.left) / rect.width;
+          if (ratio < 0) ratio = 0;
+          if (ratio > 1) ratio = 1;
+          var next = Math.round(min + (max - min) * ratio);
+          input.value = String(next);
+          updateModelPreview();
+        }
+
+        input.addEventListener("pointerdown", function (event) {
+          activePointerId = event.pointerId;
+          if (input.setPointerCapture) {
+            try { input.setPointerCapture(activePointerId); } catch (e) { /* ignore */ }
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          updateByPointer(event.clientX);
+        });
+
+        input.addEventListener("pointermove", function (event) {
+          if (activePointerId === null || event.pointerId !== activePointerId) return;
+          event.preventDefault();
+          event.stopPropagation();
+          updateByPointer(event.clientX);
+        });
+
+        input.addEventListener("pointerup", function (event) {
+          if (activePointerId === null || event.pointerId !== activePointerId) return;
+          if (input.releasePointerCapture) {
+            try { input.releasePointerCapture(activePointerId); } catch (e) { /* ignore */ }
+          }
+          activePointerId = null;
+        });
+
+        input.addEventListener("pointercancel", function (event) {
+          if (activePointerId === null || event.pointerId !== activePointerId) return;
+          if (input.releasePointerCapture) {
+            try { input.releasePointerCapture(activePointerId); } catch (e) { /* ignore */ }
+          }
+          activePointerId = null;
+        });
       }
 
       root.querySelectorAll(".home-learn-model__range").forEach(function (input) {
-        input.addEventListener("pointerdown", function (event) { event.stopPropagation(); });
-        input.addEventListener("mousedown", function (event) { event.stopPropagation(); });
-        input.addEventListener("touchstart", function (event) { event.stopPropagation(); }, { passive: true });
-        input.addEventListener("click", function (event) {
-          event.stopPropagation();
-          event.preventDefault();
-        });
+        attachRangeDragSupport(input);
         input.addEventListener("input", updateModelPreview);
+        input.addEventListener("change", updateModelPreview);
       });
       updateModelPreview();
 
-      metaEl.textContent = "Learning Module · Interactive · Color Models";
+      setLocalizedText(metaEl, "Learning Module · Interactive · Color Models");
       interactiveSavedHref = "learning.html?from=home-learn&focusScope=parent&focusParent=" + encodeURIComponent("Colour Models") + "#basic-color-models";
       linkEl.setAttribute("href", interactiveSavedHref);
-      linkEl.setAttribute("aria-label", "Open Learn module interactive color model");
+      linkEl.setAttribute("aria-label", txHome("Open Learn module interactive color model"));
       return true;
     }
 
@@ -863,17 +1130,17 @@
       if (noteEl) noteEl.classList.remove("home-learn__note--interactive");
       setLearnLinkInteractiveLock(false);
       if (!summary || !summary.previewHtml) {
-        topicEl.textContent = "What is Colour Encoding?";
+        setLocalizedText(topicEl, "What is Colour Encoding?");
         snippetEl.classList.remove("home-learn__snippet--interactive");
-        snippetEl.innerHTML = "<h3>Key Notes</h3><p>Explore how color information is represented and used across devices and media.</p>";
-        metaEl.textContent = "Overview · Colour Encoding Overview";
+        snippetEl.innerHTML = "<h3>" + escapeHtmlText(txHome("Key Notes")) + "</h3><p>" + escapeHtmlText(txHome("Explore how color information is represented and used across devices and media.")) + "</p>";
+        setLocalizedText(metaEl, "Overview · Colour Encoding Overview");
         return;
       }
 
-      topicEl.textContent = summary.title || "Key Points";
+      setLocalizedText(topicEl, summary.title || "Key Points");
       snippetEl.classList.remove("home-learn__snippet--interactive");
       snippetEl.innerHTML = summary.previewHtml;
-      metaEl.textContent = (summary.category || "Learning") + " · " + (summary.path || "Key section");
+      setLocalizedText(metaEl, (summary.category || "Learning") + " · " + (summary.path || "Key section"));
     }
 
     function buildLearnDeepLink(sectionKey, summary, fallbackHeading) {
@@ -886,7 +1153,7 @@
       return "learning.html?" + query.join("&") + "#" + hashKey;
     }
 
-    titleEl.textContent = "Learn Colors the Smart Way";
+    titleEl.textContent = txHome("Learn Colors the Smart Way");
     setLearnSlogan(false);
     loadLearnTopicCatalog()
       .then(function (catalog) {
@@ -903,7 +1170,7 @@
         renderLearnSummary(picked.summary);
         interactiveSavedHref = buildLearnDeepLink(picked.sectionKey, picked.summary, picked.heading);
         linkEl.href = interactiveSavedHref;
-        linkEl.setAttribute("aria-label", "Open Learn module topic: " + String(picked.summary.title || picked.heading || "Learn topic"));
+        linkEl.setAttribute("aria-label", txHome("Open Learn module topic: ") + String(txHome(picked.summary.title || picked.heading || "Learn topic")));
       })
       .catch(function () {
         setLearnSlogan(false);
@@ -1047,7 +1314,7 @@
       authorEl.textContent = "@" + item.author;
       tagEl.textContent = item.tag || "#Community";
       postEl.textContent = item.content;
-      postLinkEl.setAttribute("aria-label", "Open community post list, highlighted from @" + item.author);
+      postLinkEl.setAttribute("aria-label", txHome("Open community post list, highlighted from @") + item.author);
       var postHref = "community-posts.html?from=home-community";
       if (item.id) postHref += "&postId=" + encodeURIComponent(item.id);
       postLinkEl.href = postHref;
@@ -1057,7 +1324,7 @@
     function renderCommunityLeaderboard(rows) {
       var list = Array.isArray(rows) ? rows : [];
       leaderboardEl.innerHTML =
-        '<h4 class="home-community__leaderboard-title">All-time Top Learners</h4>' +
+        '<h4 class="home-community__leaderboard-title">' + escapeHtmlText(txHome("All-time Top Learners")) + "</h4>" +
         '<ol class="home-community__leaderboard-list">' +
         list
           .map(function (row, index) {
@@ -1065,13 +1332,13 @@
               '<li class="home-community__leaderboard-item">' +
               '<span class="home-community__leaderboard-rank">' + String(index + 1) + "</span>" +
               '<span class="home-community__leaderboard-name">@' + escapeHtmlText(row.username) + "</span>" +
-              '<strong class="home-community__leaderboard-points">' + String(row.points) + " pts</strong>" +
+              '<strong class="home-community__leaderboard-points">' + String(row.points) + " " + escapeHtmlText(txHome("pts")) + "</strong>" +
               "</li>"
             );
           })
           .join("") +
         "</ol>";
-      postLinkEl.setAttribute("aria-label", "Open community page leaderboard");
+      postLinkEl.setAttribute("aria-label", txHome("Open community page leaderboard"));
       postLinkEl.href = "community.html?from=home-community&focus=leaderboard#alltime-title";
       bubbleEl.classList.add("home-community__bubble--leaderboard");
     }
@@ -1085,7 +1352,7 @@
       renderCommunityPost(item);
     }
 
-    titleEl.textContent = "👥 Join the Color Community";
+    titleEl.textContent = txHome("👥 Join the Color Community");
     noticeLinkEl.href = "community.html";
     postLinkEl.href = "community-posts.html?from=home-community";
     var pauseRotation = false;
@@ -1133,7 +1400,7 @@
         renderCommunityItem({
           author: "colorLearner",
           tag: "#Community",
-          content: "Share one color insight, palette, or learning takeaway with peers in the community."
+          content: txHome("Share one color insight, palette, or learning takeaway with peers in the community.")
         });
       });
   }
@@ -1445,12 +1712,12 @@
         drawing.draw(ctx, previewCanvas.width, previewCanvas.height);
 
         previewLink.href = "game.html?openDrawing=" + String(randomIndex);
-        previewLink.setAttribute("aria-label", "Start your color challenge with " + drawingName);
-        if (previewTitle) previewTitle.textContent = "Start your color challenge: " + drawingName + "!";
+        previewLink.setAttribute("aria-label", txHome("Start your color challenge with ") + txHome(drawingName));
+        if (previewTitle) renderLocalizedGameTitle(previewTitle, drawingName);
       })
       .catch(function () {
         previewLink.href = "game.html";
-        if (previewTitle) previewTitle.textContent = "Start your color challenge!";
+        if (previewTitle) renderLocalizedGameTitle(previewTitle, "");
       });
   }
 
@@ -1532,7 +1799,74 @@
     throw new Error("Unclosed var: " + varName);
   }
 
+  function getHomeTestChapterName(chapterId) {
+    var names = {
+      basics: "Foundations",
+      models: "Encoding Fundamentals",
+      meaning: "Advanced Display Technologies",
+      workflow: "Color Management Workflow",
+      practice: "Tool Use & Applied Practice"
+    };
+    return names[chapterId] || toTitleCase(String(chapterId || "test"));
+  }
+
+  function getHomeTestLevelName(levelId) {
+    var names = { easy: "Easy", medium: "Medium", hard: "Hard" };
+    return names[levelId] || toTitleCase(String(levelId || "level"));
+  }
+
+  function getHomeTestOptionTexts(question) {
+    var opts = Array.isArray(question && question.options) ? question.options : [];
+    if (!opts.length) return [];
+    if (question && question.type === "image") {
+      return opts.map(function (item) {
+        return item && item.label ? String(item.label) : String(item && item.id ? item.id : "Option");
+      });
+    }
+    return opts.map(function (item) {
+      return typeof item === "string" ? item : String(item && item.label ? item.label : item);
+    });
+  }
+
+  function buildTestCatalogFromQuestionBank(bank) {
+    if (!bank || typeof bank !== "object") return [];
+    var catalog = [];
+    Object.keys(bank).forEach(function (chapterId) {
+      var chapter = bank[chapterId];
+      var units = chapter && chapter.units && typeof chapter.units === "object" ? chapter.units : null;
+      if (!units) return;
+      Object.keys(units).forEach(function (unitId) {
+        var unit = units[unitId];
+        if (!unit || !unit.levels || typeof unit.levels !== "object") return;
+        var unitNumber = Math.max(1, Number(String(unitId || "").split("-")[1]) || 1);
+        Object.keys(unit.levels).forEach(function (levelId) {
+          var questions = Array.isArray(unit.levels[levelId]) ? unit.levels[levelId] : [];
+          questions.forEach(function (question, qIndex) {
+            catalog.push({
+              chapterId: chapterId,
+              chapterName: getHomeTestChapterName(chapterId),
+              levelId: levelId,
+              levelName: getHomeTestLevelName(levelId),
+              unitId: unitId,
+              unitNumber: unitNumber,
+              unitFocusLabel: unit && unit.label ? String(unit.label) : "Unit " + unitNumber,
+              questionIndex: qIndex,
+              prompt: question && question.prompt ? String(question.prompt) : "",
+              topic: question && question.topic ? String(question.topic) : "",
+              id: chapterId + "-" + levelId + "-" + unitId + "-q" + (qIndex + 1),
+              optionTexts: getHomeTestOptionTexts(question)
+            });
+          });
+        });
+      });
+    });
+    return catalog;
+  }
+
   function loadTestQuestionCatalog() {
+    var bankCatalog = buildTestCatalogFromQuestionBank(window.CLWTestQuestionBank);
+    if (bankCatalog.length) return Promise.resolve(bankCatalog);
+
     return fetch("js/pages/test/test.js")
       .then(function (res) {
         if (!res.ok) throw new Error("Failed to load test module");
@@ -1613,7 +1947,7 @@
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
-  function formatTestBreadcrumb(picked) {
+  function formatTestBreadcrumbBase(picked) {
     if (!picked || !picked.chapterName) return "Test module";
     var nodes = [
       "Test",
@@ -1764,25 +2098,26 @@
 
   function renderHomeTestCard(linkEl, promptEl, optionsEl, metaEl, picked) {
     if (!linkEl || !promptEl || !optionsEl || !metaEl || !picked) return;
-    promptEl.textContent = picked.prompt || "Tap to jump into a random color challenge question.";
+    setLocalizedText(promptEl, picked.prompt || "Tap to jump into a random color challenge question.", "test");
     var optionRows = Array.isArray(picked.optionTexts) ? picked.optionTexts.slice(0, 4) : [];
     if (optionRows.length) {
       optionsEl.innerHTML = optionRows
         .map(function (text, index) {
+          var baseText = String(text || "");
           return (
             '<p class="home-test__option" data-home-test-option-index="' + index + '">' +
             '<span class="home-test__option-key">' + String.fromCharCode(65 + (index % 26)) + "</span>" +
-            '<span class="home-test__option-text">' + escapeHtmlText(clipWithEllipsis(text, 72)) + "</span>" +
+            '<span class="home-test__option-text" data-home-i18n-base="' + escapeHtmlText(baseText) + '" data-home-i18n-scope="test">' + escapeHtmlText(clipWithEllipsis(txTest(baseText), 72)) + "</span>" +
             "</p>"
           );
         })
         .join("");
     } else {
-      optionsEl.innerHTML = '<p class="home-test__option"><span class="home-test__option-key">i</span><span class="home-test__option-text">Open to view options</span></p>';
+      optionsEl.innerHTML = '<p class="home-test__option"><span class="home-test__option-key">i</span><span class="home-test__option-text" data-home-i18n-base="Open to view options">' + escapeHtmlText(txHome("Open to view options")) + "</span></p>";
     }
-    metaEl.textContent = formatTestBreadcrumb(picked);
+    setLocalizedText(metaEl, formatTestBreadcrumbBase(picked));
     linkEl.href = buildHomeTestQuizHref(picked);
-    linkEl.setAttribute("aria-label", "Open test question: " + String(picked.prompt || "Random question"));
+    linkEl.setAttribute("aria-label", txHome("Open test question: ") + String(txTest(picked.prompt || "Random question")));
     bindHomeTestOptionResize(optionsEl);
     scheduleAdaptiveOptionWidth(optionsEl);
   }
@@ -1838,6 +2173,23 @@
     var tagline = document.querySelector(".home-hero__tagline");
     if (!tagline) return;
 
+    if (tagline._clwHomeTaglineRaf) {
+      window.cancelAnimationFrame(tagline._clwHomeTaglineRaf);
+      tagline._clwHomeTaglineRaf = 0;
+    }
+    if (tagline._clwHomeTaglineResizeHandler) {
+      window.removeEventListener("resize", tagline._clwHomeTaglineResizeHandler);
+      tagline._clwHomeTaglineResizeHandler = null;
+    }
+    if (tagline._clwHomeTaglineMoveHandler) {
+      tagline.removeEventListener("pointermove", tagline._clwHomeTaglineMoveHandler);
+      tagline._clwHomeTaglineMoveHandler = null;
+    }
+    if (tagline._clwHomeTaglineLeaveHandler) {
+      tagline.removeEventListener("pointerleave", tagline._clwHomeTaglineLeaveHandler);
+      tagline._clwHomeTaglineLeaveHandler = null;
+    }
+
     var rawText = tagline.textContent || "";
     if (!rawText.trim()) return;
     tagline.setAttribute("aria-label", rawText.trim());
@@ -1887,26 +2239,36 @@
         letter.style.setProperty("--letter-hue", String(hue));
       });
       animationId = window.requestAnimationFrame(animateBand);
+      tagline._clwHomeTaglineRaf = animationId;
     }
 
     syncBandMetrics();
-    window.addEventListener("resize", syncBandMetrics);
+    var onResize = function () {
+      syncBandMetrics();
+    };
+    window.addEventListener("resize", onResize);
     animationId = window.requestAnimationFrame(animateBand);
+    tagline._clwHomeTaglineResizeHandler = onResize;
+    tagline._clwHomeTaglineRaf = animationId;
 
-    tagline.addEventListener("pointermove", function (event) {
+    var onMove = function (event) {
       var target = event.target.closest(".home-hero__letter");
       if (!target || !tagline.contains(target)) return;
 
       clearTaglineEffect(letters);
       target.classList.add("is-active");
-    });
-
-    tagline.addEventListener("pointerleave", function () {
+    };
+    var onLeave = function () {
       clearTaglineEffect(letters);
-    });
+    };
+    tagline.addEventListener("pointermove", onMove);
+    tagline.addEventListener("pointerleave", onLeave);
+    tagline._clwHomeTaglineMoveHandler = onMove;
+    tagline._clwHomeTaglineLeaveHandler = onLeave;
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    applyHomepageLocaleChrome();
     setupHeroTagline();
     setupHomeLearnSpotlight();
     setupHomeGameSpotlight();
@@ -1975,5 +2337,15 @@
         }
       });
     }
+  });
+
+  var lastLocale = getHomeLocale();
+  document.addEventListener("clw:locale-changed", function (event) {
+    var nextLocale = event && event.detail && event.detail.locale ? String(event.detail.locale) : getHomeLocale();
+    if (nextLocale !== "zh" && nextLocale !== "en") nextLocale = getHomeLocale();
+    if (nextLocale === lastLocale) return;
+    lastLocale = nextLocale;
+    applyHomepageLocaleChrome();
+    setupHeroTagline();
   });
 })();
