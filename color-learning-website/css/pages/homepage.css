@@ -395,6 +395,7 @@ main.page-home {
 .home-learn-model__range {
   width: 100%;
   accent-color: var(--theme-stop-2);
+  touch-action: pan-x;
 }
 
 .home-learn-model__value {
