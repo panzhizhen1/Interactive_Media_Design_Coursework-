@@ -1,12 +1,42 @@
 // Learning page scripts
 
-import { contentData } from './learn/learning-content.js';
-import { ColorPicker } from './learn/interaction-color-picker.js';
-import { VisualExample } from './learn/ineraction-visual-example.js';
-import { InteractionTools } from './learn/interaction-tools.js';
-
 (function() {
   'use strict';
+
+  let contentData = null;
+  let ColorPicker = null;
+  let VisualExample = null;
+  let InteractionTools = null;
+
+  async function loadContentModule() {
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    if (currentPage === 'learning-zh.html') {
+      const module = await import('./learn-zh/learning-content.js');
+      contentData = module.contentData;
+      
+      const colorPickerModule = await import('./learn/interaction-color-picker.js');
+      ColorPicker = colorPickerModule.ColorPicker;
+      
+      const visualExampleModule = await import('./learn/ineraction-visual-example.js');
+      VisualExample = visualExampleModule.VisualExample;
+      
+      const interactionToolsModule = await import('./learn/interaction-tools.js');
+      InteractionTools = interactionToolsModule.InteractionTools;
+    } else {
+      const module = await import('./learn/learning-content.js');
+      contentData = module.contentData;
+      
+      const colorPickerModule = await import('./learn/interaction-color-picker.js');
+      ColorPicker = colorPickerModule.ColorPicker;
+      
+      const visualExampleModule = await import('./learn/ineraction-visual-example.js');
+      VisualExample = visualExampleModule.VisualExample;
+      
+      const interactionToolsModule = await import('./learn/interaction-tools.js');
+      InteractionTools = interactionToolsModule.InteractionTools;
+    }
+  }
 
   // DOM elements
   const sidebar = document.getElementById('learning-sidebar');
@@ -50,7 +80,9 @@ import { InteractionTools } from './learn/interaction-tools.js';
   }
 
   // Initialize
-  function init() {
+  async function init() {
+    await loadContentModule();
+    
     setupSidebarToggle();
     setupAccordionMenu();
     setupNavigationLinks();
