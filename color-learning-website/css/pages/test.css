@@ -366,6 +366,18 @@ main.page-test.page-test-results {
   align-self: start;
 }
 
+main.page-test[data-test-page="map"] .test-map-header-card,
+main.page-test[data-test-page="map"] .test-map-shell,
+main.page-test[data-test-page="map"] .test-map-page .test-sidebar-card {
+  border: none;
+}
+
+main.page-test[data-test-page="results"] .results-attempt-bar,
+main.page-test[data-test-page="results"] .results-stars-section,
+main.page-test[data-test-page="results"] .results-split .results-card {
+  border: none;
+}
+
 .test-map-page {
   min-width: 0;
 }
@@ -542,7 +554,6 @@ a.test-stat--link:focus-visible {
   gap: 0.54rem;
   align-items: center;
   padding-top: 0.99rem;
-  border-top: 1px solid var(--test-border);
 }
 
 .test-map-node__body {
@@ -794,7 +805,7 @@ a.test-stat--link:focus-visible {
 .quiz-shell--workspace {
   gap: 0;
   margin: calc(-1 * clamp(0.9rem, 1.8vw, 1.35rem));
-  border-radius: 1.5rem;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: #ffffff;
 }
