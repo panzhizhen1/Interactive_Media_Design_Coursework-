@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy &amp; Data Policy — Color Learning</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <style>
+      :root {
+        --pp-max: 40rem;
+        --pp-muted: var(--color-text-muted, #64748b);
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        font-family: var(--font-sans, system-ui, sans-serif);
+        background: linear-gradient(180deg, #fffdf8 0%, var(--color-surface, #f8fafc) 40%);
+        color: var(--color-text, #0f172a);
+        line-height: 1.55;
+      }
+      .pp-wrap {
+        max-width: var(--pp-max);
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 3rem;
+      }
+      .pp-back {
+        display: inline-block;
+        margin-bottom: 1.25rem;
+        font-size: var(--text-sm, 0.875rem);
+        font-weight: 600;
+        color: var(--color-primary, #ea580c);
+        text-decoration: none;
+        transition: color 0.15s ease, opacity 0.15s ease;
+      }
+      .pp-back:hover {
+        color: var(--color-primary-hover, #c2410c);
+      }
+      .pp-back:focus-visible {
+        outline: 2px solid var(--color-accent, #fb923c);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+      .pp-title {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.35rem, 4vw, 1.65rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      .pp-updated {
+        margin: 0 0 1.75rem;
+        font-size: var(--text-xs, 0.75rem);
+        color: var(--pp-muted);
+      }
+      .pp-stack {
+        display: block;
+      }
+      .pp-block {
+        padding: 1.15rem 1.2rem;
+        border-radius: 1rem;
+        border: 1px solid color-mix(in srgb, var(--color-primary, #ea580c) 28%, var(--color-border, #e2e8f0));
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+      }
+      .pp-block p {
+        margin: 0 0 0.65rem;
+        font-size: var(--text-sm, 0.875rem);
+      }
+      .pp-block p:last-child {
+        margin-bottom: 0;
+      }
+      .pp-block ul {
+        margin: 0.35rem 0 0;
+        padding-left: 1.2rem;
+        font-size: var(--text-sm, 0.875rem);
+      }
+      .pp-block li {
+        margin-bottom: 0.35rem;
+      }
+      /* Only the language chosen when opening the link (?lang=) is shown */
+      [data-policy-lang="en"] .pp-block--zh {
+        display: none;
+      }
+      [data-policy-lang="zh"] .pp-block--en {
+        display: none;
+      }
+      .pp-note {
+        margin: 0;
+        font-size: var(--text-xs, 0.75rem);
+        color: var(--pp-muted);
+      }
+    </style>
+    <script>
+      (function () {
+        var q = new URLSearchParams(window.location.search).get("lang");
+        window.__CLW_POLICY_LANG__ = q === "zh" ? "zh" : "en";
+        document.documentElement.lang = window.__CLW_POLICY_LANG__;
+      })();
+    </script>
+  </head>
+  <body data-policy-lang="en">
+    <script>
+      (function () {
+        var lang = window.__CLW_POLICY_LANG__ || "en";
+        document.body.setAttribute("data-policy-lang", lang);
+      })();
+    </script>
+    <div class="pp-wrap">
+      <a class="pp-back" href="index.html">← Back to Home</a>
+      <h1 class="pp-title">Privacy &amp; Data Policy</h1>
+      <p class="pp-updated"></p>
+
+      <div class="pp-stack">
+        <article class="pp-block pp-block--en" lang="en">
+          <p>
+            This site is a student coursework project about learning colour. This page explains, in plain language,
+            what data exists in the project and how it is used.
+          </p>
+          <p><strong>Accounts and profiles (in your browser)</strong></p>
+          <ul>
+            <li>Demo “log in” uses accounts stored in <strong>localStorage</strong> on your device (username, password for local verification, display name, avatar colour, learning stats). It is not a cloud login system.</li>
+            <li>If you use “Log out” or another browser, that device will not share the same stored data unless you copy it yourself.</li>
+          </ul>
+          <p><strong>Preferences (in your browser)</strong></p>
+          <ul>
+            <li>Settings such as sound effects, interface language, colour mode, and font size are saved in localStorage so the site can remember your choices.</li>
+          </ul>
+          <p><strong>Community page (optional cloud sync)</strong></p>
+          <ul>
+            <li>If the maintainer enables Supabase in <code>js/supabase-config.js</code>, posts you publish can sync there: text you write, tag, chosen colours / palette, optional image (may be stored as a data URL), author name, likes, timestamps, and related activity or report records as designed for the assignment demo.</li>
+            <li>The coursework SQL schema is intentionally open for demonstration; treat shared posts as <strong>public</strong> and do not submit sensitive personal information.</li>
+            <li>If Supabase is not configured, community data stays only in your browser’s localStorage pattern used elsewhere in the project.</li>
+          </ul>
+          <p><strong>No extra analytics</strong></p>
+          <p class="pp-note">
+            This simple static project does not embed third-party advertising or analytics trackers beyond what your browser normally sends when you request pages, and what you choose to submit in forms.
+          </p>
+        </article>
+
+        <article class="pp-block pp-block--zh" lang="zh-Hans">
+          <p>本站为色彩学习相关的课程作业项目。本页用简明中文说明项目中会有哪些数据、以及大致如何被使用。</p>
+          <p><strong>账号与个人资料（仅在您的浏览器中）</strong></p>
+          <ul>
+            <li>演示用「登录」把账号信息存放在本机 <strong>localStorage</strong>（用户名、用于本地校验的密码、显示名、头像色、学习统计等），并非云端统一账号体系。</li>
+            <li>退出登录或使用另一台设备/浏览器时，不会自动与您本机的数据同步，除非您自行迁移数据。</li>
+          </ul>
+          <p><strong>偏好设置（仅在您的浏览器中）</strong></p>
+          <ul>
+            <li>音效、界面语言、颜色模式、字体大小等设置保存在 localStorage，以便下次访问时还原您的选择。</li>
+          </ul>
+          <p><strong>社区（可选云端同步）</strong></p>
+          <ul>
+            <li>若维护者在 <code>js/supabase-config.js</code> 中配置了 Supabase，您发布的帖子可能同步至该服务，一般包括您填写的文字、标签、所选颜色/色板、可选图片（可能以 data URL 形式存储）、作者名、点赞、时间戳，以及作业演示所设计的活动或举报等相关记录。</li>
+            <li>课程演示用的数据库权限较为宽松；请把公开发布内容视为<strong>公开信息</strong>，不要提交真实敏感个人信息。</li>
+            <li>若未配置 Supabase，社区数据仍按项目中其他页所使用的方式主要保留在浏览器本地。</li>
+          </ul>
+          <p><strong>分析与广告</strong></p>
+          <p class="pp-note">本项目为静态作业站点，未额外嵌入第三方广告或统计脚本；除浏览器访问网页时的常规请求外，只有您在表单中主动填写并提交的内容会作为数据被保存（与上节说明一致）。</p>
+        </article>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var lang = window.__CLW_POLICY_LANG__ || "en";
+        var back = document.querySelector(".pp-back");
+        var title = document.querySelector(".pp-title");
+        var updated = document.querySelector(".pp-updated");
+        if (back) {
+          back.textContent = lang === "zh" ? "← 返回首页" : "← Back to Home";
+          back.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.close();
+            window.setTimeout(function () {
+              window.location.assign(back.getAttribute("href") || "index.html");
+            }, 80);
+          });
+        }
+        if (title) {
+          title.textContent = lang === "zh" ? "隐私与数据政策" : "Privacy & Data Policy";
+        }
+        if (updated) {
+          updated.textContent =
+            lang === "zh"
+              ? "色彩学习课程项目网站的简要说明。"
+              : "Short notice for the Color Learning coursework site.";
+        }
+        document.title =
+          lang === "zh" ? "隐私与数据政策 — 色彩学习" : "Privacy & Data Policy — Color Learning";
+      })();
+    </script>
+  </body>
+</html>

@@ -317,39 +317,71 @@
     }
   }
 
+  function authTr(key) {
+    if (window.CLWLocale && typeof CLWLocale.translate === "function") {
+      return CLWLocale.translate(key, "global");
+    }
+    return key;
+  }
+
+  function authPolicyLangParam() {
+    if (window.CLWLocale && typeof CLWLocale.getLocale === "function" && CLWLocale.getLocale() === "zh") {
+      return "zh";
+    }
+    return "en";
+  }
+
+  function removeExistingAuthModals() {
+    document.querySelectorAll(".auth-modal-backdrop").forEach(function (el) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    });
+  }
+
   function createLoginModal(initialMode) {
+    removeExistingAuthModals();
     var backdrop = document.createElement("div");
     backdrop.className = "auth-modal-backdrop";
     backdrop.innerHTML = [
       '<div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">',
       '  <button type="button" class="auth-modal__close" data-auth-cancel aria-label="Close account dialog">x</button>',
       '  <div class="auth-modal__hero">',
-      '    <p class="auth-modal__eyebrow">Color Learning</p>',
+      '    <p class="auth-modal__eyebrow" data-auth-eyebrow>Color Learning</p>',
       '    <h2 class="auth-modal__title" id="auth-title">Log in</h2>',
       '    <p class="auth-modal__desc" data-auth-desc>Access your saved progress, posts, and activity in this browser.</p>',
       "  </div>",
-      '  <div class="auth-mode-switch" role="tablist" aria-label="Auth mode">',
+      '  <div class="auth-mode-switch" role="tablist" data-auth-mode-tabs aria-label="Log in or create account">',
       '    <button type="button" class="auth-mode-switch__btn is-active" data-auth-mode-btn="signin">Log in</button>',
       '    <button type="button" class="auth-mode-switch__btn" data-auth-mode-btn="signup">Create account</button>',
       "  </div>",
       '  <form data-auth-form>',
       '    <div class="auth-modal__field">',
-      '      <label class="auth-modal__label" for="auth-username">Username</label>',
+      '      <label class="auth-modal__label" for="auth-username" data-auth-label-username>Username</label>',
       '      <input class="auth-modal__input" id="auth-username" name="username" placeholder="Enter your username" autocomplete="username" required />',
       "    </div>",
       '    <div class="auth-modal__field">',
-      '      <label class="auth-modal__label" for="auth-password">Password</label>',
+      '      <label class="auth-modal__label" for="auth-password" data-auth-label-password>Password</label>',
       '      <input class="auth-modal__input" id="auth-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required />',
       "    </div>",
       '    <div class="auth-modal__field auth-modal__field--signup" hidden>',
-      '      <label class="auth-modal__label" for="auth-password-confirm">Confirm Password</label>',
+      '      <label class="auth-modal__label" for="auth-password-confirm" data-auth-label-confirm>Confirm Password</label>',
       '      <input class="auth-modal__input" id="auth-password-confirm" name="passwordConfirm" type="password" placeholder="Re-enter your password" autocomplete="new-password" />',
       "    </div>",
       '    <div class="auth-modal__field auth-modal__field--signup" hidden>',
-      '      <label class="auth-modal__label" for="auth-display-name">Display Name (optional)</label>',
+      '      <label class="auth-modal__label" for="auth-display-name" data-auth-label-display>Display Name (optional)</label>',
       '      <input class="auth-modal__input" id="auth-display-name" name="displayName" placeholder="How should others see your name?" autocomplete="nickname" />',
       "    </div>",
       '    <p class="auth-help" data-auth-help>Demo accounts: studentA / studentB / studentC</p>',
+      '    <div class="auth-modal__privacy">',
+      '      <label class="auth-modal__privacy-label">',
+      '        <input type="checkbox" class="auth-modal__privacy-check" data-auth-privacy-consent />',
+      '        <span class="auth-modal__privacy-text">',
+      '          <span data-auth-privacy-before></span>',
+      '          <a href="privacy-policy.html?lang=en" class="auth-modal__privacy-link" data-auth-privacy-policy-link target="_blank" rel="noopener noreferrer">Privacy & Data Policy</a>',
+      '          <span data-auth-privacy-after></span>',
+      "        </span>",
+      "      </label>",
+      "    </div>",
+      '    <p class="auth-privacy-error" data-auth-privacy-error hidden></p>',
       '    <p class="auth-message" data-auth-message></p>',
       '    <div class="auth-modal__actions">',
       '      <button type="button" class="auth-modal__btn auth-modal__btn--ghost" data-auth-cancel>Cancel</button>',
@@ -362,10 +394,17 @@
     var mode = "signin";
     var form = backdrop.querySelector("[data-auth-form]");
     var message = backdrop.querySelector("[data-auth-message]");
+    var privacyError = backdrop.querySelector("[data-auth-privacy-error]");
+    var consentCheckbox = backdrop.querySelector("[data-auth-privacy-consent]");
+    var privacyLink = backdrop.querySelector("[data-auth-privacy-policy-link]");
+    var privacyBefore = backdrop.querySelector("[data-auth-privacy-before]");
+    var privacyAfter = backdrop.querySelector("[data-auth-privacy-after]");
     var desc = backdrop.querySelector("[data-auth-desc]");
     var help = backdrop.querySelector("[data-auth-help]");
+    var eyebrow = backdrop.querySelector("[data-auth-eyebrow]");
+    var modeTabs = backdrop.querySelector("[data-auth-mode-tabs]");
     var submitBtn = backdrop.querySelector("[data-auth-submit]");
-    var cancelBtn = backdrop.querySelector("[data-auth-cancel]");
+    var closeBtn = backdrop.querySelector(".auth-modal__close");
     var usernameInput = backdrop.querySelector("#auth-username");
     var passwordInput = backdrop.querySelector("#auth-password");
     var confirmInput = backdrop.querySelector("#auth-password-confirm");
@@ -373,6 +412,60 @@
     var modeButtons = backdrop.querySelectorAll("[data-auth-mode-btn]");
     var signupFields = backdrop.querySelectorAll(".auth-modal__field--signup");
     var title = backdrop.querySelector("#auth-title");
+
+    function clearPrivacyError() {
+      if (!privacyError) return;
+      privacyError.textContent = "";
+      privacyError.hidden = true;
+    }
+
+    function syncAuthModalLocale() {
+      var signup = mode === "signup";
+      if (closeBtn) closeBtn.setAttribute("aria-label", authTr("Close account dialog"));
+      if (eyebrow) eyebrow.textContent = authTr("Color Learning");
+      if (modeTabs) modeTabs.setAttribute("aria-label", authTr("Log in or create account"));
+      modeButtons.forEach(function (btn) {
+        var m = btn.getAttribute("data-auth-mode-btn");
+        btn.textContent = m === "signup" ? authTr("Create account") : authTr("Log in");
+      });
+      if (title) title.textContent = signup ? authTr("Create account") : authTr("Log in");
+      if (desc) {
+        desc.textContent = signup
+          ? authTr("Create a local account to save progress, palettes, and community activity in this browser.")
+          : authTr("Access your saved progress, posts, and activity in this browser.");
+      }
+      if (help) {
+        help.textContent = signup
+          ? authTr("Tip: username can use letters, numbers, underscore.")
+          : authTr("Demo accounts: studentA / studentB / studentC");
+      }
+      if (submitBtn) submitBtn.textContent = signup ? authTr("Create account") : authTr("Log in");
+
+      var labUser = backdrop.querySelector("[data-auth-label-username]");
+      var labPass = backdrop.querySelector("[data-auth-label-password]");
+      var labConfirm = backdrop.querySelector("[data-auth-label-confirm]");
+      var labDisplay = backdrop.querySelector("[data-auth-label-display]");
+      if (labUser) labUser.textContent = authTr("Username");
+      if (labPass) labPass.textContent = authTr("Password");
+      if (labConfirm) labConfirm.textContent = authTr("Confirm Password");
+      if (labDisplay) labDisplay.textContent = authTr("Display Name (optional)");
+
+      if (usernameInput) usernameInput.setAttribute("placeholder", authTr("Enter your username"));
+      if (passwordInput) passwordInput.setAttribute("placeholder", authTr("Enter your password"));
+      if (confirmInput) confirmInput.setAttribute("placeholder", authTr("Re-enter your password"));
+      if (displayNameInput) displayNameInput.setAttribute("placeholder", authTr("How should others see your name?"));
+
+      if (privacyBefore) privacyBefore.textContent = authTr("I have read and agree to the ");
+      if (privacyAfter) privacyAfter.textContent = authPolicyLangParam() === "zh" ? "。" : ".";
+      if (privacyLink) {
+        privacyLink.textContent = authTr("Privacy & Data Policy");
+        privacyLink.setAttribute("href", "privacy-policy.html?lang=" + authPolicyLangParam());
+      }
+
+      backdrop.querySelectorAll(".auth-modal__actions [data-auth-cancel]").forEach(function (btn) {
+        btn.textContent = authTr("Cancel");
+      });
+    }
 
     function applyMode(nextMode) {
       mode = nextMode === "signup" ? "signup" : "signin";
@@ -384,23 +477,16 @@
       signupFields.forEach(function (el) {
         el.hidden = !signup;
       });
-      if (title) title.textContent = signup ? "Create account" : "Log in";
-      if (desc) {
-        desc.textContent = signup
-          ? "Create a local account to save progress, palettes, and community activity in this browser."
-          : "Access your saved progress, posts, and activity in this browser.";
-      }
-      if (help) {
-        help.textContent = signup
-          ? "Tip: username can use letters, numbers, underscore."
-          : "Demo accounts: studentA / studentB / studentC";
-      }
-      submitBtn.textContent = signup ? "Create account" : "Log in";
+      if (consentCheckbox) consentCheckbox.checked = false;
+      clearPrivacyError();
       message.textContent = "";
+      syncAuthModalLocale();
     }
 
-    cancelBtn.addEventListener("click", function () {
-      closeModal(backdrop);
+    backdrop.querySelectorAll("[data-auth-cancel]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        closeModal(backdrop);
+      });
     });
 
     backdrop.addEventListener("click", function (event) {
@@ -408,6 +494,12 @@
         closeModal(backdrop);
       }
     });
+
+    if (consentCheckbox) {
+      consentCheckbox.addEventListener("change", function () {
+        if (consentCheckbox.checked) clearPrivacyError();
+      });
+    }
 
     modeButtons.forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -417,38 +509,49 @@
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
+      clearPrivacyError();
+      message.textContent = "";
+
+      if (!consentCheckbox || !consentCheckbox.checked) {
+        if (privacyError) {
+          privacyError.textContent = authTr("Please agree to the Privacy & Data Policy before continuing.");
+          privacyError.hidden = false;
+        }
+        return;
+      }
+
       var username = usernameInput.value;
       var password = passwordInput.value;
       var result;
 
       if (mode === "signup") {
         if (password !== confirmInput.value) {
-          message.textContent = "Password confirmation does not match.";
+          message.textContent = authTr("Password confirmation does not match.");
           return;
         }
         result = createAccount(username, password, displayNameInput.value);
         if (!result.ok) {
-          message.textContent = result.message;
+          message.textContent = authTr(result.message);
           return;
         }
         setCurrentUser(result.username);
         ensureUser(result.username);
         updateAvatarUI();
         closeModal(backdrop);
-        alert("Account created and logged in as " + result.username + ".");
+        alert(authTr("Account created and logged in as USER.").replace("USER", result.username));
         return;
       }
 
       result = verifyCredentials(username, password);
       if (!result.ok) {
-        message.textContent = result.message;
+        message.textContent = authTr(result.message);
         return;
       }
       setCurrentUser(result.username);
       ensureUser(result.username);
       updateAvatarUI();
       closeModal(backdrop);
-      alert("Logged in as " + result.username + ".");
+      alert(authTr("Logged in as USER.").replace("USER", result.username));
     });
 
     document.body.appendChild(backdrop);
