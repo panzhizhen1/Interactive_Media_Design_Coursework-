@@ -143,6 +143,11 @@
       '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--primary" data-profile-settings-signup data-profile-auth-when="guest" hidden>' + tr("Create account") + "</button>" +
       "      </div>" +
       "    </section>" +
+      '    <div class="profile-settings-privacy-row">' +
+      '      <a class="profile-settings-privacy-link" href="privacy-policy.html" data-privacy-policy-link target="_blank" rel="noopener noreferrer">' +
+      tr("Privacy & Data Policy") +
+      "</a>" +
+      "    </div>" +
       '    <div data-clw-pref-panel="settings">' +
       '      <div class="profile-settings-row">' +
       '        <div class="profile-settings-row__icon profile-settings-row__icon--sound">' +
@@ -256,8 +261,17 @@
     if (btnUp) btnUp.hidden = p.loggedIn;
   }
 
+  function updatePrivacyPolicyLinkHref() {
+    if (!rootEl) return;
+    var a = rootEl.querySelector("[data-privacy-policy-link]");
+    if (!a) return;
+    var lang = prefState.language === "zh" ? "zh" : "en";
+    a.setAttribute("href", "privacy-policy.html?lang=" + lang);
+  }
+
   function applyPrefStateToDom() {
     if (!rootEl) return;
+    updatePrivacyPolicyLinkHref();
     var soundBtn = rootEl.querySelector('[data-clw-pref="sound-effects"]');
     if (soundBtn) {
       soundBtn.setAttribute("aria-checked", prefState.soundEffects ? "true" : "false");
@@ -288,10 +302,8 @@
   function rebuildPanelContent() {
     if (!rootEl) return;
     rootEl.innerHTML = buildMarkup();
-    delete rootEl.dataset.bound;
     backdropEl = rootEl.querySelector("[data-profile-settings-backdrop]");
     panelEl = rootEl.querySelector("[data-profile-settings-panel]");
-    bindPanelEvents();
     refreshProfileCard();
     applyPrefStateToDom();
     if (isOpen) {
@@ -445,12 +457,14 @@
         if (window.CLWAuth && typeof CLWAuth.openLoginModal === "function") {
           CLWAuth.openLoginModal({ mode: "signin" });
         }
+        return;
       }
       if (t.closest("[data-profile-settings-signup]")) {
         closePanel();
         if (window.CLWAuth && typeof CLWAuth.openLoginModal === "function") {
           CLWAuth.openLoginModal({ mode: "signup" });
         }
+        return;
       }
     });
   }
