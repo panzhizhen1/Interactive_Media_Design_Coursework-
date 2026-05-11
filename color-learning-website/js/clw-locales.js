@@ -57,6 +57,9 @@
     if (scope === "test" && window.CLW_TEST_ZH && typeof window.CLW_TEST_ZH === "object") {
       return window.CLW_TEST_ZH;
     }
+    if (scope === "game" && window.CLW_GAME_ZH && typeof window.CLW_GAME_ZH === "object") {
+      return window.CLW_GAME_ZH;
+    }
     if (window.CLW_GLOBAL_ZH && typeof window.CLW_GLOBAL_ZH === "object") {
       return window.CLW_GLOBAL_ZH;
     }
@@ -75,7 +78,7 @@
     var primary = getZhTable(scope || "global");
     var out = primary[s];
     if (typeof out === "string" && out.length) return out;
-    if (scope === "test") {
+    if (scope === "test" || scope === "game") {
       var globalOut = getZhTable("global")[s];
       if (typeof globalOut === "string" && globalOut.length) return globalOut;
     }
