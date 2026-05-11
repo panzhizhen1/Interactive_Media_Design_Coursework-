@@ -2,7 +2,7 @@
 
 main.page-home {
   max-width: var(--content-max);
-  margin: var(--space-md) auto;
+  margin: clamp(2.4rem, 10vh, 6rem) auto var(--space-md);
   padding: var(--space-md);
   background: transparent;
   box-shadow: none;
@@ -27,8 +27,9 @@ main.page-home {
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 0.46rem;
+  gap: clamp(0.72rem, 2.5vh, 1.2rem);
   padding: var(--space-md) var(--space-lg);
+  margin-bottom: clamp(0.9rem, 4vh, 2.4rem);
   box-shadow: none;
 }
 
@@ -36,7 +37,7 @@ main.page-home {
   margin: 0;
   width: 100%;
   max-width: none;
-  font-size: clamp(2.8rem, 8.2vw, 6.8rem);
+  font-size: clamp(2.33rem, 6.65vw, 5.42rem);
   font-weight: 700;
   font-family: var(--home-title-font);
   line-height: 1.02;
@@ -51,7 +52,7 @@ main.page-home {
   width: 100%;
   text-align: right;
   color: #4b5563;
-  font-size: clamp(0.72rem, 1.75vw, 1.34rem);
+  font-size: clamp(0.78rem, 1.85vw, 1.38rem);
   font-weight: 500;
   line-height: 1.28;
 }
@@ -70,7 +71,18 @@ main.page-home {
     #3b82f6 83%,
     #a855f7 100%
   );
+  background-size: 220% 100%;
+  animation: homeHeroDividerFlow 5s linear infinite;
   opacity: 0.62;
+}
+
+@keyframes homeHeroDividerFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 .home-hero__word {
@@ -81,7 +93,7 @@ main.page-home {
 .home-hero__letter {
   display: inline-block;
   position: relative;
-  color: hsl(var(--letter-hue, 0) 95% 58%);
+  color: var(--letter-color, hsl(var(--letter-hue, 0) 95% 58%));
   transform-origin: center 78%;
   transition: transform 180ms ease;
   will-change: transform;
@@ -167,16 +179,22 @@ main.page-home {
 
 @media (max-width: 40rem) {
   .home-hero__tagline {
-    font-size: clamp(1.6rem, 7.2vw, 3.1rem);
+    font-size: clamp(1.5rem, 6.8vw, 2.9rem);
     line-height: 1.08;
   }
 
   .home-hero__slogan {
-    font-size: clamp(0.68rem, 3.2vw, 1rem);
+    font-size: clamp(0.82rem, 3.84vw, 1.2rem);
   }
 
   .home-hero__divider {
     height: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero__divider {
+    animation: none;
   }
 }
 
@@ -229,6 +247,7 @@ main.page-home {
 .home-card--game-spotlight,
 .home-card--community-spotlight {
   padding-top: var(--home-spotlight-title-top-gap);
+  border-radius: 1.25rem;
 }
 
 .home-card__text--learn {
@@ -256,21 +275,15 @@ main.page-home {
   justify-self: center;
   min-height: clamp(11.6rem, 26vw, 13.8rem);
   border-radius: 0.88rem;
-  box-shadow: 0 3px 12px rgba(16, 35, 60, 0.08);
+  border: 1.5px solid color-mix(in srgb, var(--theme-stop-2) 42%, #d8dee9);
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
   padding: 0.96rem 0.68rem 0.52rem;
   overflow: hidden;
 }
 
 .home-learn__note::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-color: #f4eee6;
-  background-image: url("../../assets/images/learn-note-bg.png");
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  display: none;
 }
 
 .home-learn__note--interactive {

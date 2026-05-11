@@ -87,7 +87,17 @@
   }
 
   document.addEventListener("DOMContentLoaded", async function () {
-    initFluidBackground();
+    var fluidInitPromise = initFluidBackground();
+    var currentPage = window.location.pathname.split("/").pop() || "index.html";
+    if (currentPage === "index.html") {
+      fluidInitPromise
+        .then(function () {
+          return loadScriptOnce("js/home-fluid-intro.js");
+        })
+        .catch(function (error) {
+          console.warn("[main.js] home fluid intro init failed:", error);
+        });
+    }
     await loadFragment("#site-navbar", "components/navbar.html", EMBEDDED_NAVBAR);
     await loadFragment("#site-footer", "components/footer.html", EMBEDDED_FOOTER);
 

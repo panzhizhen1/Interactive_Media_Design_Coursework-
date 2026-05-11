@@ -7,7 +7,7 @@
   var HOME_ZH = {
     "Home — Color Learning": "首页 — 色彩学习",
     "Explore the world of colors!": "探索色彩的世界！",
-    "Learn color. See beauty. Think in systems.": "从色彩感知到色彩原理，轻松建立你的色彩理解。",
+    "Learn color through visuals, games, quizzes, and challenges.": "用可视化、游戏、测验与挑战学习色彩。",
     "Learn Colors the Smart Way": "色彩知识随手学",
     "Learn a Color Concept!": "每天认识一个色彩概念",
     "See Color in Action!": "拖一拖，理解颜色如何变化",
@@ -128,6 +128,10 @@
     return txHome(source);
   }
 
+  function getLearningPagePath() {
+    return getHomeLocale() === "zh" ? "learning-zh.html" : "learning.html";
+  }
+
   function setLocalizedText(el, baseText, scope) {
     if (!el) return;
     var base = String(baseText == null ? "" : baseText);
@@ -172,7 +176,7 @@
     var taglineEl = document.querySelector(".home-hero__tagline");
     if (taglineEl) taglineEl.textContent = txHome("Explore the world of colors!");
     var sloganEl = document.querySelector(".home-hero__slogan");
-    if (sloganEl) sloganEl.textContent = txHome("Learn color. See beauty. Think in systems.");
+    if (sloganEl) sloganEl.textContent = txHome("Learn color through visuals, games, quizzes, and challenges.");
 
     var learnTitleEl = document.querySelector("[data-home-learn-title]");
     if (learnTitleEl) learnTitleEl.textContent = txHome("Learn Colors the Smart Way");
@@ -801,7 +805,8 @@
   }
 
   function loadLearnTopicCatalog() {
-    return fetch("js/pages/learn/learning-content.js")
+    var sourcePath = getHomeLocale() === "zh" ? "js/pages/learn-zh/learning-content.js" : "js/pages/learn/learning-content.js";
+    return fetch(sourcePath)
       .then(function (res) {
         if (!res.ok) throw new Error("Failed to load learning content");
         return res.text();
@@ -864,7 +869,7 @@
 
     function setLearnLinkInteractiveLock(lock) {
       if (lock) {
-        if (!interactiveSavedHref) interactiveSavedHref = linkEl.getAttribute("href") || "learning.html#basic-color-models";
+        if (!interactiveSavedHref) interactiveSavedHref = linkEl.getAttribute("href") || (getLearningPagePath() + "#basic-color-models");
         return;
       }
       if (interactiveSavedHref) {
@@ -1122,7 +1127,7 @@
       updateModelPreview();
 
       setLocalizedText(metaEl, "Learning Module · Interactive · Color Models");
-      interactiveSavedHref = "learning.html?from=home-learn&focusScope=parent&focusParent=" + encodeURIComponent("Colour Models") + "#basic-color-models";
+      interactiveSavedHref = getLearningPagePath() + "?from=home-learn&focusScope=parent&focusParent=" + encodeURIComponent("Colour Models") + "#basic-color-models";
       linkEl.setAttribute("href", interactiveSavedHref);
       linkEl.setAttribute("aria-label", txHome("Open Learn module interactive color model"));
       return true;
@@ -1153,7 +1158,7 @@
       var query = ["from=home-learn"];
       if (parentText) query.push("focusParent=" + encodeURIComponent(clipWithEllipsis(parentText, 90)));
       if (childText) query.push("focusChild=" + encodeURIComponent(clipWithEllipsis(childText, 90)));
-      return "learning.html?" + query.join("&") + "#" + hashKey;
+      return getLearningPagePath() + "?" + query.join("&") + "#" + hashKey;
     }
 
     titleEl.textContent = txHome("Learn Colors the Smart Way");
@@ -1178,7 +1183,7 @@
       .catch(function () {
         setLearnSlogan(false);
         renderLearnSummary(null);
-        interactiveSavedHref = "learning.html#overview";
+        interactiveSavedHref = getLearningPagePath() + "#overview";
         linkEl.href = interactiveSavedHref;
       });
   }
@@ -2276,15 +2281,62 @@
     }
 
     var animationId = 0;
-    var speedPxPerSec = 100;
+    var speedPxPerSec = 1152;
     var hueSpreadPx = 16;
+    var dividerPaletteStops = [
+      "#ef4444",
+      "#f97316",
+      "#eab308",
+      "#22c55e",
+      "#06b6d4",
+      "#3b82f6",
+      "#a855f7"
+    ];
+
+    function hexToRgbChannels(hex) {
+      var value = String(hex || "").replace("#", "");
+      return {
+        r: parseInt(value.slice(0, 2), 16) || 0,
+        g: parseInt(value.slice(2, 4), 16) || 0,
+        b: parseInt(value.slice(4, 6), 16) || 0
+      };
+    }
+
+    function rgbChannelsToHex(r, g, b) {
+      return (
+        "#" +
+        [r, g, b]
+          .map(function (channel) {
+            var clamped = Math.max(0, Math.min(255, Math.round(channel)));
+            return clamped.toString(16).padStart(2, "0");
+          })
+          .join("")
+      );
+    }
+
+    function getDividerPaletteColor(progress) {
+      var p = ((Number(progress) % 1) + 1) % 1;
+      var stopCount = dividerPaletteStops.length;
+      if (stopCount < 2) return dividerPaletteStops[0] || "#ef4444";
+      var scaled = p * stopCount;
+      var indexA = Math.floor(scaled) % stopCount;
+      var indexB = (indexA + 1) % stopCount;
+      var t = scaled - Math.floor(scaled);
+      var a = hexToRgbChannels(dividerPaletteStops[indexA]);
+      var b = hexToRgbChannels(dividerPaletteStops[indexB]);
+      return rgbChannelsToHex(
+        a.r + (b.r - a.r) * t,
+        a.g + (b.g - a.g) * t,
+        a.b + (b.b - a.b) * t
+      );
+    }
 
     function animateBand(timestamp) {
       var flow = (timestamp / 1000) * speedPxPerSec;
       letters.forEach(function (letter) {
         var x = parseFloat(letter.style.getPropertyValue("--letter-x")) || 0;
-        var hue = (flow / hueSpreadPx + x / hueSpreadPx) % 360;
-        letter.style.setProperty("--letter-hue", String(hue));
+        var progress = (flow / hueSpreadPx + x / hueSpreadPx) / 360;
+        letter.style.setProperty("--letter-color", getDividerPaletteColor(progress));
       });
       animationId = window.requestAnimationFrame(animateBand);
       tagline._clwHomeTaglineRaf = animationId;
@@ -2395,5 +2447,6 @@
     lastLocale = nextLocale;
     applyHomepageLocaleChrome();
     setupHeroTagline();
+    setupHomeLearnSpotlight();
   });
 })();
