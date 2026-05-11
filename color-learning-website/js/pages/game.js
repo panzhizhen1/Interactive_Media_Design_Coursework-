@@ -141,6 +141,34 @@ ctx.beginPath();ctx.moveTo(w*.18,h*.94);ctx.lineTo(w*.82,h*.94);ctx.stroke();
 }}
 ];
 
+function applyReplacements(text, replacements) {
+  if (!text || !replacements) return text;
+  Object.keys(replacements).forEach(function (name) {
+    text = text.replace(new RegExp("\\{" + name + "\\}", "g"), replacements[name]);
+  });
+  return text;
+}
+
+function tx(str, replacements) {
+  if (str == null) return "";
+  var text = String(str);
+  if (window.CLWLocale && typeof CLWLocale.translate === "function") {
+    text = CLWLocale.translate(text, "game");
+  }
+  return applyReplacements(text, replacements);
+}
+
+function translateText(element, key, replacements) {
+  if (!element) return;
+  element.textContent = tx(key, replacements);
+}
+
+function updateHtmlLang() {
+  if (window.CLWLocale && typeof CLWLocale.getLocale === "function") {
+    document.documentElement.lang = CLWLocale.getLocale() === "zh" ? "zh-CN" : "en";
+  }
+}
+
 const galleryView=document.getElementById('gallery-view');
 const editorView=document.getElementById('editor-view');
 const editorTitle=document.getElementById('editor-title');
@@ -161,6 +189,26 @@ const challengeSampleCanvas=document.getElementById('challenge-sample-canvas');
 const challengeSampleCtx=challengeSampleCanvas.getContext('2d');
 const submitChallengeBtn=document.getElementById('submit-challenge');
 const challengeScoreEl=document.getElementById('challenge-score');
+const pageTitle=document.querySelector('.page-title');
+const introCopy=document.querySelector('.game-intro .lead');
+const modeLabel=document.querySelector('.mode-picker > span');
+const gameModeOptions=gameModeSelect ? gameModeSelect.options : [];
+const editorBackText=backBtn ? backBtn.querySelector('span:last-child') : null;
+const editorHint=document.querySelector('.hint');
+const colorModelLabel=document.querySelector('.model-picker > span');
+const currentColorLabel=document.querySelector('.current-color-block > span');
+const recentColorsLabel=document.querySelector('.palette-block > span');
+const fillProgressText=document.querySelector('.fill-progress-title');
+const challengeSampleHeading=document.querySelector('#challenge-panel h3');
+const challengeSampleCopy=document.querySelector('#challenge-panel p');
+const submitChallengeLabel=submitChallengeBtn ? submitChallengeBtn.querySelector('span:last-child') : null;
+const toolFillLabel=fillToolBtn ? fillToolBtn.querySelector('span:last-child') : null;
+const toolEraserLabel=eraserToolBtn ? eraserToolBtn.querySelector('span:last-child') : null;
+const toolResetLabel=resetBtn ? resetBtn.querySelector('span:last-child') : null;
+const toolSaveLabel=saveBtn ? saveBtn.querySelector('span:last-child') : null;
+const toolShareLabel=shareCommunityBtn ? shareCommunityBtn.querySelector('span:last-child') : null;
+const drawingTitles=document.querySelectorAll('.drawing-card__title');
+const drawingButtons=document.querySelectorAll('.enter-btn');
 
 const rgbInputs={r:document.getElementById('rgb-r'),g:document.getElementById('rgb-g'),b:document.getElementById('rgb-b'),rn:document.getElementById('rgb-r-number'),gn:document.getElementById('rgb-g-number'),bn:document.getElementById('rgb-b-number')};
 const hsvInputs={h:document.getElementById('hsv-h'),s:document.getElementById('hsv-s'),v:document.getElementById('hsv-v'),hn:document.getElementById('hsv-h-number'),sn:document.getElementById('hsv-s-number'),vn:document.getElementById('hsv-v-number')};
@@ -187,14 +235,80 @@ function setSketchStyle(ctx,scale=1){ctx.lineWidth=Math.max(4*scale,1);ctx.strok
 function drawPreview(index){const canvas=document.getElementById(`preview-${index}`);if(!canvas)return;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);setSketchStyle(ctx,.5);drawings[index].draw(ctx,canvas.width,canvas.height);}
 function drawEditor(index){const w=editorCanvas.width,h=editorCanvas.height;editorCtx.clearRect(0,0,w,h);editorCtx.fillStyle='#fff';editorCtx.fillRect(0,0,w,h);setSketchStyle(editorCtx,1);drawings[index].draw(editorCtx,w,h);const snap=editorCtx.getImageData(0,0,w,h);editorBaselineSnapshot=new ImageData(new Uint8ClampedArray(snap.data),w,h);refreshSessionStats();}
 
+function updateEditorTitle() {
+  if (!editorTitle) return;
+  if (!editorView.hidden && drawings[activeDrawingIndex]) {
+    translateText(editorTitle, 'Painting Workspace: {name}', { name: tx(drawings[activeDrawingIndex].name) });
+  } else {
+    translateText(editorTitle, 'Painting Workspace');
+  }
+}
+
+function translateGameUI() {
+  updateHtmlLang();
+  document.title = tx('Paint Game — Color Learning');
+  translateText(pageTitle, 'Painting Game');
+  translateText(introCopy, 'Pick a black-line drawing, choose a color model (RGB / HSV / CMYK), and click a closed region to fill it like a paint bucket.');
+  translateText(modeLabel, 'Mode');
+  if (gameModeOptions && gameModeOptions.length) {
+    if (gameModeOptions[0]) gameModeOptions[0].textContent = tx('Standard mode');
+    if (gameModeOptions[1]) gameModeOptions[1].textContent = tx('Challenge mode');
+  }
+  drawingTitles.forEach(function (el, index) {
+    if (el) el.textContent = tx(drawings[index].name);
+  });
+  drawingButtons.forEach(function (btn) {
+    if (!btn) return;
+    var textNode = btn.firstChild && btn.firstChild.nodeType === Node.TEXT_NODE ? btn.firstChild : null;
+    if (!textNode) {
+      textNode = Array.prototype.slice.call(btn.childNodes).find(function (node) {
+        return node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0;
+      });
+    }
+    if (textNode) {
+      textNode.nodeValue = tx('Open this') + ' ';
+    }
+  });
+  updateEditorTitle();
+  translateText(editorBackText, 'Back to gallery');
+  translateText(editorHint, 'How to use: choose a color model, then use slider or number input, choose a tool, and click a closed region.');
+  translateText(colorModelLabel, 'Color Model');
+  translateText(currentColorLabel, 'Current color');
+  translateText(recentColorsLabel, 'Recent colors');
+  if (galleryView) galleryView.setAttribute('aria-label', tx('Drawing selection area'));
+  if (editorView) editorView.setAttribute('aria-label', tx('Painting workspace'));
+  if (colorPreview) colorPreview.setAttribute('aria-label', tx('Current color preview'));
+  if (recentPalette) recentPalette.setAttribute('aria-label', tx('Recent 5 colors'));
+  translateText(fillProgressText, 'Fill progress');
+  if (fillProgressTrack) fillProgressTrack.setAttribute('aria-label', tx('Painting fill progress'));
+  if (fillProgressLabel && (editorView.hidden || !editorBaselineSnapshot)) {
+    fillProgressLabel.textContent = tx('{pct}% · {filled} / {total} px', { pct: '0', filled: '0', total: '0' });
+  }
+  if (fillProgressTrack) fillProgressTrack.setAttribute('aria-valuetext', tx('{pct}% complete', { pct: '0' }));
+  translateText(toolFillLabel, 'Paint Bucket');
+  translateText(toolEraserLabel, 'Region Eraser');
+  translateText(toolResetLabel, 'Reset Drawing');
+  translateText(toolSaveLabel, 'Save as Image');
+  translateText(toolShareLabel, 'Share to Community');
+  translateText(challengeSampleHeading, 'Challenge sample');
+  translateText(challengeSampleCopy, 'Try to match the sample colors. Submit when you finish.');
+  translateText(submitChallengeLabel, 'Submit challenge');
+  if (challengePanel && challengePanel.hidden) {
+    challengeScoreEl.textContent = tx('Score: —');
+  }
+  updateTimerDisplay();
+  updateColorAdjustDisplay();
+  refreshSessionStats();
+}
+
 function isStrokePixel(r,g,b){return r<35&&g<35&&b<35;}
 function computePaintProgress(baseline,current){const b=baseline.data,c=current.data;let total=0,filled=0;for(let i=0;i<b.length;i+=4){const br=b[i],bg=b[i+1],bb=b[i+2],ba=b[i+3];if(ba<250)continue;if(isStrokePixel(br,bg,bb))continue;total++;const cr=c[i],cg=c[i+1],cb=c[i+2];if(Math.abs(cr-br)>2||Math.abs(cg-bg)>2||Math.abs(cb-bb)>2)filled++;}const pct=total===0?0:Math.min(100,Math.round((filled/total)*100));return{total,filled,pct};}
 function formatDuration(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60),sec=s%60;return`${m}:${String(sec).padStart(2,'0')}`;}
-function updateColorAdjustDisplay(){if(colorAdjustCountEl)colorAdjustCountEl.textContent=`Color adjustments: ${colorAdjustCount}`;}
-function updateTimerDisplay(){if(!sessionTimeEl||editorView.hidden)return;sessionTimeEl.textContent=`Session time: ${formatDuration(performance.now()-sessionStartMs)}`;}
-function startEditorSession(){sessionStartMs=performance.now();reachedFullCompletion=false;completionElapsedMs=null;colorAdjustCount=0;if(sessionTimerId)clearInterval(sessionTimerId);sessionTimerId=setInterval(updateTimerDisplay,1000);updateTimerDisplay();if(completionTimeEl){completionTimeEl.hidden=true;completionTimeEl.textContent='Completed in: —';}updateColorAdjustDisplay();}
+function updateColorAdjustDisplay(){if(colorAdjustCountEl)colorAdjustCountEl.textContent=tx('Color adjustments: ') + colorAdjustCount;}
+function updateTimerDisplay(){if(!sessionTimeEl||editorView.hidden)return;sessionTimeEl.textContent=tx('Session time: ') + formatDuration(performance.now()-sessionStartMs);}
+function startEditorSession(){sessionStartMs=performance.now();reachedFullCompletion=false;completionElapsedMs=null;colorAdjustCount=0;if(sessionTimerId)clearInterval(sessionTimerId);sessionTimerId=setInterval(updateTimerDisplay,1000);updateTimerDisplay();if(completionTimeEl){completionTimeEl.hidden=true;completionTimeEl.textContent=tx('Completed in: —');}updateColorAdjustDisplay();}
 function stopEditorSession(){if(sessionTimerId){clearInterval(sessionTimerId);sessionTimerId=null;}}
-function refreshSessionStats(){if(!editorBaselineSnapshot||editorView.hidden)return;const current=editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height);const {total,filled,pct}=computePaintProgress(editorBaselineSnapshot,current);if(fillProgressLabel)fillProgressLabel.textContent=`${pct}% · ${filled.toLocaleString()} / ${total.toLocaleString()} px`;if(fillProgressFill)fillProgressFill.style.width=`${pct}%`;if(fillProgressTrack){fillProgressTrack.setAttribute('aria-valuenow',String(pct));fillProgressTrack.setAttribute('aria-valuetext',`${pct}% complete`);}if(total>0&&filled<total&&reachedFullCompletion){reachedFullCompletion=false;completionElapsedMs=null;if(completionTimeEl){completionTimeEl.hidden=true;completionTimeEl.textContent='Completed in: —';}}if(total>0&&filled===total&&!reachedFullCompletion){reachedFullCompletion=true;completionElapsedMs=performance.now()-sessionStartMs;if(completionTimeEl){completionTimeEl.hidden=false;completionTimeEl.textContent=`Completed in: ${formatDuration(completionElapsedMs)}`;}}}
+function refreshSessionStats(){if(!editorBaselineSnapshot||editorView.hidden)return;const current=editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height);const {total,filled,pct}=computePaintProgress(editorBaselineSnapshot,current);if(fillProgressLabel)fillProgressLabel.textContent=tx('{pct}% · {filled} / {total} px',{pct:String(pct),filled:filled.toLocaleString(),total:total.toLocaleString()});if(fillProgressFill)fillProgressFill.style.width=`${pct}%`;if(fillProgressTrack){fillProgressTrack.setAttribute('aria-valuenow',String(pct));fillProgressTrack.setAttribute('aria-valuetext',tx('{pct}% complete',{pct:String(pct)}));}if(total>0&&filled<total&&reachedFullCompletion){reachedFullCompletion=false;completionElapsedMs=null;if(completionTimeEl){completionTimeEl.hidden=true;completionTimeEl.textContent=tx('Completed in: —');}}if(total>0&&filled===total&&!reachedFullCompletion){reachedFullCompletion=true;completionElapsedMs=performance.now()-sessionStartMs;if(completionTimeEl){completionTimeEl.hidden=false;completionTimeEl.textContent=tx('Completed in: {duration}', {duration: formatDuration(completionElapsedMs)});}}}
 function randomChallengeColor(){return[Math.floor(35+Math.random()*190),Math.floor(35+Math.random()*190),Math.floor(35+Math.random()*190)];}
 function buildChallengeRegions(baseline){
 const width=baseline.width,height=baseline.height,data=baseline.data,size=width*height,regionMap=new Int32Array(size);
@@ -273,7 +387,7 @@ challengeRegions.forEach((regionId)=>{challengeTemplateColors[regionId]=randomCh
 drawChallengeSample();
 }
 function scoreChallenge(){
-if(activeGameMode!=='challenge'||!challengeRegionMap||!challengeRegions.length){challengeScoreEl.textContent='Score: No playable regions found.';return;}
+if(activeGameMode!=='challenge'||!challengeRegionMap||!challengeRegions.length){challengeScoreEl.textContent=tx('Score: No playable regions found.');return;}
 const current=editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height).data;
 let totalSimilarity=0;
 for(let r=0;r<challengeRegions.length;r++){
@@ -290,7 +404,7 @@ const similarity=1-Math.min(1,diff/441.67295593);
 totalSimilarity+=similarity;
 }
 const finalScore=Math.round((totalSimilarity/challengeRegions.length)*100);
-challengeScoreEl.textContent=`Score: ${finalScore}/100 (${challengeRegions.length} regions compared)`;
+challengeScoreEl.textContent=tx('Score: ') + finalScore + '/100 (' + challengeRegions.length + ' ' + tx('regions compared') + ')';
 }
 
 function clampRange(v,min,max){return Math.min(max,Math.max(min,Number(v)||0));}
@@ -314,7 +428,7 @@ function canFillPixel(data,index,target){const isBlackLine=data[index]<35&&data[
 function floodFill(startX,startY,fillColor){const width=editorCanvas.width,height=editorCanvas.height;if(startX<0||startY<0||startX>=width||startY>=height)return;const imageData=editorCtx.getImageData(0,0,width,height),data=imageData.data,startIdx=(startY*width+startX)*4,target=[data[startIdx],data[startIdx+1],data[startIdx+2],data[startIdx+3]];if(target[0]===fillColor[0]&&target[1]===fillColor[1]&&target[2]===fillColor[2]&&target[3]===255)return;if(target[0]<35&&target[1]<35&&target[2]<35)return;const stack=[[startX,startY]];while(stack.length){const p=stack.pop();if(!p)continue;const [x,y]=p,idx=(y*width+x)*4;if(!canFillPixel(data,idx,target))continue;data[idx]=fillColor[0];data[idx+1]=fillColor[1];data[idx+2]=fillColor[2];data[idx+3]=255;if(x>0)stack.push([x-1,y]);if(x<width-1)stack.push([x+1,y]);if(y>0)stack.push([x,y-1]);if(y<height-1)stack.push([x,y+1]);}editorCtx.putImageData(imageData,0,0);refreshSessionStats();}
 
 function setActiveTool(tool){activeTool=tool;fillToolBtn.classList.toggle('is-active',tool==='fill');eraserToolBtn.classList.toggle('is-active',tool==='eraser');}
-function openEditor(index){activeDrawingIndex=index;editorTitle.textContent=`Painting Workspace: ${drawings[index].name}`;galleryView.hidden=true;editorView.hidden=false;setActiveTool('fill');startEditorSession();drawEditor(index);setupChallengeRound();}
+function openEditor(index){activeDrawingIndex=index;translateGameUI();galleryView.hidden=true;editorView.hidden=false;setActiveTool('fill');startEditorSession();drawEditor(index);setupChallengeRound();}
 function showGallery(){stopEditorSession();editorView.hidden=true;galleryView.hidden=false;challengePanel.hidden=true;}
 function bindGalleryButtons(){document.querySelectorAll('[data-open-drawing]').forEach((button)=>{button.addEventListener('click',()=>{openEditor(Number(button.getAttribute('data-open-drawing')));});});}
 function toCanvasCoords(event){const rect=editorCanvas.getBoundingClientRect(),scaleX=editorCanvas.width/rect.width,scaleY=editorCanvas.height/rect.height;return{x:Math.floor((event.clientX-rect.left)*scaleX),y:Math.floor((event.clientY-rect.top)*scaleY)};}
@@ -325,7 +439,7 @@ function shareCanvasToCommunity(){
 const drawing=drawings[activeDrawingIndex];
 const palette=recentColors.length?recentColors.slice(0,6).map(rgbToHex):[rgbToHex(getCurrentRgb())];
 const draft={
-content:`Game artwork: I painted ${drawing.name} and want to discuss my color choices.`,
+content:tx('Game artwork: I painted {name} and want to discuss my color choices.', {name: tx(drawing.name)}),
 tag:"#Palette",
 colorHex:palette[0]||"#2b78e4",
 paletteHexes:palette,
@@ -353,12 +467,13 @@ gameModeSelect.addEventListener('change',()=>{
 activeGameMode=gameModeSelect.value;
 if(activeGameMode!=='challenge'){
 challengePanel.hidden=true;
-if(challengeScoreEl)challengeScoreEl.textContent='Score: —';
+if(challengeScoreEl)challengeScoreEl.textContent=tx('Score: —');
 return;
 }
 if(!editorView.hidden){setupChallengeRound();}
 });
 }
 function placeStatsAboveCanvas(){if(!editorStatsEl||!canvasPane)return;const canvasEl=document.getElementById('editor-canvas');if(canvasEl&&editorStatsEl.parentElement!==canvasPane){canvasPane.insertBefore(editorStatsEl,canvasEl);}}
-function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;placeStatsAboveCanvas();drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();showGallery();}
+document.addEventListener('clw:locale-changed', translateGameUI);
+function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;placeStatsAboveCanvas();drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();translateGameUI();showGallery();}
 init();
