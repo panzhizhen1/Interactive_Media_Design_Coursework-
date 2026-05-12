@@ -13,12 +13,6 @@
     accounts: "clw_accounts_v1",
     activityLog: "clw_activity_log_v1"
   };
-  var DEMO_ACCOUNTS = {
-    studentA: { password: "StudentA123!", displayName: "Student A" },
-    studentB: { password: "StudentB123!", displayName: "Student B" },
-    studentC: { password: "StudentC123!", displayName: "Student C" }
-  };
-
   function readJSON(key, fallback) {
     try {
       var raw = localStorage.getItem(key);
@@ -82,27 +76,6 @@
 
   function getCommunityCloudApi() {
     return window.CLWCommunityCloud || null;
-  }
-
-  function ensureSeedAccounts() {
-    var store = readAccounts();
-    var changed = false;
-    Object.keys(DEMO_ACCOUNTS).forEach(function (username) {
-      if (store.users[username]) return;
-      var demo = DEMO_ACCOUNTS[username];
-      store.users[username] = {
-        username: username,
-        password: demo.password,
-        profile: {
-          displayName: demo.displayName,
-          avatarColor: "#2b78e4"
-        },
-        stats: buildDefaultStats(),
-        createdAt: new Date().toISOString()
-      };
-      changed = true;
-    });
-    if (changed) writeAccounts(store);
   }
 
   function getCurrentUser() {
@@ -370,7 +343,7 @@
       '      <label class="auth-modal__label" for="auth-display-name" data-auth-label-display>Display Name (optional)</label>',
       '      <input class="auth-modal__input" id="auth-display-name" name="displayName" placeholder="How should others see your name?" autocomplete="nickname" />',
       "    </div>",
-      '    <p class="auth-help" data-auth-help>Demo accounts: studentA / studentB / studentC</p>',
+      '    <p class="auth-help" data-auth-help>Create a local account to save your progress in this browser.</p>',
       '    <div class="auth-modal__privacy">',
       '      <label class="auth-modal__privacy-label">',
       '        <input type="checkbox" class="auth-modal__privacy-check" data-auth-privacy-consent />',
@@ -437,7 +410,7 @@
       if (help) {
         help.textContent = signup
           ? authTr("Tip: username can use letters, numbers, underscore.")
-          : authTr("Demo accounts: studentA / studentB / studentC");
+          : authTr("Create a local account to save your progress in this browser.");
       }
       if (submitBtn) submitBtn.textContent = signup ? authTr("Create account") : authTr("Log in");
 
@@ -607,7 +580,6 @@
   }
 
   function init() {
-    ensureSeedAccounts();
     initAuthAPI();
     updateAvatarUI();
   }

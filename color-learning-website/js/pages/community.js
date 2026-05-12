@@ -28,45 +28,13 @@
   var MAX_POST_LENGTH = 500;
   var SUBMIT_COOLDOWN_MS = 2500;
   var LIKE_COOLDOWN_MS = 600;
-  var DEMO_MODERATOR_USERS = ["studentA"];
+  var HIDDEN_PUBLIC_USERS = ["studenta", "studentb", "studentc"];
+  var DEMO_MODERATOR_USERS = [];
   var ALLOWED_ORIGINS = ["learning", "game", "test"];
 
-  var seedPosts = [
-    {
-      id: "seed_1",
-      author: "studentA",
-      content: "Low contrast text can fail accessibility quickly. I now test pairs before publishing.",
-      tag: "#Accessibility",
-      colorHex: "#2b78e4",
-      likes: 12,
-      likedBy: [],
-      pointsAwarded: 5,
-      createdAt: "2026-04-09T06:00:00.000Z",
-      origin: "learning",
-      originMeta: { section: "Color accessibility primer" },
-      featured: true
-    },
-    {
-      id: "seed_2",
-      author: "studentB",
-      content: "HSV helped me quickly compare hue families before locking export values in RGB.",
-      tag: "#Color_Theory",
-      colorHex: "#1e4fb0",
-      likes: 8,
-      likedBy: [],
-      pointsAwarded: 5,
-      createdAt: "2026-04-09T03:30:00.000Z",
-      origin: "test",
-      originMeta: { chapter: "Color Models", score: 22, accuracy: 0.78 },
-      featured: false
-    }
-  ];
+  var seedPosts = [];
 
-  var baseLeaderboard = {
-    studentA: 120,
-    studentB: 95,
-    studentC: 82
-  };
+  var baseLeaderboard = {};
 
   var state = {
     posts: [],
@@ -195,6 +163,11 @@
 
   function isDemoModerator() {
     return DEMO_MODERATOR_USERS.indexOf(getCurrentUsername()) >= 0;
+  }
+
+  function isHiddenPublicUser(username) {
+    var normalized = String(username || "").trim().toLowerCase();
+    return !!normalized && HIDDEN_PUBLIC_USERS.indexOf(normalized) >= 0;
   }
 
   function isPostOwner(post) {
@@ -562,13 +535,19 @@
     if (!Array.isArray(saved)) saved = readJSON(STORAGE.legacyPostsV2, null);
     if (!Array.isArray(saved)) saved = readJSON(STORAGE.legacyPostsV1, null);
     if (!Array.isArray(saved) || !saved.length) saved = seedPosts.slice();
-    saved = saved.map(normalizePost).filter(function (post) { return !!post.content; });
+    saved = saved
+      .map(normalizePost)
+      .filter(function (post) {
+        return !!post.content && !isHiddenPublicUser(post.author);
+      });
     writeJSON(STORAGE.posts, saved);
     return saved;
   }
 
   function writePosts(posts) {
-    state.posts = posts.map(normalizePost);
+    state.posts = posts
+      .map(normalizePost)
+      .filter(function (post) { return !!post && !isHiddenPublicUser(post.author); });
     writeJSON(STORAGE.posts, state.posts);
   }
 
@@ -768,6 +747,7 @@
     var map = {};
     getActivityLog().forEach(function (item) {
       if (!item || !item.username) return;
+      if (isHiddenPublicUser(item.username)) return;
       var ts = Date.parse(item.createdAt || "");
       if (Number.isNaN(ts) || ts < cutoff) return;
       var delta = Number(item.pointsDelta || 0);
@@ -784,12 +764,14 @@
     });
     getActivityLog().forEach(function (item) {
       if (!item || !item.username) return;
+      if (isHiddenPublicUser(item.username)) return;
       var delta = Number(item.pointsDelta || 0);
       if (Number.isNaN(delta)) return;
       map[item.username] = Number(map[item.username] || 0) + delta;
     });
     state.posts.forEach(function (post) {
       if (!post || !post.author) return;
+      if (isHiddenPublicUser(post.author)) return;
       if (!map[post.author]) map[post.author] = Number(baseLeaderboard[post.author] || 0);
     });
     return map;
@@ -948,7 +930,7 @@
     if (compact[0]) compact[0].textContent = tr("7-day points");
     var alltimeTitle = document.getElementById("alltime-title");
     if (alltimeTitle) alltimeTitle.textContent = tr("All-time Top Learners");
-    if (compact[1]) compact[1].textContent = tr("Includes demo seed learners for showcase.");
+    if (compact[1]) compact[1].textContent = tr("Includes community learners ranked by recorded activity.");
 
     var detail = document.querySelector("[data-post-detail]");
     if (detail && !detail.querySelector(".post-detail-card")) {

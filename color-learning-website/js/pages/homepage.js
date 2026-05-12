@@ -1217,11 +1217,17 @@
     }
   }
 
+  function isHiddenPublicCommunityUser(username) {
+    var normalized = String(username || "").trim().toLowerCase();
+    return normalized === "studenta" || normalized === "studentb" || normalized === "studentc";
+  }
+
   function normalizeCommunityPost(post) {
     if (!post || typeof post !== "object") return null;
     var content = clipWithEllipsis(toPlainText(post.content || ""), 190);
     if (!content) return null;
     var author = post.author ? String(post.author).trim() : "Guest";
+    if (isHiddenPublicCommunityUser(author)) return null;
     var tag = post.tag ? String(post.tag).trim() : "#Community";
     return {
       id: post.id ? String(post.id).trim() : "",
@@ -1275,11 +1281,7 @@
 
   function buildHomeCommunityLeaderboardRows(limit) {
     var rowsLimit = Math.max(1, Number(limit) || 4);
-    var pointsMap = {
-      studentA: 120,
-      studentB: 95,
-      studentC: 82
-    };
+    var pointsMap = {};
     var cloud = getCommunityCloudApi();
     if (cloud && cloud.isConfigured && cloud.isConfigured() && cloud.listActivity) {
       return cloud.listActivity(1000).then(function (result) {
@@ -1289,6 +1291,7 @@
           if (!item || typeof item !== "object") return;
           var username = item.username ? String(item.username).trim() : "";
           if (!username) return;
+          if (isHiddenPublicCommunityUser(username)) return;
           var delta = Number(item.pointsDelta || 0);
           if (Number.isNaN(delta)) return;
           pointsMap[username] = Number(pointsMap[username] || 0) + delta;
@@ -1313,6 +1316,7 @@
         if (item.source !== "community") return;
         var username = item.username ? String(item.username).trim() : "";
         if (!username) return;
+        if (isHiddenPublicCommunityUser(username)) return;
         var delta = Number(item.pointsDelta || 0);
         if (Number.isNaN(delta)) return;
         pointsMap[username] = Number(pointsMap[username] || 0) + delta;
@@ -1322,6 +1326,7 @@
     var accountsStore = readStoredJson(COMMUNITY_ACCOUNTS_KEY, { users: {} });
     var users = accountsStore && accountsStore.users && typeof accountsStore.users === "object" ? accountsStore.users : {};
     Object.keys(users).forEach(function (username) {
+      if (isHiddenPublicCommunityUser(username)) return;
       var points = Number(users[username] && users[username].stats ? users[username].stats.points || 0 : 0);
       if (Number.isNaN(points)) points = 0;
       pointsMap[username] = Number(pointsMap[username] || 0) + points;
