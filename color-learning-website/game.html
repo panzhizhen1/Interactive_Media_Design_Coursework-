@@ -76,6 +76,21 @@
             <canvas id="preview-7" width="280" height="200" aria-label="Mushroom line-art preview"></canvas>
             <button type="button" class="enter-btn" data-open-drawing="7" data-i18n="Open this">Open this <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg></span></button>
           </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title" data-i18n="butterfly">butterfly</h2>
+            <canvas id="preview-8" width="280" height="200" aria-label="butterfly line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="8" data-i18n="Open this">Open this <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg></span></button>
+          </article>
+
+          <article class="drawing-card">
+            <h2 class="drawing-card__title" data-i18n="Cupcake">Cupcake</h2>
+            <canvas id="preview-9" width="280" height="200" aria-label="Cupcake line-art preview"></canvas>
+            <button type="button" class="enter-btn" data-open-drawing="9" data-i18n="Open this">Open this <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg></span></button>
+          </article>
+
+
+
         </div>
       </section>
 
@@ -213,6 +228,8 @@
             <div class="tool-row" aria-label="Tool actions">
               <button type="button" id="tool-fill" class="tool-btn btn-with-icon is-active"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 11.5L12.5 5 5 12.5c-1.66 1.66-1.66 4.34 0 6s4.34 1.66 6 0l7.5-7.5c1.66-1.66 1.66-4.34 0-6zM7.5 16.5a2.5 2.5 0 010-3.54l4.65-4.65 3.54 3.54L11 16.5a2.5 2.5 0 01-3.5 0z"/></svg></span><span data-i18n="Paint Bucket">Paint Bucket</span></button>
               <button type="button" id="tool-eraser" class="tool-btn btn-with-icon"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16.24 3.56a2 2 0 00-2.83 0L3.56 13.41a2 2 0 000 2.83L7.34 20H20a1 1 0 100-2h-4.93l4.17-4.17a2 2 0 000-2.83l-3-3zM8.76 18l-3.79-3.79 9.85-9.85L18.61 8.15 8.76 18z"/></svg></span><span data-i18n="Region Eraser">Region Eraser</span></button>
+              <button type="button" id="undo-btn" class="tool-btn btn-with-icon" title="Undo"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg></span><span data-i18n="Undo">Undo</span></button>
+              <button type="button" id="redo-btn" class="tool-btn btn-with-icon" title="Redo"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg></span><span data-i18n="Redo">Redo</span></button>
               <button type="button" id="reset-drawing" class="tool-btn btn-with-icon tool-btn--warn"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6a6 6 0 01-10.24 4.24l-1.42 1.42A8 8 0 1012 5z"/></svg></span><span data-i18n="Reset Drawing">Reset Drawing</span></button>
               <button type="button" id="save-image" class="tool-btn btn-with-icon tool-btn--success"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 3H5a2 2 0 00-2 2v14h18V7l-4-4zM7 5h8v4H7V5zm5 12a3 3 0 110-6 3 3 0 010 6z"/></svg></span><span data-i18n="Save as Image">Save as Image</span></button>
               <button type="button" id="share-community" class="tool-btn btn-with-icon tool-btn--community"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.3 3.3 0 000-1.39l7.05-4.11A2.99 2.99 0 1015 5c0 .23.03.45.08.66L8.03 9.77a3 3 0 100 4.46l7.1 4.17c-.05.19-.07.39-.07.6a2.94 2.94 0 102.94-2.92z"/></svg></span><span data-i18n="Share to Community">Share to Community</span></button>

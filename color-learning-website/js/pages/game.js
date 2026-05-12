@@ -104,12 +104,6 @@ const wheel=x=>{ctx.beginPath();ctx.arc(w*x,h*.82,w*.09,0,Math.PI*2);ctx.closePa
 wheel(.31);wheel(.69);ctx.strokeRect(w*.18,h*.67,w*.08,h*.045);ctx.strokeRect(w*.74,h*.67,w*.08,h*.045);
 ctx.beginPath();ctx.moveTo(w*.47,h*.64);ctx.lineTo(w*.47,h*.82);ctx.stroke();ctx.beginPath();ctx.moveTo(w*.18,h*.82);ctx.lineTo(w*.82,h*.82);ctx.stroke();
 }},
-{name:'Tree',draw(ctx,w,h){
-const cx=w*.5;
-ctx.beginPath();ctx.arc(cx,h*.34,w*.22,0,Math.PI*2);ctx.closePath();ctx.stroke();
-ctx.beginPath();ctx.moveTo(w*.46,h*.92);ctx.lineTo(w*.44,h*.56);ctx.lineTo(w*.56,h*.56);ctx.lineTo(w*.54,h*.92);ctx.closePath();ctx.stroke();
-ctx.beginPath();ctx.moveTo(w*.08,h*.94);ctx.lineTo(w*.92,h*.94);ctx.stroke();
-}},
 {name:'Cat',draw(ctx,w,h){
 const cx=w*.5,cy=h*.48;
 ctx.beginPath();ctx.arc(cx,cy,w*.26,0,Math.PI*2);ctx.closePath();ctx.stroke();
@@ -138,6 +132,90 @@ ctx.beginPath();ctx.arc(cx,h*.4,w*.27,Math.PI,0);ctx.closePath();ctx.stroke();
 [[-.14,-.08,.035],[.06,-.12,.03],[-.02,-.15,.028]].forEach(([dx,dy,r])=>{ctx.beginPath();ctx.arc(cx+w*dx,h*.4+h*dy,w*r,0,Math.PI*2);ctx.closePath();ctx.stroke();});
 ctx.beginPath();ctx.moveTo(cx-w*.14,h*.4);ctx.lineTo(cx-w*.11,h*.86);ctx.quadraticCurveTo(cx,h*.92,cx+w*.11,h*.86);ctx.lineTo(cx+w*.14,h*.4);ctx.closePath();ctx.stroke();
 ctx.beginPath();ctx.moveTo(w*.18,h*.94);ctx.lineTo(w*.82,h*.94);ctx.stroke();
+}},
+{name:'Butterfly',draw(ctx,w,h){
+  const cx=w*.5,cy=h*.46;
+  // 上左翅
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.bezierCurveTo(cx-w*.08,cy-h*.22,cx-w*.38,cy-h*.26,cx-w*.36,cy+h*.02);ctx.bezierCurveTo(cx-w*.34,cy+h*.16,cx-w*.08,cy+h*.08,cx,cy);ctx.closePath();ctx.stroke();
+  // 上右翅
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.bezierCurveTo(cx+w*.08,cy-h*.22,cx+w*.38,cy-h*.26,cx+w*.36,cy+h*.02);ctx.bezierCurveTo(cx+w*.34,cy+h*.16,cx+w*.08,cy+h*.08,cx,cy);ctx.closePath();ctx.stroke();
+  // 下左翅
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.bezierCurveTo(cx-w*.06,cy+h*.08,cx-w*.28,cy+h*.22,cx-w*.24,cy+h*.34);ctx.bezierCurveTo(cx-w*.2,cy+h*.44,cx-w*.04,cy+h*.32,cx,cy);ctx.closePath();ctx.stroke();
+  // 下右翅
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.bezierCurveTo(cx+w*.06,cy+h*.08,cx+w*.28,cy+h*.22,cx+w*.24,cy+h*.34);ctx.bezierCurveTo(cx+w*.2,cy+h*.44,cx+w*.04,cy+h*.32,cx,cy);ctx.closePath();ctx.stroke();
+  // 身体
+  ctx.beginPath();ctx.ellipse(cx,cy+h*.08,w*.022,h*.22,0,0,Math.PI*2);ctx.closePath();ctx.stroke();
+  // 头
+  ctx.beginPath();ctx.arc(cx,cy-h*.16,w*.036,0,Math.PI*2);ctx.closePath();ctx.stroke();
+  // 触须
+  ctx.beginPath();ctx.moveTo(cx-w*.015,cy-h*.19);ctx.quadraticCurveTo(cx-w*.08,cy-h*.36,cx-w*.12,cy-h*.38);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx-w*.12,cy-h*.38,w*.015,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+w*.015,cy-h*.19);ctx.quadraticCurveTo(cx+w*.08,cy-h*.36,cx+w*.12,cy-h*.38);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx+w*.12,cy-h*.38,w*.015,0,Math.PI*2);ctx.stroke();
+  // 翅膀上的圆形花纹
+  ctx.beginPath();ctx.arc(cx-w*.18,cy-h*.08,w*.04,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx+w*.18,cy-h*.08,w*.04,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx-w*.14,cy+h*.2,w*.034,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx+w*.14,cy+h*.2,w*.034,0,Math.PI*2);ctx.stroke();
+}},
+
+{name:'Robot',draw(ctx,w,h){
+  const cx=w*.5;
+  // 头
+  ctx.strokeRect(w*.32,h*.08,w*.36,h*.28);
+  // 眼睛
+  ctx.strokeRect(w*.38,h*.14,w*.08,h*.08);ctx.strokeRect(w*.54,h*.14,w*.08,h*.08);
+  // 眼珠
+  ctx.beginPath();ctx.arc(w*.42,h*.18,w*.022,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(w*.58,h*.18,w*.022,0,Math.PI*2);ctx.stroke();
+  // 嘴巴
+  ctx.strokeRect(w*.38,h*.28,w*.24,h*.04);
+  [[.405,.3],[.43,.3],[.455,.3],[.48,.3],[.505,.3],[.53,.3],[.555,.3]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(w*x,h*y,w*.009,0,Math.PI*2);ctx.stroke();});
+  // 天线
+  ctx.beginPath();ctx.moveTo(cx,h*.08);ctx.lineTo(cx,h*.02);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,h*.02,w*.02,0,Math.PI*2);ctx.stroke();
+  // 耳朵
+  ctx.strokeRect(w*.24,h*.12,w*.08,h*.1);ctx.strokeRect(w*.68,h*.12,w*.08,h*.1);
+  // 脖子
+  ctx.strokeRect(w*.44,h*.36,w*.12,h*.06);
+  // 躯干
+  ctx.strokeRect(w*.26,h*.42,w*.48,h*.32);
+  // 胸口圆
+  ctx.beginPath();ctx.arc(cx,h*.56,w*.08,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,h*.56,w*.04,0,Math.PI*2);ctx.stroke();
+  // 躯干按钮
+  ctx.strokeRect(w*.34,h*.68,w*.06,h*.04);ctx.strokeRect(w*.46,h*.68,w*.06,h*.04);ctx.strokeRect(w*.58,h*.68,w*.06,h*.04);
+  // 手臂
+  ctx.strokeRect(w*.12,h*.44,w*.14,h*.08);ctx.strokeRect(w*.74,h*.44,w*.14,h*.08);
+  // 手
+  ctx.beginPath();ctx.arc(w*.16,h*.56,w*.06,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(w*.84,h*.56,w*.06,0,Math.PI*2);ctx.stroke();
+  // 腿
+  ctx.strokeRect(w*.32,h*.74,w*.14,h*.2);ctx.strokeRect(w*.54,h*.74,w*.14,h*.2);
+  // 脚
+  ctx.strokeRect(w*.28,h*.9,w*.2,h*.06);ctx.strokeRect(w*.52,h*.9,w*.2,h*.06);
+}},
+{name:'Cupcake',draw(ctx,w,h){
+  const cx=w*.5;
+  // 杯身（梯形）
+  ctx.beginPath();ctx.moveTo(w*.28,h*.88);ctx.lineTo(w*.36,h*.54);ctx.lineTo(w*.64,h*.54);ctx.lineTo(w*.72,h*.88);ctx.closePath();ctx.stroke();
+  // 杯身竖线纹
+  [[.405,.56,.37,.88],[.475,.555,.455,.88],[.545,.555,.535,.88],[.615,.56,.605,.88]].forEach(([x1,y1,x2,y2])=>{ctx.beginPath();ctx.moveTo(w*x1,h*y1);ctx.lineTo(w*x2,h*y2);ctx.stroke();});
+  // 蛋糕底层（矩形）
+  ctx.strokeRect(w*.34,h*.44,w*.32,h*.1);
+  // 奶油主体（圆弧曲线堆叠）
+  ctx.beginPath();ctx.moveTo(w*.34,h*.44);ctx.quadraticCurveTo(w*.36,h*.22,cx,h*.18);ctx.quadraticCurveTo(w*.64,h*.22,w*.66,h*.44);ctx.closePath();ctx.stroke();
+  // 奶油第二层
+  ctx.beginPath();ctx.moveTo(w*.38,h*.44);ctx.quadraticCurveTo(w*.4,h*.28,cx,h*.24);ctx.quadraticCurveTo(w*.6,h*.28,w*.62,h*.44);ctx.stroke();
+  // 顶部奶油旋
+  ctx.beginPath();ctx.arc(cx,h*.18,w*.06,0,Math.PI*2);ctx.stroke();
+  // 樱桃
+  ctx.beginPath();ctx.arc(cx,h*.1,w*.04,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,h*.06);ctx.quadraticCurveTo(cx+w*.04,h*.02,cx+w*.06,h*.05);ctx.stroke();
+  // 底部地面线
+  ctx.beginPath();ctx.moveTo(w*.2,h*.9);ctx.lineTo(w*.8,h*.9);ctx.stroke();
+  // 杯身底部小圆点装饰
+  [[.41,.7],[.5,.72],[.59,.7],[.45,.79],[.55,.79]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(w*x,h*y,w*.012,0,Math.PI*2);ctx.stroke();});
 }}
 ];
 
@@ -207,6 +285,8 @@ const toolEraserLabel=eraserToolBtn ? eraserToolBtn.querySelector('span:last-chi
 const toolResetLabel=resetBtn ? resetBtn.querySelector('span:last-child') : null;
 const toolSaveLabel=saveBtn ? saveBtn.querySelector('span:last-child') : null;
 const toolShareLabel=shareCommunityBtn ? shareCommunityBtn.querySelector('span:last-child') : null;
+const toolUndoLabel=document.getElementById('undo-btn') ? document.getElementById('undo-btn').querySelector('span:last-child') : null;
+const toolRedoLabel=document.getElementById('redo-btn') ? document.getElementById('redo-btn').querySelector('span:last-child') : null;
 const drawingTitles=document.querySelectorAll('.drawing-card__title');
 const drawingButtons=document.querySelectorAll('.enter-btn');
 
@@ -230,6 +310,7 @@ let editorBaselineSnapshot=null;
 let sessionStartMs=0;let sessionTimerId=null;let reachedFullCompletion=false;let completionElapsedMs=null;let colorAdjustCount=0;
 let activeGameMode='standard';
 let challengeRegionMap=null;let challengeRegions=[];let challengeTemplateColors=[];
+let undoStack=[];let redoStack=[];
 
 function setSketchStyle(ctx,scale=1){ctx.lineWidth=Math.max(4*scale,1);ctx.strokeStyle='#000';ctx.lineCap='round';ctx.lineJoin='round';}
 function drawPreview(index){const canvas=document.getElementById(`preview-${index}`);if(!canvas)return;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);setSketchStyle(ctx,.5);drawings[index].draw(ctx,canvas.width,canvas.height);}
@@ -287,6 +368,8 @@ function translateGameUI() {
   if (fillProgressTrack) fillProgressTrack.setAttribute('aria-valuetext', tx('{pct}% complete', { pct: '0' }));
   translateText(toolFillLabel, 'Paint Bucket');
   translateText(toolEraserLabel, 'Region Eraser');
+  translateText(toolUndoLabel, 'Undo');
+  translateText(toolRedoLabel, 'Redo');
   translateText(toolResetLabel, 'Reset Drawing');
   translateText(toolSaveLabel, 'Save as Image');
   translateText(toolShareLabel, 'Share to Community');
@@ -425,7 +508,7 @@ function bindModelControls(){bindPair(rgbInputs.r,rgbInputs.rn);bindPair(rgbInpu
 
 function colorMatch(data,index,target,t=14){return Math.abs(data[index]-target[0])<=t&&Math.abs(data[index+1]-target[1])<=t&&Math.abs(data[index+2]-target[2])<=t&&data[index+3]===target[3];}
 function canFillPixel(data,index,target){const isBlackLine=data[index]<35&&data[index+1]<35&&data[index+2]<35;if(isBlackLine)return false;return colorMatch(data,index,target,14);}
-function floodFill(startX,startY,fillColor){const width=editorCanvas.width,height=editorCanvas.height;if(startX<0||startY<0||startX>=width||startY>=height)return;const imageData=editorCtx.getImageData(0,0,width,height),data=imageData.data,startIdx=(startY*width+startX)*4,target=[data[startIdx],data[startIdx+1],data[startIdx+2],data[startIdx+3]];if(target[0]===fillColor[0]&&target[1]===fillColor[1]&&target[2]===fillColor[2]&&target[3]===255)return;if(target[0]<35&&target[1]<35&&target[2]<35)return;const stack=[[startX,startY]];while(stack.length){const p=stack.pop();if(!p)continue;const [x,y]=p,idx=(y*width+x)*4;if(!canFillPixel(data,idx,target))continue;data[idx]=fillColor[0];data[idx+1]=fillColor[1];data[idx+2]=fillColor[2];data[idx+3]=255;if(x>0)stack.push([x-1,y]);if(x<width-1)stack.push([x+1,y]);if(y>0)stack.push([x,y-1]);if(y<height-1)stack.push([x,y+1]);}editorCtx.putImageData(imageData,0,0);refreshSessionStats();}
+function floodFill(startX,startY,fillColor){const width=editorCanvas.width,height=editorCanvas.height;if(startX<0||startY<0||startX>=width||startY>=height)return;saveUndoState();const imageData=editorCtx.getImageData(0,0,width,height),data=imageData.data,startIdx=(startY*width+startX)*4,target=[data[startIdx],data[startIdx+1],data[startIdx+2],data[startIdx+3]];if(target[0]===fillColor[0]&&target[1]===fillColor[1]&&target[2]===fillColor[2]&&target[3]===255){undoStack.pop();return;}if(target[0]<35&&target[1]<35&&target[2]<35){undoStack.pop();return;}const stack=[[startX,startY]];while(stack.length){const p=stack.pop();if(!p)continue;const [x,y]=p,idx=(y*width+x)*4;if(!canFillPixel(data,idx,target))continue;data[idx]=fillColor[0];data[idx+1]=fillColor[1];data[idx+2]=fillColor[2];data[idx+3]=255;if(x>0)stack.push([x-1,y]);if(x<width-1)stack.push([x+1,y]);if(y>0)stack.push([x,y-1]);if(y<height-1)stack.push([x,y+1]);}editorCtx.putImageData(imageData,0,0);refreshSessionStats();}
 
 function setActiveTool(tool){activeTool=tool;fillToolBtn.classList.toggle('is-active',tool==='fill');eraserToolBtn.classList.toggle('is-active',tool==='eraser');}
 function openEditor(index){activeDrawingIndex=index;translateGameUI();galleryView.hidden=true;editorView.hidden=false;setActiveTool('fill');startEditorSession();drawEditor(index);setupChallengeRound();}
@@ -458,6 +541,9 @@ try{localStorage.setItem("clw_community_draft_v1",JSON.stringify(draft));}catch(
 document.dispatchEvent(new CustomEvent("clw:community-draft-updated",{detail:{origin:"game",drawingName:drawing.name}}));
 window.location.href="community.html";
 }
+function saveUndoState(){undoStack.push(editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height));if(undoStack.length>30)undoStack.shift();redoStack=[];}
+function undo(){if(undoStack.length===0)return;redoStack.push(editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height));const state=undoStack.pop();editorCtx.putImageData(state,0,0);refreshSessionStats();}
+function redo(){if(redoStack.length===0)return;undoStack.push(editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height));const state=redoStack.pop();editorCtx.putImageData(state,0,0);refreshSessionStats();}
 function bindToolActions(){fillToolBtn.addEventListener('click',()=>setActiveTool('fill'));eraserToolBtn.addEventListener('click',()=>setActiveTool('eraser'));resetBtn.addEventListener('click',resetCurrentDrawing);saveBtn.addEventListener('click',saveCurrentCanvas);if(shareCommunityBtn)shareCommunityBtn.addEventListener('click',shareCanvasToCommunity);}
 
 function bindColorAdjustTracking(){if(!editorControlsPanel)return;editorControlsPanel.addEventListener('input',(e)=>{if(editorView.hidden)return;const t=e.target;if(t.matches&&t.matches('input[type="range"], input[type="number"]')){colorAdjustCount++;updateColorAdjustDisplay();}});}
@@ -475,5 +561,5 @@ if(!editorView.hidden){setupChallengeRound();}
 }
 function placeStatsAboveCanvas(){if(!editorStatsEl||!canvasPane)return;const canvasEl=document.getElementById('editor-canvas');if(canvasEl&&editorStatsEl.parentElement!==canvasPane){canvasPane.insertBefore(editorStatsEl,canvasEl);}}
 document.addEventListener('clw:locale-changed', translateGameUI);
-function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;placeStatsAboveCanvas();drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();translateGameUI();showGallery();}
+function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;placeStatsAboveCanvas();drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);document.getElementById('undo-btn').addEventListener('click',undo);document.getElementById('redo-btn').addEventListener('click',redo);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();translateGameUI();showGallery();}
 init();
