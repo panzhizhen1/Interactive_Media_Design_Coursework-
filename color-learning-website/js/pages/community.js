@@ -26,6 +26,8 @@
   var DEFAULT_COLOR = "#2b78e4";
   var MIN_POST_LENGTH = 8;
   var MAX_POST_LENGTH = 500;
+  var COMMENT_MIN_LENGTH = 2;
+  var COMMENT_MAX_LENGTH = 220;
   var SUBMIT_COOLDOWN_MS = 2500;
   var LIKE_COOLDOWN_MS = 600;
   var HIDDEN_PUBLIC_USERS = ["studenta", "studentb", "studentc"];
@@ -439,8 +441,27 @@
       createdAt: post && post.createdAt ? post.createdAt : new Date().toISOString(),
       origin: post && post.origin ? String(post.origin) : "community",
       originMeta: post && post.originMeta && typeof post.originMeta === "object" ? post.originMeta : {},
+      comments: normalizeCommentList(post && post.comments ? post.comments : []),
       featured: !!(post && post.featured)
     };
+  }
+
+  function normalizeComment(comment) {
+    var text = String(comment && comment.content ? comment.content : "").trim().replace(/\s+/g, " ");
+    return {
+      id: String(comment && comment.id ? comment.id : ("comment_" + Date.now() + "_" + Math.random().toString(16).slice(2, 7))),
+      author: String(comment && comment.author ? comment.author : "Guest"),
+      content: text.slice(0, COMMENT_MAX_LENGTH),
+      createdAt: comment && comment.createdAt ? String(comment.createdAt) : new Date().toISOString()
+    };
+  }
+
+  function normalizeCommentList(list) {
+    if (!Array.isArray(list)) return [];
+    return list
+      .map(normalizeComment)
+      .filter(function (comment) { return !!comment.content; })
+      .slice(-80);
   }
 
   function escapeHtml(text) {
@@ -863,26 +884,25 @@
     var composerTitle = document.getElementById("composer-title");
     if (composerTitle) composerTitle.textContent = tr("Create a new post");
     var prompt = document.querySelector(".composer-card__prompt");
-    if (prompt) prompt.textContent = tr("Learning Prompt: How does this color choice impact users with color vision deficiency?");
+    if (prompt) prompt.textContent = tr("Prompt · How will this color choice affect users with color-vision deficiency?");
     var hint = document.querySelector(".composer-card__hint");
-    if (hint) hint.textContent = tr("Explain why your color decision works, what changed your thinking, or what you want feedback on.");
+    if (hint) hint.textContent = tr("Share what you learned, why it works, or what feedback you need.");
     var textarea = document.querySelector("[data-post-content]");
     if (textarea) {
-      textarea.placeholder = tr("Write your learning note here...");
+      textarea.placeholder = tr("Write a short learning reflection...");
       textarea.setAttribute("aria-label", tr("Post content"));
     }
-    var rules = document.querySelector(".composer-card__rules");
-    if (rules) rules.textContent = tr("Text is required. Palette and image are optional. Publishing a post adds +5 community points.");
+    renderComposerRules();
 
     var toggleLabels = document.querySelectorAll(".composer-toggle span");
-    if (toggleLabels[0]) toggleLabels[0].textContent = tr("Publish palette");
-    if (toggleLabels[1]) toggleLabels[1].textContent = tr("Publish image");
+    if (toggleLabels[0]) toggleLabels[0].textContent = tr("Palette");
+    if (toggleLabels[1]) toggleLabels[1].textContent = tr("Image");
     var paletteBtn = document.querySelector("[data-palette-from-image]");
-    if (paletteBtn) paletteBtn.textContent = tr("Extract Palette from Image");
+    if (paletteBtn) paletteBtn.textContent = tr("Extract from image");
     var uploadTitle = document.querySelector(".composer-upload__title");
-    if (uploadTitle) uploadTitle.textContent = tr("Attach Image");
+    if (uploadTitle) uploadTitle.textContent = tr("Image");
     var uploadHint = document.querySelector(".composer-upload__hint");
-    if (uploadHint) uploadHint.textContent = tr("Tap to upload");
+    if (uploadHint) uploadHint.textContent = tr("Upload or share from Game");
     var imageClear = document.querySelector("[data-image-clear]");
     if (imageClear) imageClear.textContent = tr("Remove");
     var imagePreview = document.querySelector("[data-image-preview]");
@@ -909,7 +929,7 @@
     var featuredTitle = document.getElementById("featured-posts-title");
     if (featuredTitle) featuredTitle.textContent = tr("Featured Learning Picks");
     var featuredCaption = document.querySelector(".post-preview-head__caption");
-    if (featuredCaption) featuredCaption.textContent = tr("Showcase-highlighted demo posts");
+    if (featuredCaption) featuredCaption.textContent = tr("Selected community highlights");
     var latestTitle = document.querySelector(".post-preview-head:not(.post-preview-head--featured) .post-preview-head__title");
     if (latestTitle) latestTitle.textContent = tr("Latest Posts");
     var viewAll = document.querySelector("[data-view-all-posts]");
@@ -1116,11 +1136,13 @@
     return "";
   }
 
-  function renderPaletteHtml(post) {
+  function renderPaletteHtml(post, options) {
+    var opts = options || {};
     if (post && post.includePalette === false) return "";
     var palette = normalizePaletteList(post && post.paletteHexes ? post.paletteHexes : [post.colorHex], post.colorHex);
+    if (opts.compact) palette = palette.slice(0, 5);
     return (
-      '<div class="post-palette" role="list" aria-label="' + tr("Post palette colors") + '">' +
+      '<div class="post-palette' + (opts.compact ? " post-palette--compact" : "") + '" role="list" aria-label="' + tr("Post palette colors") + '">' +
       palette.map(function (hex, index) {
         var displayHex = normalizeHex(hex).replace("#", "").toUpperCase();
         var textColor = getContrastText(hex);
@@ -1136,12 +1158,23 @@
     );
   }
 
-  function renderImageHtml(post, detailMode) {
+  function renderComposerRules() {
+    var rules = document.querySelector("[data-composer-rules]");
+    if (!rules) return;
+    rules.setAttribute("aria-label", tr("Posting rules"));
+    rules.innerHTML =
+      '<span class="composer-rule-chip composer-rule-chip--required">' + tr("Text required") + "</span>" +
+      '<span class="composer-rule-chip">' + tr("Palette optional") + "</span>" +
+      '<span class="composer-rule-chip">' + tr("Image optional") + "</span>";
+  }
+
+  function renderImageHtml(post, detailMode, options) {
+    var opts = options || {};
     if (post && post.includeImage === false) return "";
     var image = sanitizeImageDataUrl(post && post.imageDataUrl ? post.imageDataUrl : "");
     if (!image) return "";
     return (
-      '<figure class="post-image' + (detailMode ? " post-image--detail" : "") + '">' +
+      '<figure class="post-image' + (detailMode ? " post-image--detail" : "") + (opts.compact ? " post-image--compact" : "") + '">' +
       '<button type="button" class="post-image__zoom" data-image-zoom="' + image + '">' +
       '<img src="' + image + '" alt="' + tr("Shared attachment for this post") + '">' +
       "</button>" +
@@ -1149,7 +1182,7 @@
     );
   }
 
-  function buildPostActionsHtml(post, currentUser) {
+  function buildPostActionButtonsHtml(post, currentUser) {
     var actions = [];
     if (isDemoModerator()) {
       actions.push(
@@ -1163,13 +1196,114 @@
     if (isPostOwner(post)) {
       actions.push('<button type="button" class="post-action-btn post-action-btn--danger" data-post-action="delete" data-post-id="' + post.id + '">' + tr("Delete Post") + "</button>");
     }
-    return '<div class="post-actions">' + actions.join("") + "</div>";
+    return actions.join("");
+  }
+
+  function buildPostActionsHtml(post, currentUser, options) {
+    var opts = options || {};
+    var buttonsHtml = buildPostActionButtonsHtml(post, currentUser);
+    if (!buttonsHtml) return "";
+    if (!opts.compact && !opts.menu) {
+      return '<div class="post-actions">' + buttonsHtml + "</div>";
+    }
+    return (
+      '<div class="post-actions post-actions--menu">' +
+        '<button type="button" class="post-action-menu__toggle" data-post-menu-toggle aria-label="' + tr("More actions") + '" aria-expanded="false">···</button>' +
+        '<div class="post-action-menu" data-post-action-menu hidden>' + buttonsHtml + "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderPreviewMediaHtml(post, compact) {
+    if (!compact) {
+      return renderImageHtml(post, false) + renderPaletteHtml(post);
+    }
+    var image = sanitizeImageDataUrl(post && post.imageDataUrl ? post.imageDataUrl : "");
+    if (image && post.includeImage !== false) {
+      return renderImageHtml(post, false, { compact: true });
+    }
+    return renderPaletteHtml(post, { compact: true });
+  }
+
+  function buildLikeButtonHtml(postId, liked, likes) {
+    var ariaLabel = (liked ? tr("Liked post") : tr("Like post")) + " " + likes;
+    return (
+      '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + postId + '" aria-pressed="' + (liked ? 'true' : 'false') + '" aria-label="' + escapeHtml(ariaLabel) + '">' +
+        '<span class="like-btn__icon" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" focusable="false">' +
+            '<path d="M12 20.3 4.9 13.6A4.8 4.8 0 0 1 11.6 6l.4.4.4-.4a4.8 4.8 0 0 1 6.7 6.8L12 20.3Z"/>' +
+          "</svg>" +
+        "</span>" +
+        '<span class="like-btn__count">' + likes + "</span>" +
+      "</button>"
+    );
+  }
+
+  function formatCommentCount(count) {
+    var total = Math.max(0, Number(count || 0));
+    if (isZhLocale()) return total + " 条评论";
+    return total === 1 ? "1 comment" : total + " comments";
+  }
+
+  function buildCommentCountHtml(count) {
+    return (
+      '<span class="comment-count" aria-label="' + escapeHtml(formatCommentCount(count)) + '">' +
+        '<span class="comment-count__icon" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" focusable="false">' +
+            '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v6A2.5 2.5 0 0 1 17.5 15H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 12.5Z"/>' +
+          "</svg>" +
+        "</span>" +
+        '<span class="comment-count__text">' + escapeHtml(formatCommentCount(count)) + "</span>" +
+      "</span>"
+    );
+  }
+
+  function renderCommentsHtml(post, options) {
+    if (!post) return "";
+    var opts = options || {};
+    var compact = !!opts.compact;
+    var detail = !!opts.detail;
+    var comments = normalizeCommentList(post.comments || []);
+    var visibleComments = detail ? comments.slice(-6) : comments.slice(-2);
+    var listHtml = visibleComments.length
+      ? (
+        '<div class="post-comments__list">' +
+          visibleComments.map(function (comment) {
+            return (
+              '<article class="post-comment">' +
+                '<div class="post-comment__head">' +
+                  '<strong class="post-comment__author">' + escapeHtml(comment.author) + '</strong>' +
+                  '<span class="post-comment__time">' + escapeHtml(timeAgo(comment.createdAt)) + "</span>" +
+                "</div>" +
+                '<p class="post-comment__content">' + escapeHtml(comment.content) + "</p>" +
+              "</article>"
+            );
+          }).join("") +
+        "</div>"
+      )
+      : '<p class="post-comments__empty">' + tr("No comments yet") + "</p>";
+    var formHtml =
+      '<form class="post-comments__form' + (compact ? ' post-comments__form--compact' : '') + '" data-comment-form="' + post.id + '">' +
+        '<input type="text" class="post-comments__input" data-comment-input maxlength="' + COMMENT_MAX_LENGTH + '" placeholder="' + escapeHtml(tr("Share a helpful reply...")) + '" aria-label="' + escapeHtml(tr("Add a comment")) + '" />' +
+        '<button type="submit" class="post-comments__submit">' + tr("Reply") + "</button>" +
+      "</form>";
+    return (
+      '<section class="post-comments' + (compact ? ' post-comments--compact' : '') + '">' +
+        '<div class="post-comments__head-row">' +
+          '<span class="post-comments__title">' + escapeHtml(formatCommentCount(comments.length)) + "</span>" +
+        "</div>" +
+        listHtml +
+        formHtml +
+      "</section>"
+    );
   }
 
   function buildPostCardsHtml(rows, currentUser, options) {
     var opts = options || {};
     var selectable = !!opts.selectable;
     var selectedId = opts.selectedPostId || "";
+    var compact = !!opts.compact;
+    var menuActions = !!opts.menuActions;
     return rows
       .map(function (post) {
         var content = escapeHtml(post.content);
@@ -1182,12 +1316,13 @@
         var hidden = isPostHiddenForUser(post.id, currentUser);
         var originText = escapeHtml(formatOrigin(post));
         var initial = escapeHtml((post.author || "?").slice(0, 1).toUpperCase());
-        var paletteHtml = renderPaletteHtml(post);
-        var imageHtml = renderImageHtml(post, false);
+        var previewMediaHtml = renderPreviewMediaHtml(post, compact);
         var originMetaHtml = renderOriginMetaHtml(post);
+        var commentsHtml = hidden ? "" : renderCommentsHtml(post, { compact: compact });
         var selected = selectable && selectedId === post.id;
         return (
-          '<article class="post-card' + (post.featured ? ' is-featured' : '') + (hidden ? ' is-hidden' : '') + (selected ? ' is-selected' : '') + '"' + (selectable ? ' data-post-select="' + post.id + '"' : "") + ">" +
+          '<article class="post-card' + (compact ? " post-card--compact" : "") + (post.featured ? ' is-featured' : '') + (hidden ? ' is-hidden' : '') + (selected ? ' is-selected' : '') + '"' + (selectable ? ' data-post-select="' + post.id + '"' : "") + ">" +
+          (post.featured ? '<div class="post-card__featured-badge">' + tr("Featured") + "</div>" : "") +
           '<header class="post-header">' +
           '<div class="post-user">' +
           '<span class="post-user__avatar" aria-hidden="true">' + initial + '</span>' +
@@ -1202,14 +1337,17 @@
           '<span class="post-time">' + timeAgo(post.createdAt) + '</span>' +
           '</header>' +
           '<p class="post-content">' + (hidden ? tr("This post is hidden for your account.") : content) + '</p>' +
-          originMetaHtml +
-          imageHtml +
-          paletteHtml +
+          (compact ? "" : originMetaHtml) +
+          (hidden ? "" : previewMediaHtml) +
           '<footer class="post-footer">' +
-          '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? tr("Liked ") : tr("Like ")) + likes + '</button>' +
-          '<span class="post-points">' + tr("Community reward +") + points + " " + tr("pts") + "</span>" +
-          buildPostActionsHtml(post, currentUser) +
+          '<div class="post-footer__meta">' +
+          buildLikeButtonHtml(post.id, liked, likes) +
+          buildCommentCountHtml((post.comments || []).length) +
+          (compact ? "" : ('<span class="post-points">' + tr("Community reward +") + points + " " + tr("pts") + "</span>")) +
+          "</div>" +
+          buildPostActionsHtml(post, currentUser, { compact: compact, menu: menuActions }) +
           '</footer>' +
+          commentsHtml +
           '</article>'
         );
       })
@@ -1263,10 +1401,12 @@
         (hidden ? "" : renderImageHtml(post, true)) +
         (hidden ? "" : renderPaletteHtml(post)) +
         '<div class="post-detail-card__footer">' +
-          '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + post.id + '" aria-pressed="' + (liked ? 'true' : 'false') + '">' + (liked ? tr("Liked ") : tr("Like ")) + likes + '</button>' +
+          buildLikeButtonHtml(post.id, liked, likes) +
+          buildCommentCountHtml((post.comments || []).length) +
           '<span class="post-points">' + tr("Community reward +") + points + " " + tr("pts") + "</span>" +
         "</div>" +
-        buildPostActionsHtml(post, currentUser) +
+        (hidden ? "" : renderCommentsHtml(post, { detail: true })) +
+        buildPostActionsHtml(post, currentUser, { menu: true }) +
       "</article>";
   }
 
@@ -1300,9 +1440,9 @@
     var featuredRows = state.posts
       .filter(function (post) { return !!post.featured; })
       .sort(function (a, b) { return Date.parse(b.createdAt) - Date.parse(a.createdAt); })
-      .slice(0, 3);
+      .slice(0, 1);
     section.hidden = !featuredRows.length;
-    list.innerHTML = featuredRows.length ? buildPostCardsHtml(featuredRows, getCurrentUsername(), { selectable: false }) : "";
+    list.innerHTML = featuredRows.length ? buildPostCardsHtml(featuredRows, getCurrentUsername(), { selectable: false, compact: true }) : "";
   }
 
   function renderPosts() {
@@ -1331,7 +1471,7 @@
       if (!state.selectedPostId || !rows.some(function (item) { return item.id === state.selectedPostId; })) {
         state.selectedPostId = rows[0].id;
       }
-      container.innerHTML = buildPostCardsHtml(rows, currentUser, { selectable: true, selectedPostId: state.selectedPostId });
+      container.innerHTML = buildPostCardsHtml(rows, currentUser, { selectable: true, selectedPostId: state.selectedPostId, menuActions: true });
       var selectedPost = null;
       for (var i = 0; i < rows.length; i += 1) {
         if (rows[i].id === state.selectedPostId) {
@@ -1345,7 +1485,9 @@
       return;
     }
 
-    container.innerHTML = buildPostCardsHtml(rows.slice(0, 3), currentUser, { selectable: false });
+    var latestRows = rows.filter(function (post) { return !post.featured; }).slice(0, 2);
+    if (!latestRows.length) latestRows = rows.slice(0, 2);
+    container.innerHTML = buildPostCardsHtml(latestRows, currentUser, { selectable: false, compact: true });
     renderFeedStatus(rows);
     updateViewAllLink();
     renderFeaturedPreview();
@@ -1616,6 +1758,7 @@
       createdAt: new Date().toISOString(),
       origin: origin,
       originMeta: originMeta,
+      comments: [],
       featured: false
     });
   }
@@ -1765,6 +1908,74 @@
 
     setFeedback("", "");
     refreshAll();
+    return true;
+  }
+
+  async function handleCommentSubmit(event) {
+    event.preventDefault();
+    var form = event.target.closest("[data-comment-form]");
+    if (!form) return false;
+    if (!isLoggedIn()) {
+      setFeedback(tr("Log in to comment on posts."), "error");
+      return true;
+    }
+    var postId = form.getAttribute("data-comment-form") || "";
+    var input = form.querySelector("[data-comment-input]");
+    if (!input) return true;
+    var content = String(input.value || "").trim().replace(/\s+/g, " ");
+    if (content.length < COMMENT_MIN_LENGTH) {
+      setFeedback(isZhLocale() ? "评论至少输入 2 个字符。" : "Write at least 2 characters before commenting.", "error");
+      input.focus();
+      return true;
+    }
+
+    var target = null;
+    var previousComments = [];
+    state.posts = state.posts.map(function (post) {
+      if (post.id !== postId) return post;
+      target = normalizePost(post);
+      previousComments = normalizeCommentList(post.comments || []);
+      target.comments = normalizeCommentList(previousComments.concat([{
+        id: "comment_" + Date.now() + "_" + Math.random().toString(16).slice(2, 7),
+        author: getCurrentUsername(),
+        content: content,
+        createdAt: new Date().toISOString()
+      }]));
+      return target;
+    });
+    if (!target) return true;
+
+    if (isCloudEnabled()) {
+      try {
+        var commentSave = await getCloudApi().savePost(target);
+        if (commentSave && commentSave.error) {
+          setFeedback(tr("Could not publish your comment to the shared community yet."), "error");
+          console.warn("[community.js] comment sync failed:", commentSave.error);
+          await syncCommunityStateFromCloud({ silent: true });
+          refreshAll();
+          return true;
+        }
+        target = normalizePost(commentSave && commentSave.data ? commentSave.data : target);
+        state.posts = state.posts.map(function (post) {
+          return post.id === postId ? target : post;
+        });
+      } catch (error) {
+        console.warn("[community.js] comment sync failed:", error);
+        setFeedback(tr("Could not publish your comment to the shared community yet."), "error");
+        state.posts = state.posts.map(function (post) {
+          if (post.id !== postId) return post;
+          var restored = normalizePost(post);
+          restored.comments = previousComments;
+          return restored;
+        });
+        refreshAll();
+        return true;
+      }
+    }
+
+    writePosts(state.posts);
+    refreshAll();
+    setFeedback(tr("Comment posted."), "success");
     return true;
   }
 
@@ -1922,6 +2133,26 @@
     updateOverlayScrollLock();
   }
 
+  function closeAllPostActionMenus() {
+    document.querySelectorAll("[data-post-action-menu]").forEach(function (menu) {
+      menu.hidden = true;
+    });
+    document.querySelectorAll("[data-post-menu-toggle]").forEach(function (btn) {
+      btn.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function togglePostActionMenu(button) {
+    if (!button) return;
+    var wrap = button.closest(".post-actions--menu");
+    var menu = wrap ? wrap.querySelector("[data-post-action-menu]") : null;
+    if (!menu) return;
+    var willOpen = !!menu.hidden;
+    closeAllPostActionMenus();
+    menu.hidden = !willOpen;
+    button.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  }
+
   function scrollDetailIntoViewOnMobile() {
     if (getCommunityView() !== "all" || !isMobileViewport()) return;
     var detail = document.querySelector("[data-post-detail]");
@@ -1977,10 +2208,26 @@
         scrollToComposer();
         return;
       }
+      var menuToggleBtn = event.target.closest("[data-post-menu-toggle]");
+      if (menuToggleBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        togglePostActionMenu(menuToggleBtn);
+        return;
+      }
       var clearBtn = event.target.closest("[data-clear-tag-search]");
       if (clearBtn) {
         event.preventDefault();
         setTagSearch("");
+        return;
+      }
+      if (!event.target.closest(".post-actions--menu")) closeAllPostActionMenus();
+    });
+
+    document.addEventListener("submit", function (event) {
+      var commentForm = event.target.closest("[data-comment-form]");
+      if (commentForm) {
+        void handleCommentSubmit(event);
       }
     });
 
@@ -2151,11 +2398,18 @@
     function bindPostListClicks(node) {
       if (!node) return;
       node.addEventListener("click", function (event) {
+        if (event.target.closest("[data-post-menu-toggle]")) {
+          return;
+        }
+        if (event.target.closest("[data-comment-form]")) {
+          return;
+        }
         if (event.target.closest("[data-like-id]")) {
           void handleLikeClick(event);
           return;
         }
         if (event.target.closest("[data-post-action]")) {
+          closeAllPostActionMenus();
           handlePostAction(event);
           return;
         }
@@ -2205,6 +2459,7 @@
     }
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
+        closeAllPostActionMenus();
         closeGuidelines();
         closeImageLightbox();
       }

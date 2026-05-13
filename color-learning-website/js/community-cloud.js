@@ -73,6 +73,7 @@
       createdAt: row.created_at ? String(row.created_at) : new Date().toISOString(),
       origin: String(row.origin || "community"),
       originMeta: cloneJson(row.origin_meta, {}),
+      comments: Array.isArray(row.comments) ? row.comments.slice() : [],
       featured: !!row.featured
     };
   }
@@ -94,6 +95,7 @@
       created_at: post.createdAt ? String(post.createdAt) : new Date().toISOString(),
       origin: String(post.origin || "community"),
       origin_meta: cloneJson(post.originMeta, {}),
+      comments: Array.isArray(post.comments) ? post.comments.slice() : [],
       featured: !!post.featured
     };
   }
