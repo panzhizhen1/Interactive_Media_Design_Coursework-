@@ -23,9 +23,9 @@
   --color-surface: #ffffff;
   --color-content-panel: rgba(255, 255, 255, 0.98);
 
-  /* Inner pages: large opaque content sheet (gradient visible only as narrow margin) */
+  /* Inner pages: content sheet aligns with the main navigation width */
   --page-gutter: clamp(0.5rem, 2.5vw, 1.25rem);
-  --content-sheet-max: 92rem;
+  --content-sheet-max: var(--content-max);
   --main-footer-reserve: clamp(5.25rem, 11vh, 8.75rem);
   --color-content-sheet: rgba(255, 255, 255, 0.996);
 
