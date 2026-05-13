@@ -185,6 +185,14 @@ function tx(str) {
     }
   ];
 
+  var ACCESSIBLE_CHAPTER_COLORS = {
+    basics: { primary: "#b45309", secondary: "#f59e0b", border: "#f8c96b" },
+    models: { primary: "#1d4ed8", secondary: "#0284c7", border: "#93c5fd" },
+    meaning: { primary: "#be185d", secondary: "#db2777", border: "#f9a8d4" },
+    workflow: { primary: "#047857", secondary: "#059669", border: "#6ee7b7" },
+    practice: { primary: "#6d28d9", secondary: "#8b5cf6", border: "#c4b5fd" }
+  };
+
   var LEVELS = [
     { id: "easy", name: "Easy", label: "Starter Path", duration: "5-7 min" },
     { id: "medium", name: "Medium", label: "Applied Path", duration: "7-9 min" },
@@ -263,6 +271,7 @@ function tx(str) {
   document.addEventListener("clw:locale-changed", function () {
     renderPage();
   });
+  observeColourModeChanges();
 
   function buildQuestionData() {
     return {
@@ -751,8 +760,9 @@ function tx(str) {
     var ctx = canvas.getContext("2d");
     if (!ctx) return "";
     var chapter = getChapter(result.chapter) || CHAPTERS[0];
-    var primary = chapter.colors && chapter.colors.primary ? chapter.colors.primary : "#2563eb";
-    var accent = chapter.colors && chapter.colors.secondary ? chapter.colors.secondary : "#f59e0b";
+    var chapterColors = getChapterColors(chapter);
+    var primary = chapterColors.primary || "#2563eb";
+    var accent = chapterColors.secondary || "#f59e0b";
     var accuracyPercent = Math.round(Number(result.accuracy || 0) * 100);
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -986,7 +996,8 @@ function tx(str) {
       var replayBadgeName = badgeReplayBtn.getAttribute("data-badge-replay");
       var replayChapterId = getBadgeChapterId(replayBadgeName);
       var replayChapter = getChapter(replayChapterId) || CHAPTERS[0];
-      showBadgeRevealAnimation(replayBadgeName, replayChapter.colors.primary, replayChapter.colors.secondary, { originEl: badgeReplayBtn });
+      var replayColors = getChapterColors(replayChapter);
+      showBadgeRevealAnimation(replayBadgeName, replayColors.primary, replayColors.secondary, { originEl: badgeReplayBtn });
       return;
     }
     var practiceBtn = target.closest("[data-practice-question]");
@@ -1324,7 +1335,8 @@ function tx(str) {
     state.rewards.shownBadgeAnimations = shown.concat([badgeName]);
     saveState();
     var chapter = getChapter(result.chapter) || CHAPTERS[0];
-    showBadgeRevealAnimation(badgeName, chapter.colors.primary, chapter.colors.secondary);
+    var colors = getChapterColors(chapter);
+    showBadgeRevealAnimation(badgeName, colors.primary, colors.secondary);
   }
 
   function showBadgeRevealAnimation(badgeName, colorPrimary, colorSecondary, opts) {
@@ -3118,7 +3130,7 @@ function tx(str) {
   }
   function badgeRewardTagInlineStyle(chapterId) {
     var ch = getChapter(chapterId) || CHAPTERS[0];
-    var p = ch.colors.primary;
+    var p = getChapterColors(ch).primary;
     var rgb = hexToRgb(p);
     return (
       "color:" + p + ";" +
@@ -3324,8 +3336,9 @@ function tx(str) {
     var chapterName = chObj ? tx(chObj.name) : mistake.chapter;
     var lvObj = getLevel(mistake.level);
     var levelName = lvObj ? tx(lvObj.name) : mistake.level;
-    var chColor = chObj ? chObj.colors.primary : "";
-    var chBorder = chObj ? chObj.colors.border : "";
+    var chColors = chObj ? getChapterColors(chObj) : null;
+    var chColor = chColors ? chColors.primary : "";
+    var chBorder = chColors ? chColors.border : "";
     return (
       '<article class="mistake-compact-card' + (mistake.mastered ? " is-reviewed" : " is-pending") + '"' +
         (chBorder ? ' style="border-color:' + chBorder + '"' : '') + '>' +
@@ -3354,8 +3367,9 @@ function tx(str) {
     var lvObj = getLevel(item.level);
     var levelName = lvObj ? tx(lvObj.name) : item.level;
     var q = item.questionSnapshot || {};
-    var chColor = chObj ? chObj.colors.primary : "";
-    var chBorder = chObj ? chObj.colors.border : "";
+    var chColors = chObj ? getChapterColors(chObj) : null;
+    var chColor = chColors ? chColors.primary : "";
+    var chBorder = chColors ? chColors.border : "";
     return (
       '<article class="mistake-compact-card is-flagged"' +
         (chBorder ? ' style="border-color:' + chBorder + '"' : '') + '>' +
@@ -3563,7 +3577,7 @@ function tx(str) {
     var chapterName = chObj ? tx(chObj.name) : item.chapter;
     var lvObj = getLevel(item.level);
     var levelName = lvObj ? tx(lvObj.name) : item.level;
-    var chColor = chObj ? chObj.colors.primary : "";
+    var chColor = chObj ? getChapterColors(chObj).primary : "";
     var draft = soloState.draft;
     var submitted = soloState.submitted;
     var canSubmit = !submitted && hasAnswer(question, draft);
@@ -3660,7 +3674,7 @@ function tx(str) {
       var prompt = tab === "flagged" ? (q.prompt ? tx(q.prompt) : "\u2014") : tx(li.prompt);
       var isActive = id === currentId;
       var chObj = getChapter(li.chapter);
-      var chColor = chObj ? chObj.colors.primary : "#94a3b8";
+      var chColor = chObj ? getChapterColors(chObj).primary : "#94a3b8";
       var statusLabel = tab === "flagged" ? tx("Bookmarked") : (li.mastered ? tx("Reviewed") : tx("Pending"));
       var statusCls = tab === "flagged" ? "is-flagged" : (li.mastered ? "is-ok" : "");
       return '<button type="button" class="solo-list__item' + (isActive ? ' is-active' : '') + '"' +
@@ -3693,8 +3707,22 @@ function tx(str) {
   function buildUrl(path, params) { var query = Object.keys(params || {}).filter(function (key) { return params[key]; }).map(function (key) { return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]); }).join("&"); return query ? path + "?" + query : path; }
   function syncSelectionFromQuery() { var params = getParams(); if (params.chapter && getChapter(params.chapter)) state.selection.chapter = params.chapter; if (params.level && getLevel(params.level)) state.selection.level = params.level; saveState(); }
   function resolveChapterId() { var params = getParams(); return params.chapter || state.selection.chapter || "basics"; }
-  function applyChapterTheme(chapterId) { var chapter = getChapter(chapterId) || CHAPTERS[0]; mainEl.style.setProperty("--theme-stop-2", chapter.colors.primary); mainEl.style.setProperty("--theme-stop-3", chapter.colors.secondary); mainEl.style.setProperty("--color-primary", chapter.colors.primary); mainEl.style.setProperty("--test-border", chapter.colors.border); }
+  function applyChapterTheme(chapterId) { var chapter = getChapter(chapterId) || CHAPTERS[0]; var colors = getChapterColors(chapter); mainEl.style.setProperty("--theme-stop-2", colors.primary); mainEl.style.setProperty("--theme-stop-3", colors.secondary); mainEl.style.setProperty("--color-primary", colors.primary); mainEl.style.setProperty("--test-border", colors.border); }
   function getChapter(id) { return CHAPTERS.find(function (item) { return item.id === id; }) || null; }
+  function isAccessibleColourMode() { return document.documentElement.getAttribute("data-clw-colour-mode") === "accessible"; }
+  function getChapterColors(chapter) { var base = chapter && chapter.colors ? chapter.colors : CHAPTERS[0].colors; return isAccessibleColourMode() && chapter && ACCESSIBLE_CHAPTER_COLORS[chapter.id] ? ACCESSIBLE_CHAPTER_COLORS[chapter.id] : base; }
+  function observeColourModeChanges() {
+    if (typeof MutationObserver !== "function") return;
+    var lastMode = document.documentElement.getAttribute("data-clw-colour-mode") || "default";
+    var observer = new MutationObserver(function () {
+      var nextMode = document.documentElement.getAttribute("data-clw-colour-mode") || "default";
+      if (nextMode === lastMode) return;
+      lastMode = nextMode;
+      applyChapterTheme(resolveChapterId());
+      renderPage();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-clw-colour-mode"] });
+  }
   function getLevel(id) { return LEVELS.find(function (item) { return item.id === id; }) || null; }
   function getNextLevel(id) { var index = LEVEL_ORDER.indexOf(id); return index >= 0 && index < LEVEL_ORDER.length - 1 ? getLevel(LEVEL_ORDER[index + 1]) : null; }
   function getUnitFocus(chapterId, levelId, unitId) { var list = getChapter(chapterId).focuses[levelId]; var index = Math.max(0, (Number(unitId.split("-")[1]) || 1) - 1); return list[Math.min(index, list.length - 1)]; }
@@ -3731,7 +3759,7 @@ function tx(str) {
     }).join("") + "</ul>";
   }
   function getVisibleMistakes(chapterId, levelId, status) { return state.mistakes.filter(function (item) { var chapterMatch = !chapterId || chapterId === "all" || item.chapter === chapterId; var levelMatch = !levelId || levelId === "all" || item.level === levelId; var statusMatch = !status || status === "all" || (status === "reviewed" ? item.mastered : !item.mastered); return chapterMatch && levelMatch && statusMatch; }); }
-  function getNodePalette(chapterId, levelId, unitIndex) { var chapter = getChapter(chapterId) || CHAPTERS[0]; var totalUnits = LEVEL_ORDER.reduce(function (sum, item) { return sum + UNIT_TEMPLATES[item].length; }, 0); var previousUnits = LEVEL_ORDER.slice(0, LEVEL_ORDER.indexOf(levelId)).reduce(function (sum, item) { return sum + UNIT_TEMPLATES[item].length; }, 0); var absoluteIndex = previousUnits + unitIndex; var ratio = totalUnits > 1 ? absoluteIndex / (totalUnits - 1) : 0; var baseHsl = hexToHsl(chapter.colors.secondary); var accent = hslToHex(baseHsl.h, clamp(baseHsl.s - 12 - ratio * 6, 40, 68), clamp(68 - ratio * 16, 48, 68)); return { accent: accent, soft: hslToHex(baseHsl.h, clamp(baseHsl.s - 14 - ratio * 8, 34, 62), clamp(92 - ratio * 10, 80, 92)), strong: hslToHex(baseHsl.h, clamp(baseHsl.s - 8 - ratio * 4, 40, 70), clamp(58 - ratio * 12, 40, 58)), border: hslToHex(baseHsl.h, clamp(baseHsl.s - 16 - ratio * 10, 30, 58), clamp(82 - ratio * 8, 70, 82)) }; }
+  function getNodePalette(chapterId, levelId, unitIndex) { var chapter = getChapter(chapterId) || CHAPTERS[0]; var colors = getChapterColors(chapter); var totalUnits = LEVEL_ORDER.reduce(function (sum, item) { return sum + UNIT_TEMPLATES[item].length; }, 0); var previousUnits = LEVEL_ORDER.slice(0, LEVEL_ORDER.indexOf(levelId)).reduce(function (sum, item) { return sum + UNIT_TEMPLATES[item].length; }, 0); var absoluteIndex = previousUnits + unitIndex; var ratio = totalUnits > 1 ? absoluteIndex / (totalUnits - 1) : 0; var baseHsl = hexToHsl(colors.secondary); var accent = hslToHex(baseHsl.h, clamp(baseHsl.s - 12 - ratio * 6, 40, 68), clamp(68 - ratio * 16, 48, 68)); return { accent: accent, soft: hslToHex(baseHsl.h, clamp(baseHsl.s - 14 - ratio * 8, 34, 62), clamp(92 - ratio * 10, 80, 92)), strong: hslToHex(baseHsl.h, clamp(baseHsl.s - 8 - ratio * 4, 40, 70), clamp(58 - ratio * 12, 40, 58)), border: hslToHex(baseHsl.h, clamp(baseHsl.s - 16 - ratio * 10, 30, 58), clamp(82 - ratio * 8, 70, 82)) }; }
   function blendHex(hexA, hexB, amount) { var a = hexToRgb(hexA); var b = hexToRgb(hexB); var t = Math.max(0, Math.min(1, amount)); return rgbToHex(Math.round(a.r + (b.r - a.r) * t), Math.round(a.g + (b.g - a.g) * t), Math.round(a.b + (b.b - a.b) * t)); }
   function hexToRgb(hex) { var value = (hex || "").replace("#", ""); if (value.length === 3) value = value.split("").map(function (item) { return item + item; }).join(""); return { r: parseInt(value.slice(0, 2), 16), g: parseInt(value.slice(2, 4), 16), b: parseInt(value.slice(4, 6), 16) }; }
   function rgbToHex(r, g, b) { return "#" + [r, g, b].map(function (item) { var value = Math.max(0, Math.min(255, item)).toString(16); return value.length === 1 ? "0" + value : value; }).join(""); }
