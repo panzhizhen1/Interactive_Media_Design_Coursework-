@@ -6,8 +6,8 @@
   "use strict";
 
   window.CLWSupabaseConfig = window.CLWSupabaseConfig || {
-    url: "",
-    anonKey: "",
+    url: "https://dkbumctekwfnlhkgmrur.supabase.co",
+    anonKey: "sb_publishable_kajkwJErlW2FNEP5IoJNNw_6G_tuw0m",
     schema: "public"
   };
 })();
