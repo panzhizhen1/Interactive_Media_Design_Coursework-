@@ -7,6 +7,8 @@
 
   var FONT_SIZE_STORAGE_KEY = "clw_font_size_by_user_v1";
   var FONT_SIZE_ATTR = "data-clw-font-size";
+  var COLOUR_MODE_STORAGE_KEY = "clw_colour_mode_by_user_v1";
+  var COLOUR_MODE_ATTR = "data-clw-colour-mode";
 
   /** @type {{ soundEffects: boolean, language: 'zh'|'en', colourMode: 'default'|'accessible', fontSize: 's'|'m'|'l' }} */
   var prefState = {
@@ -85,6 +87,46 @@
 
   function normalizeFontSize(fontSize) {
     return fontSize === "s" || fontSize === "l" ? fontSize : "m";
+  }
+
+  function normalizeColourMode(colourMode) {
+    return colourMode === "accessible" ? "accessible" : "default";
+  }
+
+  function readColourModePrefs() {
+    try {
+      var raw = localStorage.getItem(COLOUR_MODE_STORAGE_KEY);
+      if (!raw) return {};
+      var parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function writeColourModeForCurrentUser(colourMode) {
+    var all = readColourModePrefs();
+    all[getUserKey()] = normalizeColourMode(colourMode);
+    try {
+      localStorage.setItem(COLOUR_MODE_STORAGE_KEY, JSON.stringify(all));
+    } catch (e) {}
+  }
+
+  function applyColourMode(colourMode, options) {
+    var next = normalizeColourMode(colourMode);
+    prefState.colourMode = next;
+    document.documentElement.setAttribute(COLOUR_MODE_ATTR, next);
+    if (!options || options.persist !== false) {
+      writeColourModeForCurrentUser(next);
+    }
+  }
+
+  function syncColourModeFromStorage() {
+    var all = readColourModePrefs();
+    var next = Object.prototype.hasOwnProperty.call(all, getUserKey())
+      ? all[getUserKey()]
+      : defaults.colourMode;
+    applyColourMode(next, { persist: false });
   }
 
   function emitFontSizeChanged(fontSize) {
@@ -322,7 +364,7 @@
   function resetPrefs() {
     prefState.soundEffects = defaults.soundEffects;
     prefState.language = defaults.language;
-    prefState.colourMode = defaults.colourMode;
+    applyColourMode(defaults.colourMode);
     prefState.fontSize = defaults.fontSize;
     if (window.CLWSound && typeof CLWSound.setSoundEffectsEnabled === "function") {
       CLWSound.setSoundEffectsEnabled(defaults.soundEffects);
@@ -443,7 +485,7 @@
             CLWLocale.setLocale(val);
           }
         } else if (key === "colour-mode" && (val === "default" || val === "accessible")) {
-          prefState.colourMode = val;
+          applyColourMode(val);
         } else if (key === "font-size" && (val === "s" || val === "m" || val === "l")) {
           applyFontSize(val, { emit: true });
         }
@@ -500,6 +542,7 @@
     refreshProfileCard();
     syncSoundFromCLW();
     syncLocaleFromCLW();
+    syncColourModeFromStorage();
     syncFontSizeFromStorage();
     applyPrefStateToDom();
   }
@@ -511,6 +554,7 @@
     refreshProfileCard();
     syncSoundFromCLW();
     syncLocaleFromCLW();
+    syncColourModeFromStorage();
     syncFontSizeFromStorage();
     applyPrefStateToDom();
   });

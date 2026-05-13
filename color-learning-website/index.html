@@ -3,7 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home — Color Learning</title>
+    <title>Home — Colour Learning</title>
+    <script>
+      (function () {
+        try {
+          var userKey = "__guest__";
+          var rawUser = localStorage.getItem("clw_current_user");
+          if (rawUser) {
+            var parsedUser = JSON.parse(rawUser);
+            if (parsedUser && typeof parsedUser.username === "string" && parsedUser.username.trim()) {
+              userKey = parsedUser.username.trim();
+            }
+          }
+          var rawPrefs = localStorage.getItem("clw_font_size_by_user_v1");
+          if (!rawPrefs) return;
+          var prefs = JSON.parse(rawPrefs);
+          if (!prefs || typeof prefs !== "object") return;
+          var size = prefs[userKey];
+          if (size !== "s" && size !== "m" && size !== "l") return;
+          document.documentElement.setAttribute("data-clw-font-size", size);
+        } catch (e) {
+          /* ignore bootstrap failures */
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/layout.css" />
@@ -16,39 +39,61 @@
 
     <main id="main-content" class="page-home">
       <section class="home-hero" aria-label="Intro banner">
-        <p class="home-hero__tagline">Explore the world of colors!</p>
-        <p class="home-hero__slogan">Learn color through visuals, games, quizzes, and challenges.</p>
+        <p class="home-hero__tagline">Explore the world of colours!</p>
+        <p class="home-hero__slogan">Learn colour through visuals, games, quizzes, and challenges.</p>
+        <div class="home-hero__actions" aria-label="Quick actions">
+          <a class="home-hero__action home-hero__action--learn" href="learning.html#overview" data-home-hero-learn>Start Learning</a>
+          <a class="home-hero__action home-hero__action--test" href="test-quiz.html?chapter=basics&amp;level=easy&amp;unit=unit-1&amp;fresh=1&amp;hq=0" data-home-hero-test>Try Challenge</a>
+        </div>
         <div class="home-hero__divider" aria-hidden="true"></div>
+        <p class="home-hero__extra-slogan" data-home-hero-extra-slogan>
+          <span>Choose Your Colour Path</span>
+          <span>Pick the way you want to explore colour today.</span>
+        </p>
       </section>
 
       <section class="home-row home-row--2" aria-label="Learn and test">
-        <a class="home-card home-card--learn-spotlight" href="learning.html" data-home-learn-link aria-label="Explore learn module">
-          <p class="home-card__text home-card__text--learn" data-home-learn-title>Learn Colors the Smart Way</p>
-          <p class="home-learn__sub" data-home-learn-sub>Learn a Color Concept!</p>
-          <div class="home-learn__note">
-            <p class="home-learn__topic" data-home-learn-topic>Loading a random topic...</p>
-            <div class="home-learn__snippet" data-home-learn-snippet>Loading knowledge preview...</div>
+        <section class="home-card home-card--learn-spotlight" aria-label="Guided learn modules">
+          <p class="home-card__text home-card__text--learn" data-home-learn-title>Learn Colours the Smart Way</p>
+          <p class="home-learn__sub" data-home-learn-sub>Follow four guided modules from colour basics to interactive practice.</p>
+          <div class="home-learn__modules" data-home-learn-modules>
+            <a class="home-learn__module" href="learning.html?from=home-learn&amp;focusScope=parent&amp;focusParent=Colour%20Models#basic-color-models" data-home-learn-module-link="1"><p data-home-learn-module-1>Module 1: Colour Basics</p></a>
+            <a class="home-learn__module" href="learning.html?from=home-learn&amp;focusScope=parent&amp;focusParent=Bit%20Depth%20and%20Colour%20Precision#encoding-bit-depth" data-home-learn-module-link="2"><p data-home-learn-module-2>Module 2: Encoding Concepts</p></a>
+            <a class="home-learn__module" href="learning.html?from=home-learn&amp;focusScope=parent&amp;focusParent=High%20Dynamic%20Range%20%28HDR%29%20Colour#advance-hdr-color" data-home-learn-module-link="3"><p data-home-learn-module-3>Module 3: Advanced Topics</p></a>
+            <a class="home-learn__module" href="learning.html?from=home-learn&amp;focusScope=parent&amp;focusParent=Interactive%20Color%20Picker#interaction-color-picker" data-home-learn-module-link="4"><p data-home-learn-module-4>Module 4: Interactive Practice</p></a>
           </div>
-          <p class="home-learn__meta" data-home-learn-meta>Preparing section route...</p>
-        </a>
-        <a class="home-card home-card--test-spotlight" href="test.html" data-home-test-link aria-label="Open random test question">
+          <p class="home-learn__recommend">
+            <span data-home-learn-recommend-prefix>Recommended start:</span>
+            <a class="home-learn__recommend-focus" href="learning.html?from=home-learn&amp;focusScope=parent&amp;focusParent=Colour%20Models#basic-color-models" data-home-learn-recommend-focus-link>Colour Basics</a>
+          </p>
+          <div class="home-learn__actions" aria-label="Learn card actions">
+            <a class="home-learn__action" href="learning.html#overview" data-home-learn-start>Start Learning</a>
+          </div>
+        </section>
+        <section class="home-card home-card--test-spotlight" data-home-test-link aria-label="Open random test question">
           <div class="home-test__head">
             <p class="home-card__text home-card__text--test">Try Today’s Challenge!</p>
           </div>
-          <p class="home-test__prompt" data-home-test-prompt>Loading a random question...</p>
-          <div class="home-test__options" data-home-test-options aria-label="Question options"></div>
-          <p class="home-test__meta" data-home-test-meta>Preparing quiz route</p>
-        </a>
+          <p class="home-test__sub" data-home-test-sub>Check your understanding with quick quizzes, levels, and instant feedback.</p>
+          <div class="home-test__panel">
+            <p class="home-test__prompt" data-home-test-prompt>Loading a random question...</p>
+            <div class="home-test__options" data-home-test-options aria-label="Question options"></div>
+            <p class="home-test__meta" data-home-test-meta>Preparing quiz route</p>
+          </div>
+          <div class="home-test__actions" aria-label="Test quick actions">
+            <a class="home-test__action home-test__action--quiz" href="test.html" data-home-test-full-quiz>Take Full Quiz</a>
+          </div>
+        </section>
       </section>
 
       <section class="home-row home-row--3" aria-label="Game and community">
-        <a class="home-card home-card--game-spotlight" href="game.html" data-home-game-link aria-label="Start your color challenge in Game">
+        <a class="home-card home-card--game-spotlight" href="game.html" data-home-game-link aria-label="Start your colour challenge in Game">
           <div class="home-game__head">
             <div class="home-game__titles">
-              <p class="home-card__text home-card__text--game">Start your color challenge!</p>
-              <p class="home-game__sub">Shape &amp; Color Game</p>
+              <p class="home-card__text home-card__text--game">Start your colour challenge!</p>
             </div>
           </div>
+          <p class="home-game__sub" data-home-game-sub>Turn a blank drawing into a colour challenge using palettes, harmony rules, and creative choices.</p>
           <div class="home-game__frame">
             <canvas
               class="home-game-preview"
@@ -57,22 +102,47 @@
               height="200"
               aria-label="Random game drawing preview"
             ></canvas>
+            <div class="home-game__guide" aria-label="How to play">
+              <p class="home-game__guide-title" data-home-game-guide-title>How to play</p>
+              <ol class="home-game__guide-list">
+                <li data-home-game-guide-step-1>1 Pick a palette</li>
+                <li data-home-game-guide-step-2>2 Fill the shapes</li>
+                <li data-home-game-guide-step-3>3 Check harmony</li>
+              </ol>
+            </div>
           </div>
-          <span class="home-game__cta">Start challenge &#8250;</span>
+          <span class="home-game__cta">Start challenge</span>
         </a>
         <section class="home-card home-card--community-spotlight" aria-label="Community preview card">
-          <p class="home-card__text home-card__text--community" data-home-community-title>👥 Join the Color Community</p>
+          <p class="home-card__text home-card__text--community" data-home-community-title>👥 Join the Colour Community</p>
+          <p class="home-community__sub" data-home-community-sub>Share progress, earn points, and learn together with other colour explorers.</p>
           <a class="home-community__notice" href="community.html" data-home-community-notice-link aria-label="Open community page">New community post +1</a>
           <a class="home-community__post-link" href="community-posts.html" data-home-community-post-link aria-label="Open community post detail list">
-            <article class="home-community__bubble" aria-label="Community post preview">
-              <header class="home-community__head">
-                <span class="home-community__avatar" data-home-community-avatar aria-hidden="true">U</span>
-                <span class="home-community__author" data-home-community-author>@user</span>
-              </header>
-              <p class="home-community__tag" data-home-community-tag>#Community</p>
-              <p class="home-community__post" data-home-community-post>Loading a community post...</p>
-            </article>
+            <div class="home-community__carousel" data-home-community-carousel aria-label="Community rotating feed">
+              <article class="home-community__bubble home-community__bubble--top" data-home-community-slot="top" aria-hidden="true"></article>
+              <article class="home-community__bubble home-community__bubble--center" data-home-community-slot="center"></article>
+              <article class="home-community__bubble home-community__bubble--bottom" data-home-community-slot="bottom" aria-hidden="true"></article>
+            </div>
           </a>
+          <div class="home-community__actions" aria-label="Community card actions">
+            <a class="home-community__action" href="community.html" data-home-community-enter>Enter Community</a>
+          </div>
+        </section>
+      </section>
+
+      <section class="home-links" aria-label="Quick navigation and info">
+        <section class="home-links__col" aria-label="Tools">
+          <h2 class="home-links__title" data-home-link-title-tools>Tools</h2>
+          <a class="home-links__item" href="learning.html" data-home-link-learn>Learning</a>
+          <a class="home-links__item" href="test.html" data-home-link-test>Testing</a>
+          <a class="home-links__item" href="game.html" data-home-link-game>Game</a>
+          <a class="home-links__item" href="community.html" data-home-link-community>Community</a>
+        </section>
+        <section class="home-links__col" aria-label="Project information">
+          <h2 class="home-links__title" data-home-link-title-project>Project</h2>
+          <a class="home-links__item" href="project-introduction.html" data-home-link-project-intro>Project Introduction</a>
+          <a class="home-links__item" href="privacy-policy.html" data-home-link-privacy>Privacy &amp; Data Policy</a>
+          <a class="home-links__item" href="community.html" data-home-link-contact>Contact Team</a>
         </section>
       </section>
     </main>

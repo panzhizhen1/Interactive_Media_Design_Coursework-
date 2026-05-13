@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact the Team — Colour Learning</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <style>
+      :root {
+        --ct-max: 46rem;
+        --ct-muted: var(--color-text-muted, #64748b);
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        font-family: var(--font-sans, system-ui, sans-serif);
+        background: linear-gradient(180deg, #fffdf8 0%, var(--color-surface, #f8fafc) 40%);
+        color: var(--color-text, #0f172a);
+        line-height: 1.6;
+      }
+      .ct-wrap {
+        max-width: var(--ct-max);
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 3rem;
+      }
+      .ct-back {
+        display: inline-block;
+        margin-bottom: 1.25rem;
+        font-size: var(--text-sm, 0.875rem);
+        font-weight: 600;
+        color: var(--color-primary, #ea580c);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+      .ct-back:hover {
+        color: var(--color-primary-hover, #c2410c);
+      }
+      .ct-back:focus-visible {
+        outline: 2px solid var(--color-accent, #fb923c);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+      .ct-title {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.35rem, 4vw, 1.72rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      .ct-slogan {
+        margin: 0 0 1.75rem;
+        font-size: var(--text-xs, 0.75rem);
+        color: var(--ct-muted);
+      }
+      .ct-stack {
+        display: block;
+      }
+      .ct-block {
+        padding: 1.15rem 1.2rem;
+        border-radius: 1rem;
+        border: 1px solid color-mix(in srgb, var(--color-primary, #ea580c) 28%, var(--color-border, #e2e8f0));
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+      }
+      .ct-block p {
+        margin: 0 0 0.82rem;
+        font-size: var(--text-sm, 0.875rem);
+      }
+      .ct-block p:last-child {
+        margin-bottom: 0;
+      }
+      .ct-link {
+        color: var(--color-primary, #0b3ea9);
+        text-decoration: underline;
+        text-underline-offset: 0.18em;
+      }
+      [data-contact-lang="en"] .ct-block--zh {
+        display: none;
+      }
+      [data-contact-lang="zh"] .ct-block--en {
+        display: none;
+      }
+    </style>
+    <script>
+      (function () {
+        var q = new URLSearchParams(window.location.search).get("lang");
+        window.__CLW_CONTACT_LANG__ = q === "zh" ? "zh" : "en";
+        document.documentElement.lang = window.__CLW_CONTACT_LANG__;
+      })();
+    </script>
+  </head>
+  <body data-contact-lang="en">
+    <script>
+      (function () {
+        var lang = window.__CLW_CONTACT_LANG__ || "en";
+        document.body.setAttribute("data-contact-lang", lang);
+      })();
+    </script>
+
+    <div class="ct-wrap">
+      <a class="ct-back" href="index.html">← Back to Home</a>
+      <h1 class="ct-title">Contact the Team</h1>
+      <p class="ct-slogan">Short notice for the Color Learning coursework site.</p>
+
+      <div class="ct-stack">
+        <article class="ct-block ct-block--en" lang="en">
+          <p>
+            This website was created as a group coursework project for EBU6305 Interactive Media Design and Production.
+          </p>
+          <p>
+            For questions about the project, design decisions, implementation details, or page responsibilities, please contact the project team through the group GitHub repository.
+          </p>
+          <p><strong>Team Information</strong></p>
+          <p>Project Title: Color Learning Website</p>
+          <p>Module: EBU6305 Interactive Media Design and Production</p>
+          <p>Project Type: Interactive multimedia learning website</p>
+          <p>Topic: Colour encoding and digital colour learning</p>
+          <p><strong>Team Contact</strong></p>
+          <p>
+            GitHub Repository:
+            <a class="ct-link" href="https://github.com/panzhizhen1/Interactive_Media_Design_Coursework-.git" target="_blank" rel="noopener noreferrer">
+              https://github.com/panzhizhen1/Interactive_Media_Design_Coursework-.git
+            </a>
+          </p>
+          <p>
+            Please note: This is a coursework demo website. It is not a commercial product and does not provide real customer support.
+          </p>
+        </article>
+
+        <article class="ct-block ct-block--zh" lang="zh-Hans">
+          <p><strong>联系团队</strong></p>
+          <p>
+            本网站是 EBU6305 Interactive Media Design and Production 课程的小组作业项目。
+          </p>
+          <p>
+            如果你对项目内容、设计思路、实现方式或页面分工有疑问，可以通过小组 GitHub 仓库联系项目团队。
+          </p>
+          <p><strong>团队信息</strong></p>
+          <p>项目名称：Color Learning Website</p>
+          <p>课程模块：EBU6305 Interactive Media Design and Production</p>
+          <p>项目类型：互动多媒体学习网站</p>
+          <p>项目主题：色彩编码与数字色彩学习</p>
+          <p><strong>联系方式</strong></p>
+          <p>
+            GitHub 仓库：
+            <a class="ct-link" href="https://github.com/panzhizhen1/Interactive_Media_Design_Coursework-.git" target="_blank" rel="noopener noreferrer">
+              https://github.com/panzhizhen1/Interactive_Media_Design_Coursework-.git
+            </a>
+          </p>
+          <p>
+            请注意：本网站为课程作业演示项目，并非商业产品，因此不提供真实商业客服支持。
+          </p>
+        </article>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var lang = window.__CLW_CONTACT_LANG__ || "en";
+        var back = document.querySelector(".ct-back");
+        var title = document.querySelector(".ct-title");
+        var slogan = document.querySelector(".ct-slogan");
+        if (back) {
+          back.textContent = lang === "zh" ? "← 返回首页" : "← Back to Home";
+          back.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.close();
+            window.setTimeout(function () {
+              window.location.assign(back.getAttribute("href") || "index.html");
+            }, 80);
+          });
+        }
+        if (title) title.textContent = lang === "zh" ? "联系团队" : "Contact the Team";
+        if (slogan) {
+          slogan.textContent =
+            lang === "zh"
+              ? "色彩学习课程项目网站的简要说明。"
+              : "Short notice for the Color Learning coursework site.";
+        }
+        document.title = lang === "zh" ? "联系团队 — 色彩学习" : "Contact the Team — Colour Learning";
+      })();
+    </script>
+  </body>
+</html>

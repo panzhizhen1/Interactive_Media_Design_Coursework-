@@ -77,3 +77,40 @@
 :root[data-clw-font-size="l"] {
   font-size: 18px;
 }
+
+:root[data-clw-colour-mode="accessible"] {
+  --theme-stop-1: #0b1e5b;
+  --theme-stop-2: #0b3ea9;
+  --theme-stop-3: #005fcc;
+  --theme-stop-4: #8ec5ff;
+  --theme-stop-5: #dbeafe;
+  --color-header-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-content-panel: #ffffff;
+  --color-content-sheet: #ffffff;
+  --color-bg: #dbeafe;
+  --color-text: #0b1020;
+  --color-text-muted: #1f2a44;
+  --color-primary: #0b3ea9;
+  --color-primary-hover: #082f83;
+  --color-accent: #004aad;
+  --color-border: #64748b;
+}
+
+:root[data-clw-colour-mode="accessible"] :focus-visible {
+  outline: 3px solid #0b3ea9 !important;
+  outline-offset: 2px;
+}
+
+:root[data-clw-colour-mode="accessible"] :where(
+  button,
+  .profile-settings-seg__btn,
+  .profile-settings-toggle,
+  .home-hero__action,
+  .home-learn__action,
+  .home-test__action,
+  .home-community__action,
+  .home-game__cta
+) {
+  border-width: 1.5px;
+}

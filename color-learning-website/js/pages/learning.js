@@ -353,8 +353,31 @@
   function updateActiveLink(activeLink) {
     menuLinks.forEach(function(link) {
       link.classList.remove('is-active');
+      link.removeAttribute('aria-current');
     });
     activeLink.classList.add('is-active');
+    activeLink.setAttribute('aria-current', 'page');
+  }
+
+  function revealNavigationPath(sectionKey) {
+    const key = String(sectionKey || '').trim();
+    if (!key) return null;
+    const targetLink = document.querySelector('[data-section="' + key + '"]');
+    if (!targetLink) return null;
+
+    updateActiveLink(targetLink);
+    expandParentMenus(targetLink);
+
+    const hints = getRouteFocusHints();
+    if (hints.fromHomeLearn && window.innerWidth < 1024 && sidebar && sidebarToggle) {
+      sidebar.classList.add('is-open');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    if (typeof targetLink.scrollIntoView === 'function') {
+      targetLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+    return targetLink;
   }
 
   // Load content based on section
@@ -513,11 +536,8 @@
     const hash = getSectionKeyFromHash();
 
     if (hash && contentData[hash]) {
-      // Find corresponding link
-      const targetLink = document.querySelector('[data-section="' + hash + '"]');
-
+      const targetLink = revealNavigationPath(hash);
       if (targetLink) {
-        updateActiveLink(targetLink);
         loadContent(hash);
         if (shouldAnimateHomeJumpTitle()) {
           window.setTimeout(function() {
@@ -525,15 +545,11 @@
             consumeHomeJumpTitleFlag();
           }, 90);
         }
-
-        // Expand parent menus
-        expandParentMenus(targetLink);
       }
     } else {
       // Default to overview
-      const overviewLink = document.querySelector('[data-section="overview"]');
+      const overviewLink = revealNavigationPath('overview');
       if (overviewLink) {
-        updateActiveLink(overviewLink);
         loadContent('overview');
         if (shouldAnimateHomeJumpTitle()) {
           window.setTimeout(function() {
@@ -568,10 +584,8 @@
       const hash = getSectionKeyFromHash();
 
       if (hash && contentData[hash]) {
-        const targetLink = document.querySelector('[data-section="' + hash + '"]');
-
+        const targetLink = revealNavigationPath(hash);
         if (targetLink) {
-          updateActiveLink(targetLink);
           loadContent(hash);
           if (shouldAnimateHomeJumpTitle()) {
             window.setTimeout(function() {
@@ -579,7 +593,6 @@
               consumeHomeJumpTitleFlag();
             }, 90);
           }
-          expandParentMenus(targetLink);
         }
       }
     });

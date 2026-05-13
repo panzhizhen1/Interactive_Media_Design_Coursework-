@@ -18,30 +18,6 @@
       swatch: "#00b4d8",
       stops: ["#03045e", "#0077b6", "#00b4d8", "#90e0ef", "#caf0f8"],
       primaryHover: "#006199"
-    },
-    teal: {
-      id: "teal",
-      swatch: "#68d8d6",
-      stops: ["#07beb8", "#3dccc7", "#68d8d6", "#9ceaef", "#c4fff9"],
-      primaryHover: "#049688"
-    },
-    rose: {
-      id: "rose",
-      swatch: "#ffb3c6",
-      stops: ["#fb6f92", "#ff8fab", "#ffb3c6", "#ffc2d1", "#ffe5ec"],
-      primaryHover: "#d94d72"
-    },
-    pastel: {
-      id: "pastel",
-      swatch: "#957fef",
-      stops: ["#7a63db", "#886fe8", "#957fef", "#b7a7f7", "#d9d1fd"],
-      primaryHover: "#6d58c8"
-    },
-    amber: {
-      id: "amber",
-      swatch: "#ff9505",
-      stops: ["#cc5803", "#e2711d", "#ff9505", "#ffb627", "#ffc971"],
-      primaryHover: "#d67a04"
     }
   };
 
@@ -117,19 +93,8 @@
     }
   }
 
-  function pickRandomThemeId() {
-    var ids = Object.keys(THEME_REGISTRY);
-    if (!ids.length) return "blue";
-    if (ids.length === 1) return ids[0];
-    var nextId = currentId;
-    while (nextId === currentId) {
-      nextId = ids[Math.floor(Math.random() * ids.length)];
-    }
-    return nextId;
-  }
-
   var storedThemeId = hasLoggedInUser() ? readStoredThemeId() : readGuestSessionThemeId();
-  currentId = storedThemeId || pickRandomThemeId();
+  currentId = resolveThemeId(storedThemeId || "blue");
   applyTheme(currentId);
 
   window.CLWTheme = {
@@ -144,7 +109,7 @@
       return THEME_REGISTRY;
     },
     applyRandomTheme: function () {
-      applyTheme(currentId);
+      applyTheme("blue");
     }
   };
 })();
