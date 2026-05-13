@@ -23,8 +23,12 @@ create table if not exists public.community_posts (
   created_at timestamptz not null default timezone('utc', now()),
   origin text not null default 'community',
   origin_meta jsonb not null default '{}'::jsonb,
+  comments jsonb not null default '[]'::jsonb,
   featured boolean not null default false
 );
+
+alter table if exists public.community_posts
+  add column if not exists comments jsonb not null default '[]'::jsonb;
 
 create index if not exists community_posts_created_at_idx
   on public.community_posts (created_at desc);

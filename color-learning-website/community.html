@@ -30,9 +30,9 @@
           <article class="composer-card" id="composer" aria-labelledby="composer-title">
             <h2 class="sr-only" id="composer-title">Create a new post</h2>
             <p class="composer-card__prompt">
-              Learning Prompt: How does this color choice impact users with color vision deficiency?
+              Prompt · How will this color choice affect users with color-vision deficiency?
             </p>
-            <p class="composer-card__hint">Explain why your color decision works, what changed your thinking, or what you want feedback on.</p>
+            <p class="composer-card__hint">Share what you learned, why it works, or what feedback you need.</p>
 
             <form id="post-form" data-post-form>
               <label class="sr-only" for="post-content">Post content</label>
@@ -41,7 +41,7 @@
                 class="composer-card__textarea"
                 name="content"
                 data-post-content
-                placeholder="Write your learning note here..."
+                placeholder="Write a short learning reflection..."
                 maxlength="500"
                 required
               ></textarea>
@@ -49,7 +49,11 @@
                 <p class="composer-card__counter" data-char-counter>0 / 500</p>
                 <p class="composer-card__origin" data-draft-origin hidden></p>
               </div>
-              <p class="composer-card__rules">Text is required. Palette and image are optional. Publishing a post adds +5 community points.</p>
+              <div class="composer-card__rules" data-composer-rules aria-label="Posting rules">
+                <span class="composer-rule-chip composer-rule-chip--required">Text required</span>
+                <span class="composer-rule-chip">Palette optional</span>
+                <span class="composer-rule-chip">Image optional</span>
+              </div>
 
               <div class="composer-card__tags" role="radiogroup" aria-label="Post tag" data-tag-group>
                 <button type="button" class="tag-pill is-active" data-tag="#Accessibility" aria-pressed="true">#Accessibility</button>
@@ -64,11 +68,11 @@
                 <div class="palette-builder" data-palette-builder>
                   <label class="composer-toggle">
                     <input type="checkbox" data-include-palette checked />
-                    <span>Publish palette</span>
+                    <span>Palette</span>
                   </label>
                   <div class="palette-builder__row" data-palette-row></div>
                   <div class="palette-builder__actions">
-                    <button type="button" class="palette-builder__extract" data-palette-from-image>Extract Palette from Image</button>
+                    <button type="button" class="palette-builder__extract" data-palette-from-image>Extract from image</button>
                   </div>
                   <input id="attach-color-hex" class="hex-input" type="hidden" value="#2b78e4" maxlength="7" data-color-hex />
                   <input id="attach-color" type="color" value="#2b78e4" data-color-picker hidden />
@@ -78,7 +82,7 @@
               <div class="composer-card__extras">
                 <label class="composer-toggle">
                   <input type="checkbox" data-include-image checked />
-                  <span>Publish image</span>
+                  <span>Image</span>
                 </label>
                 <div class="composer-image-block">
                   <div class="composer-image-block__upload" data-upload-area>
@@ -86,8 +90,8 @@
                       <svg class="composer-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                         <path d="M12 16V4m0 0L7 9m5-5 5 5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
                       </svg>
-                      <span class="composer-upload__title">Attach Image</span>
-                      <span class="composer-upload__hint">Tap to upload</span>
+                      <span class="composer-upload__title">Image</span>
+                      <span class="composer-upload__hint">Upload or share from Game</span>
                       <input id="attach-image" type="file" accept="image/*" data-image-input />
                     </label>
                   </div>
@@ -127,7 +131,7 @@
           <section class="featured-posts" data-featured-section hidden aria-labelledby="featured-posts-title">
             <div class="post-preview-head post-preview-head--featured">
               <h2 class="post-preview-head__title" id="featured-posts-title">Featured Learning Picks</h2>
-              <span class="post-preview-head__caption">Showcase-highlighted demo posts</span>
+              <span class="post-preview-head__caption">Selected community highlights</span>
             </div>
             <div class="post-list" data-featured-list></div>
           </section>
