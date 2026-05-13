@@ -5,19 +5,48 @@
   "use strict";
 
   var HOME_ZH = {
-    "Home — Color Learning": "首页 — 色彩学习",
-    "Explore the world of colors!": "探索色彩的世界！",
-    "Learn color through visuals, games, quizzes, and challenges.": "用可视化、游戏、测验与挑战学习色彩。",
-    "Learn Colors the Smart Way": "色彩知识随手学",
-    "Learn a Color Concept!": "每天认识一个色彩概念",
-    "See Color in Action!": "拖一拖，理解颜色如何变化",
+    "Home — Colour Learning": "首页 — 色彩学习",
+    "Explore the world of colours!": "探索色彩的世界！",
+    "Learn colour through visuals, games, quizzes, and challenges.": "用可视化、游戏、测验与挑战学习色彩。",
+    "Check your understanding with quick quizzes, levels, and instant feedback.": "通过快速测验、分级题目与即时反馈检查学习效果。",
+    "Take Full Quiz": "进入完整测验",
+    "Follow four guided modules from colour basics to interactive practice.": "从基础概念到互动实践，按照四个模块建立完整理解。",
+    "Module 1: Colour Basics": "模块 1：色彩基础",
+    "Module 2: Encoding Concepts": "模块 2：编码概念",
+    "Module 3: Advanced Topics": "模块 3：进阶主题",
+    "Module 4: Interactive Practice": "模块 4：互动实践",
+    "Recommended start:": "推荐起点：",
+    "Colour Basics": "色彩基础",
+    "Choose Your Colour Path": "开启你的色彩之旅",
+    "Pick the way you want to explore colour today.": "选择今天最适合你的色彩学习方式。",
+    "Start Learning": "开始学习",
+    "Try Challenge": "快速测试",
+    "Learn Colours the Smart Way": "色彩知识随手学",
+    "Learn a Colour Concept!": "每天认识一个色彩概念",
+    "See Colour in Action!": "拖一拖，理解颜色如何变化",
     "Try Today’s Challenge!": "今日色彩小测",
-    "Start your color challenge!": "来一场色彩挑战！",
-    "Start your color challenge: ": "来一场色彩挑战：",
-    "Start your color challenge with ": "来一场色彩挑战：",
-    "Shape & Color Game": "用形状和颜色完成挑战！",
-    "Start challenge ›": "开始挑战 ›",
-    "👥 Join the Color Community": "加入社区，分享你的发现与灵感",
+    "Turn a blank drawing into a colour challenge using palettes, harmony rules, and creative choices.": "使用调色板、配色规则与创意选择，把黑白图画变成色彩挑战。",
+    "How to play": "玩法提示",
+    "1 Pick a palette": "1 选择颜色",
+    "2 Fill the shapes": "2 给图形上色",
+    "3 Check harmony": "3 检查配色效果",
+    "Start your colour challenge!": "来一场色彩挑战！",
+    "Start your colour challenge: ": "来一场色彩挑战：",
+    "Start your colour challenge with ": "来一场色彩挑战：",
+    "Shape & Colour Game": "用形状和颜色完成挑战！",
+    "Start challenge": "开始挑战",
+    "👥 Join the Colour Community": "加入社区，分享你的发现与灵感",
+    "Share progress, earn points, and learn together with other colour explorers.": "分享进度、获取积分，与其他色彩探索者共同学习。",
+    "Enter Community": "进入社区",
+    "Tools": "工具",
+    "Learning": "学习",
+    "Testing": "测试",
+    "Game": "游戏",
+    "Community": "社区",
+    "Project": "项目",
+    "Project Introduction": "项目介绍",
+    "Privacy & Data Policy": "数据与隐私说明",
+    "Contact Team": "联系团队",
     "New community post +1": "社区新帖子 +1",
     "Loading a random topic...": "正在加载随机知识点...",
     "Loading knowledge preview...": "正在加载知识预览...",
@@ -27,20 +56,20 @@
     "Loading a community post...": "正在加载社区帖子...",
     "Explore learn module": "进入学习模块",
     "Open random test question": "打开随机测试题",
-    "Start your color challenge in Game": "在游戏模块开始色彩挑战",
+    "Start your colour challenge in Game": "在游戏模块开始色彩挑战",
     "Open community page": "打开社区页面",
     "Open community post detail list": "打开社区帖子详情列表",
     "Open to view options": "点击查看选项",
-    "Tap to jump into a random color challenge question.": "用一道题检验你的色彩理解。",
+    "Tap to jump into a random colour challenge question.": "用一道题检验你的色彩理解。",
     "Test module": "测验模块",
     "Test": "测验",
     "Unit": "单元",
     "Learning": "学习",
     "Key section": "关键章节",
-    "Learning Module · Interactive · Color Models": "学习模块 · 交互式 · 色彩模型",
+    "Learning Module · Interactive · Colour Models": "学习模块 · 交互式 · 色彩模型",
     "What is Colour Encoding?": "什么是色彩编码？",
     "Key Notes": "关键要点",
-    "Explore how color information is represented and used across devices and media.": "了解色彩信息如何在不同设备与媒体中被表示和应用。",
+    "Explore how colour information is represented and used across devices and media.": "了解色彩信息如何在不同设备与媒体中被表示和应用。",
     "Overview · Colour Encoding Overview": "概览 · 色彩编码概览",
     "Key Points": "关键知识点",
     "Learning Module · Basic": "学习模块 · 基础",
@@ -53,11 +82,11 @@
     "RGB Interactive Mixer": "RGB 交互调色器",
     "Adjust channels to preview digital colour output": "调节通道，预览数字色彩输出",
     "HSV Interactive Mixer": "HSV 交互调色器",
-    "Drag hue, saturation, and value to explore color behavior": "拖动色相、饱和度和明度，探索色彩变化",
+    "Drag hue, saturation, and value to explore colour behavior": "拖动色相、饱和度和明度，探索色彩变化",
     "CMYK Interactive Mixer": "CMYK 交互调色器",
-    "Adjust cyan, magenta, yellow, and key for print-style color mixing": "调节青、品红、黄和黑，体验印刷式混色",
-    "Current Color": "当前颜色",
-    "Color": "颜色",
+    "Adjust cyan, magenta, yellow, and key for print-style colour mixing": "调节青、品红、黄和黑，体验印刷式混色",
+    "Current Colour": "当前颜色",
+    "Colour": "颜色",
     "Red": "红色",
     "Orange": "橙色",
     "Yellow": "黄色",
@@ -88,12 +117,12 @@
     "Deep Pink": "深粉色",
     "All-time Top Learners": "全站总榜学习者",
     "pts": "分",
-    "Open Learn module interactive color model": "打开学习模块交互色彩模型",
+    "Open Learn module interactive colour model": "打开学习模块交互色彩模型",
     "Open Learn module topic: ": "打开学习模块知识点：",
     "Open test question: ": "打开测试题：",
     "Open community post list, highlighted from @": "打开社区帖子列表，定位到 @",
     "Open community page leaderboard": "打开社区排行榜",
-    "Share one color insight, palette, or learning takeaway with peers in the community.": "在社区与同伴分享一个色彩洞察、配色方案或学习收获。"
+    "Share one colour insight, palette, or learning takeaway with peers in the community.": "在社区与同伴分享一个色彩洞察、配色方案或学习收获。"
   };
 
   function getHomeLocale() {
@@ -128,8 +157,36 @@
     return txHome(source);
   }
 
+  function txGame(text) {
+    var source = String(text == null ? "" : text);
+    var translated = txWithScope(source, "game");
+    if (translated !== source) return translated;
+    return txHome(source);
+  }
+
   function getLearningPagePath() {
     return getHomeLocale() === "zh" ? "learning-zh.html" : "learning.html";
+  }
+
+  function getHomeStartLearningHref() {
+    return buildHomeLearnModuleHref(1);
+  }
+
+  function buildHomeLearnModuleHref(moduleIndex) {
+    var defs = {
+      1: { hash: "basic-color-models", titleEn: "Colour Models", titleZh: "色彩模型" },
+      2: { hash: "encoding-bit-depth", titleEn: "Bit Depth and Colour Precision", titleZh: "位深度与色彩精度" },
+      3: { hash: "advance-hdr-color", titleEn: "High Dynamic Range (HDR) Colour", titleZh: "高动态范围（HDR）色彩" },
+      4: { hash: "interaction-color-picker", titleEn: "Interactive Colour Picker", titleZh: "Interactive Colour Picker" }
+    };
+    var def = defs[moduleIndex];
+    if (!def) return getLearningPagePath() + "#overview";
+    var focusTitle = getHomeLocale() === "zh" ? def.titleZh : def.titleEn;
+    return (
+      getLearningPagePath() +
+      "?from=home-learn&focusScope=parent&focusParent=" + encodeURIComponent(focusTitle) +
+      "#" + encodeURIComponent(def.hash)
+    );
   }
 
   function setLocalizedText(el, baseText, scope) {
@@ -159,56 +216,138 @@
     var name = String(drawingName == null ? "" : drawingName).trim();
     if (!name) {
       delete el.dataset.homeGameDrawingBase;
-      setLocalizedText(el, "Start your color challenge!");
+      setLocalizedText(el, "Start your colour challenge!");
       return;
     }
     el.dataset.homeGameDrawingBase = name;
     el.removeAttribute("data-home-i18n-base");
     el.removeAttribute("data-home-i18n-scope");
-    el.textContent = txHome("Start your color challenge: ") + txHome(name) + "!";
+    el.textContent = txHome("Start your colour challenge: ") + txGame(name) + "!";
   }
 
   function applyHomepageLocaleChrome() {
     var locale = getHomeLocale();
     document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
-    document.title = txHome("Home — Color Learning");
+    document.title = txHome("Home — Colour Learning");
 
     var taglineEl = document.querySelector(".home-hero__tagline");
-    if (taglineEl) taglineEl.textContent = txHome("Explore the world of colors!");
+    if (taglineEl) taglineEl.textContent = txHome("Explore the world of colours!");
     var sloganEl = document.querySelector(".home-hero__slogan");
-    if (sloganEl) sloganEl.textContent = txHome("Learn color through visuals, games, quizzes, and challenges.");
+    if (sloganEl) sloganEl.textContent = txHome("Learn colour through visuals, games, quizzes, and challenges.");
+    var extraSloganEl = document.querySelector("[data-home-hero-extra-slogan]");
+    if (extraSloganEl) {
+      extraSloganEl.innerHTML =
+        "<span>" + escapeHtmlText(txHome("Choose Your Colour Path")) + "</span>" +
+        "<span>" + escapeHtmlText(txHome("Pick the way you want to explore colour today.")) + "</span>";
+    }
+    var quickLearnBtn = document.querySelector("[data-home-hero-learn]");
+    if (quickLearnBtn) {
+      setLocalizedText(quickLearnBtn, "Start Learning");
+      quickLearnBtn.setAttribute("href", getHomeStartLearningHref());
+    }
+    var quickTestBtn = document.querySelector("[data-home-hero-test]");
+    if (quickTestBtn) {
+      setLocalizedText(quickTestBtn, "Try Challenge");
+      quickTestBtn.setAttribute("href", "test-quiz.html?chapter=basics&level=easy&unit=unit-1&fresh=1&hq=0");
+    }
 
     var learnTitleEl = document.querySelector("[data-home-learn-title]");
-    if (learnTitleEl) learnTitleEl.textContent = txHome("Learn Colors the Smart Way");
+    if (learnTitleEl) learnTitleEl.textContent = txHome("Learn Colours the Smart Way");
     var learnSubEl = document.querySelector("[data-home-learn-sub]");
-    if (learnSubEl) {
-      var interactive = document.querySelector(".home-learn__note.home-learn__note--interactive");
-      learnSubEl.textContent = interactive ? txHome("See Color in Action!") : txHome("Learn a Color Concept!");
+    if (learnSubEl) learnSubEl.textContent = txHome("Follow four guided modules from colour basics to interactive practice.");
+    var learnModule1El = document.querySelector("[data-home-learn-module-1]");
+    if (learnModule1El) learnModule1El.textContent = txHome("Module 1: Colour Basics");
+    var learnModule2El = document.querySelector("[data-home-learn-module-2]");
+    if (learnModule2El) learnModule2El.textContent = txHome("Module 2: Encoding Concepts");
+    var learnModule3El = document.querySelector("[data-home-learn-module-3]");
+    if (learnModule3El) learnModule3El.textContent = txHome("Module 3: Advanced Topics");
+    var learnModule4El = document.querySelector("[data-home-learn-module-4]");
+    if (learnModule4El) learnModule4El.textContent = txHome("Module 4: Interactive Practice");
+    var learnModuleLink1 = document.querySelector('[data-home-learn-module-link="1"]');
+    if (learnModuleLink1) learnModuleLink1.setAttribute("href", buildHomeLearnModuleHref(1));
+    var learnModuleLink2 = document.querySelector('[data-home-learn-module-link="2"]');
+    if (learnModuleLink2) learnModuleLink2.setAttribute("href", buildHomeLearnModuleHref(2));
+    var learnModuleLink3 = document.querySelector('[data-home-learn-module-link="3"]');
+    if (learnModuleLink3) learnModuleLink3.setAttribute("href", buildHomeLearnModuleHref(3));
+    var learnModuleLink4 = document.querySelector('[data-home-learn-module-link="4"]');
+    if (learnModuleLink4) learnModuleLink4.setAttribute("href", buildHomeLearnModuleHref(4));
+    var learnRecommendPrefixEl = document.querySelector("[data-home-learn-recommend-prefix]");
+    if (learnRecommendPrefixEl) learnRecommendPrefixEl.textContent = txHome("Recommended start:");
+    var learnRecommendFocusLinkEl = document.querySelector("[data-home-learn-recommend-focus-link]");
+    if (learnRecommendFocusLinkEl) {
+      learnRecommendFocusLinkEl.textContent = txHome("Colour Basics");
+      learnRecommendFocusLinkEl.setAttribute("href", buildHomeLearnModuleHref(1));
+    }
+    var learnStartBtn = document.querySelector("[data-home-learn-start]");
+    if (learnStartBtn) {
+      learnStartBtn.textContent = txHome("Start Learning");
+      learnStartBtn.setAttribute("href", getHomeStartLearningHref());
     }
 
     var testTitleEl = document.querySelector(".home-card__text--test");
     if (testTitleEl) testTitleEl.textContent = txHome("Try Today’s Challenge!");
+    var testSubEl = document.querySelector("[data-home-test-sub]");
+    if (testSubEl) testSubEl.textContent = txHome("Check your understanding with quick quizzes, levels, and instant feedback.");
+    var testFullQuizActionEl = document.querySelector("[data-home-test-full-quiz]");
+    if (testFullQuizActionEl) testFullQuizActionEl.textContent = txHome("Take Full Quiz");
     var gameTitleEl = document.querySelector(".home-card__text--game");
     if (gameTitleEl) {
       var drawingBase = gameTitleEl.dataset.homeGameDrawingBase;
       if (drawingBase) renderLocalizedGameTitle(gameTitleEl, drawingBase);
-      else if (!gameTitleEl.getAttribute("data-home-i18n-base")) setLocalizedText(gameTitleEl, "Start your color challenge!");
+      else if (!gameTitleEl.getAttribute("data-home-i18n-base")) setLocalizedText(gameTitleEl, "Start your colour challenge!");
     }
-    var gameSubEl = document.querySelector(".home-game__sub");
-    if (gameSubEl) gameSubEl.textContent = txHome("Shape & Color Game");
+    var gameSubEl = document.querySelector("[data-home-game-sub]");
+    if (gameSubEl) gameSubEl.textContent = txHome("Turn a blank drawing into a colour challenge using palettes, harmony rules, and creative choices.");
+    var gameGuideTitleEl = document.querySelector("[data-home-game-guide-title]");
+    if (gameGuideTitleEl) gameGuideTitleEl.textContent = txHome("How to play");
+    var gameGuideStep1El = document.querySelector("[data-home-game-guide-step-1]");
+    if (gameGuideStep1El) gameGuideStep1El.textContent = txHome("1 Pick a palette");
+    var gameGuideStep2El = document.querySelector("[data-home-game-guide-step-2]");
+    if (gameGuideStep2El) gameGuideStep2El.textContent = txHome("2 Fill the shapes");
+    var gameGuideStep3El = document.querySelector("[data-home-game-guide-step-3]");
+    if (gameGuideStep3El) gameGuideStep3El.textContent = txHome("3 Check harmony");
     var gameCtaEl = document.querySelector(".home-game__cta");
-    if (gameCtaEl) gameCtaEl.textContent = txHome("Start challenge ›");
+    if (gameCtaEl) gameCtaEl.textContent = txHome("Start challenge");
     var communityTitleEl = document.querySelector("[data-home-community-title]");
-    if (communityTitleEl) communityTitleEl.textContent = txHome("👥 Join the Color Community");
+    if (communityTitleEl) communityTitleEl.textContent = txHome("👥 Join the Colour Community");
+    var communitySubEl = document.querySelector("[data-home-community-sub]");
+    if (communitySubEl) communitySubEl.textContent = txHome("Share progress, earn points, and learn together with other colour explorers.");
+    var communityEnterBtn = document.querySelector("[data-home-community-enter]");
+    if (communityEnterBtn) communityEnterBtn.textContent = txHome("Enter Community");
+    var linkTitleToolsEl = document.querySelector("[data-home-link-title-tools]");
+    if (linkTitleToolsEl) linkTitleToolsEl.textContent = txHome("Tools");
+    var linkLearnEl = document.querySelector("[data-home-link-learn]");
+    if (linkLearnEl) linkLearnEl.textContent = txHome("Learning");
+    var linkTestEl = document.querySelector("[data-home-link-test]");
+    if (linkTestEl) linkTestEl.textContent = txHome("Testing");
+    var linkGameEl = document.querySelector("[data-home-link-game]");
+    if (linkGameEl) linkGameEl.textContent = txHome("Game");
+    var linkCommunityEl = document.querySelector("[data-home-link-community]");
+    if (linkCommunityEl) linkCommunityEl.textContent = txHome("Community");
+    var linkTitleProjectEl = document.querySelector("[data-home-link-title-project]");
+    if (linkTitleProjectEl) linkTitleProjectEl.textContent = txHome("Project");
+    var linkProjectIntroEl = document.querySelector("[data-home-link-project-intro]");
+    if (linkProjectIntroEl) {
+      linkProjectIntroEl.textContent = txHome("Project Introduction");
+      linkProjectIntroEl.setAttribute("href", "project-introduction.html?lang=" + (locale === "zh" ? "zh" : "en"));
+    }
+    var linkPrivacyEl = document.querySelector("[data-home-link-privacy]");
+    if (linkPrivacyEl) {
+      linkPrivacyEl.textContent = txHome("Privacy & Data Policy");
+      linkPrivacyEl.setAttribute("href", "privacy-policy.html?lang=" + (locale === "zh" ? "zh" : "en"));
+    }
+    var linkContactEl = document.querySelector("[data-home-link-contact]");
+    if (linkContactEl) {
+      linkContactEl.textContent = txHome("Contact Team");
+      linkContactEl.setAttribute("href", "contact-team.html?lang=" + (locale === "zh" ? "zh" : "en"));
+    }
     var communityNoticeEl = document.querySelector("[data-home-community-notice-link]");
     if (communityNoticeEl) communityNoticeEl.textContent = txHome("New community post +1");
 
-    var learnLinkEl = document.querySelector("[data-home-learn-link]");
-    if (learnLinkEl) learnLinkEl.setAttribute("aria-label", txHome("Explore learn module"));
     var testLinkEl = document.querySelector("[data-home-test-link]");
     if (testLinkEl) testLinkEl.setAttribute("aria-label", txHome("Open random test question"));
     var gameLinkEl = document.querySelector("[data-home-game-link]");
-    if (gameLinkEl) gameLinkEl.setAttribute("aria-label", txHome("Start your color challenge in Game"));
+    if (gameLinkEl) gameLinkEl.setAttribute("aria-label", txHome("Start your colour challenge in Game"));
     if (communityNoticeEl) communityNoticeEl.setAttribute("aria-label", txHome("Open community page"));
     var communityPostLinkEl = document.querySelector("[data-home-community-post-link]");
     if (communityPostLinkEl) {
@@ -217,7 +356,7 @@
 
     retranslateLocalizedNodes();
     var modelLabel = document.querySelector(".home-learn-model__name-label");
-    if (modelLabel) modelLabel.textContent = txHome("Current Color");
+    if (modelLabel) modelLabel.textContent = txHome("Current Colour");
 
     var leaderboardTitle = document.querySelector(".home-community__leaderboard-title");
     if (leaderboardTitle) leaderboardTitle.textContent = txHome("All-time Top Learners");
@@ -845,347 +984,20 @@
   }
 
   function setupHomeLearnSpotlight() {
-    var linkEl = document.querySelector("[data-home-learn-link]");
-    var titleEl = document.querySelector("[data-home-learn-title]");
-    var subEl = document.querySelector("[data-home-learn-sub]");
-    var topicEl = document.querySelector("[data-home-learn-topic]");
-    var snippetEl = document.querySelector("[data-home-learn-snippet]");
-    var metaEl = document.querySelector("[data-home-learn-meta]");
-    if (!linkEl || !titleEl || !topicEl || !snippetEl || !metaEl) return;
-    var noteEl = linkEl.querySelector(".home-learn__note");
-    var interactiveModeActive = false;
-    var interactiveSavedHref = "";
-
-    if (linkEl.dataset.learnInteractiveClickBound !== "true") {
-      linkEl.dataset.learnInteractiveClickBound = "true";
-      linkEl.addEventListener("click", function (event) {
-        if (!interactiveModeActive) return;
-        var target = event.target;
-        if (target && target.closest && target.closest(".home-learn-model")) {
-          event.preventDefault();
-        }
-      });
-    }
-
-    function setLearnLinkInteractiveLock(lock) {
-      if (lock) {
-        if (!interactiveSavedHref) interactiveSavedHref = linkEl.getAttribute("href") || (getLearningPagePath() + "#basic-color-models");
-        return;
-      }
-      if (interactiveSavedHref) {
-        linkEl.setAttribute("href", interactiveSavedHref);
-      }
-    }
-
-    function setLearnSlogan(isInteractive) {
-      if (!subEl) return;
-      subEl.textContent = isInteractive ? txHome("See Color in Action!") : txHome("Learn a Color Concept!");
-    }
-
-    function hslToHex(h, s, l) {
-      var hue = ((Number(h) % 360) + 360) % 360;
-      var sat = Math.max(0, Math.min(100, Number(s))) / 100;
-      var lit = Math.max(0, Math.min(100, Number(l))) / 100;
-      var c = (1 - Math.abs(2 * lit - 1)) * sat;
-      var x = c * (1 - Math.abs((hue / 60) % 2 - 1));
-      var m = lit - c / 2;
-      var r1 = 0, g1 = 0, b1 = 0;
-      if (hue < 60) { r1 = c; g1 = x; }
-      else if (hue < 120) { r1 = x; g1 = c; }
-      else if (hue < 180) { g1 = c; b1 = x; }
-      else if (hue < 240) { g1 = x; b1 = c; }
-      else if (hue < 300) { r1 = x; b1 = c; }
-      else { r1 = c; b1 = x; }
-      var r = Math.round((r1 + m) * 255);
-      var g = Math.round((g1 + m) * 255);
-      var b = Math.round((b1 + m) * 255);
-      return "#" + [r, g, b].map(function (v) {
-        return Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0");
-      }).join("");
-    }
-
-    function rgbToHex(r, g, b) {
-      return "#" + [r, g, b].map(function (v) {
-        return Math.max(0, Math.min(255, Number(v) || 0)).toString(16).padStart(2, "0");
-      }).join("");
-    }
-
-    function hsvToRgb(h, s, v) {
-      var hue = ((Number(h) % 360) + 360) % 360;
-      var sat = Math.max(0, Math.min(100, Number(s))) / 100;
-      var val = Math.max(0, Math.min(100, Number(v))) / 100;
-      var c = val * sat;
-      var x = c * (1 - Math.abs((hue / 60) % 2 - 1));
-      var m = val - c;
-      var r1 = 0, g1 = 0, b1 = 0;
-      if (hue < 60) { r1 = c; g1 = x; }
-      else if (hue < 120) { r1 = x; g1 = c; }
-      else if (hue < 180) { g1 = c; b1 = x; }
-      else if (hue < 240) { g1 = x; b1 = c; }
-      else if (hue < 300) { r1 = x; b1 = c; }
-      else { r1 = c; b1 = x; }
-      return {
-        r: Math.round((r1 + m) * 255),
-        g: Math.round((g1 + m) * 255),
-        b: Math.round((b1 + m) * 255)
-      };
-    }
-
-    function cmykToRgb(c, m, y, k) {
-      var cc = Math.max(0, Math.min(100, Number(c))) / 100;
-      var mm = Math.max(0, Math.min(100, Number(m))) / 100;
-      var yy = Math.max(0, Math.min(100, Number(y))) / 100;
-      var kk = Math.max(0, Math.min(100, Number(k))) / 100;
-      return {
-        r: Math.round(255 * (1 - cc) * (1 - kk)),
-        g: Math.round(255 * (1 - mm) * (1 - kk)),
-        b: Math.round(255 * (1 - yy) * (1 - kk))
-      };
-    }
-
-    function rgbToColorName(r, g, b) {
-      var rr = Number(r) || 0;
-      var gg = Number(g) || 0;
-      var bb = Number(b) || 0;
-      var max = Math.max(rr, gg, bb);
-      var min = Math.min(rr, gg, bb);
-      var light = (max + min) / 2;
-      var delta = max - min;
-      if (light < 28) return "Deep Black";
-      if (light > 235 && delta < 16) return "Soft White";
-      if (delta < 18) return light > 150 ? "Light Gray" : "Slate Gray";
-
-      var hue = 0;
-      if (delta !== 0) {
-        if (max === rr) hue = ((gg - bb) / delta) % 6;
-        else if (max === gg) hue = (bb - rr) / delta + 2;
-        else hue = (rr - gg) / delta + 4;
-        hue *= 60;
-        if (hue < 0) hue += 360;
-      }
-
-      var base = "Color";
-      if (hue < 15 || hue >= 345) base = "Red";
-      else if (hue < 40) base = "Orange";
-      else if (hue < 65) base = "Yellow";
-      else if (hue < 155) base = "Green";
-      else if (hue < 195) base = "Cyan";
-      else if (hue < 255) base = "Blue";
-      else if (hue < 300) base = "Purple";
-      else base = "Pink";
-
-      if (light > 200) return "Light " + base;
-      if (light < 70) return "Deep " + base;
-      return base;
-    }
-
-    function renderLearnInteractiveModel() {
-      var modelDefs = [
-        {
-          id: "rgb",
-          title: "RGB Interactive Mixer",
-          subtitle: "Adjust channels to preview digital colour output",
-          params: [
-            { key: "R", min: 0, max: 255, value: 128 },
-            { key: "G", min: 0, max: 255, value: 148 },
-            { key: "B", min: 0, max: 255, value: 220 }
-          ],
-          toRgb: function (values) { return { r: values.R, g: values.G, b: values.B }; }
-        },
-        {
-          id: "hsv",
-          title: "HSV Interactive Mixer",
-          subtitle: "Drag hue, saturation, and value to explore color behavior",
-          params: [
-            { key: "H", min: 0, max: 360, value: 240 },
-            { key: "S", min: 0, max: 100, value: 55 },
-            { key: "V", min: 0, max: 100, value: 86 }
-          ],
-          toRgb: function (values) { return hsvToRgb(values.H, values.S, values.V); }
-        },
-        {
-          id: "cmyk",
-          title: "CMYK Interactive Mixer",
-          subtitle: "Adjust cyan, magenta, yellow, and key for print-style color mixing",
-          params: [
-            { key: "C", min: 0, max: 100, value: 80 },
-            { key: "M", min: 0, max: 100, value: 20 },
-            { key: "Y", min: 0, max: 100, value: 0 },
-            { key: "K", min: 0, max: 100, value: 10 }
-          ],
-          toRgb: function (values) { return cmykToRgb(values.C, values.M, values.Y, values.K); }
-        }
-      ];
-      var model = modelDefs[pickStableSessionIndex(HOME_LEARN_MODEL_PICK_INDEX_KEY, modelDefs.length)];
-      if (!model) return false;
-
-      interactiveModeActive = true;
-      if (noteEl) noteEl.classList.add("home-learn__note--interactive");
-      setLocalizedText(topicEl, model.title);
-      snippetEl.classList.add("home-learn__snippet--interactive");
-      snippetEl.innerHTML =
-        '<div class="home-learn-model" data-home-learn-model>' +
-        '<p class="home-learn-model__desc" data-home-i18n-base="' + escapeHtmlText(model.subtitle) + '">' + escapeHtmlText(txHome(model.subtitle)) + "</p>" +
-        '<div class="home-learn-model__head">' +
-        '<div class="home-learn-model__swatch" data-home-learn-swatch></div>' +
-        '<div class="home-learn-model__name-wrap">' +
-        '<p class="home-learn-model__name-line"><span class="home-learn-model__name-label">' + escapeHtmlText(txHome("Current Color")) + '</span><span class="home-learn-model__name" data-home-learn-name data-home-i18n-base="Blue">' + escapeHtmlText(txHome("Blue")) + "</span></p>" +
-        '<p class="home-learn-model__hex" data-home-learn-hex>#000000</p>' +
-        "</div>" +
-        "</div>" +
-        model.params.map(function (param) {
-          return (
-            '<label class="home-learn-model__row">' +
-            '<span class="home-learn-model__label">' + escapeHtmlText(param.key) + "</span>" +
-            '<input class="home-learn-model__range" type="range" min="' + param.min + '" max="' + param.max + '" value="' + param.value + '" data-key="' + escapeHtmlText(param.key) + '">' +
-            '<span class="home-learn-model__value" data-value-for="' + escapeHtmlText(param.key) + '">' + param.value + "</span>" +
-            "</label>"
-          );
-        }).join("") +
-        "</div>";
-
-      var root = snippetEl.querySelector("[data-home-learn-model]");
-      var swatchEl = snippetEl.querySelector("[data-home-learn-swatch]");
-      var hexEl = snippetEl.querySelector("[data-home-learn-hex]");
-      var nameEl = snippetEl.querySelector("[data-home-learn-name]");
-      if (!root || !swatchEl || !hexEl || !nameEl) return false;
-
-      function updateModelPreview() {
-        var values = {};
-        model.params.forEach(function (param) {
-          var input = root.querySelector('[data-key="' + param.key + '"]');
-          var value = input ? Number(input.value) : param.value;
-          values[param.key] = value;
-          var valueEl = root.querySelector('[data-value-for="' + param.key + '"]');
-          if (valueEl) valueEl.textContent = String(value);
-        });
-        var rgb = model.toRgb(values);
-        var colorHex = rgbToHex(rgb.r, rgb.g, rgb.b);
-        swatchEl.style.background = colorHex;
-        hexEl.textContent = colorHex.toUpperCase();
-        setLocalizedText(nameEl, rgbToColorName(rgb.r, rgb.g, rgb.b));
-      }
-
-      function attachRangeDragSupport(input) {
-        if (!input || input.dataset.dragBound === "true") return;
-        input.dataset.dragBound = "true";
-        var activePointerId = null;
-
-        function updateByPointer(clientX) {
-          var rect = input.getBoundingClientRect();
-          if (!(rect.width > 0)) return;
-          var min = Number(input.min || 0);
-          var max = Number(input.max || 100);
-          if (!(max > min)) return;
-          var ratio = (clientX - rect.left) / rect.width;
-          if (ratio < 0) ratio = 0;
-          if (ratio > 1) ratio = 1;
-          var next = Math.round(min + (max - min) * ratio);
-          input.value = String(next);
-          updateModelPreview();
-        }
-
-        input.addEventListener("pointerdown", function (event) {
-          activePointerId = event.pointerId;
-          if (input.setPointerCapture) {
-            try { input.setPointerCapture(activePointerId); } catch (e) { /* ignore */ }
-          }
-          event.preventDefault();
-          event.stopPropagation();
-          updateByPointer(event.clientX);
-        });
-
-        input.addEventListener("pointermove", function (event) {
-          if (activePointerId === null || event.pointerId !== activePointerId) return;
-          event.preventDefault();
-          event.stopPropagation();
-          updateByPointer(event.clientX);
-        });
-
-        input.addEventListener("pointerup", function (event) {
-          if (activePointerId === null || event.pointerId !== activePointerId) return;
-          if (input.releasePointerCapture) {
-            try { input.releasePointerCapture(activePointerId); } catch (e) { /* ignore */ }
-          }
-          activePointerId = null;
-        });
-
-        input.addEventListener("pointercancel", function (event) {
-          if (activePointerId === null || event.pointerId !== activePointerId) return;
-          if (input.releasePointerCapture) {
-            try { input.releasePointerCapture(activePointerId); } catch (e) { /* ignore */ }
-          }
-          activePointerId = null;
-        });
-      }
-
-      root.querySelectorAll(".home-learn-model__range").forEach(function (input) {
-        attachRangeDragSupport(input);
-        input.addEventListener("input", updateModelPreview);
-        input.addEventListener("change", updateModelPreview);
-      });
-      updateModelPreview();
-
-      setLocalizedText(metaEl, "Learning Module · Interactive · Color Models");
-      interactiveSavedHref = getLearningPagePath() + "?from=home-learn&focusScope=parent&focusParent=" + encodeURIComponent("Colour Models") + "#basic-color-models";
-      linkEl.setAttribute("href", interactiveSavedHref);
-      linkEl.setAttribute("aria-label", txHome("Open Learn module interactive color model"));
-      return true;
-    }
-
-    function renderLearnSummary(summary) {
-      interactiveModeActive = false;
-      if (noteEl) noteEl.classList.remove("home-learn__note--interactive");
-      setLearnLinkInteractiveLock(false);
-      if (!summary || !summary.previewHtml) {
-        setLocalizedText(topicEl, "What is Colour Encoding?");
-        snippetEl.classList.remove("home-learn__snippet--interactive");
-        snippetEl.innerHTML = "<h3>" + escapeHtmlText(txHome("Key Notes")) + "</h3><p>" + escapeHtmlText(txHome("Explore how color information is represented and used across devices and media.")) + "</p>";
-        setLocalizedText(metaEl, "Overview · Colour Encoding Overview");
-        return;
-      }
-
-      setLocalizedText(topicEl, summary.title || "Key Points");
-      snippetEl.classList.remove("home-learn__snippet--interactive");
-      snippetEl.innerHTML = summary.previewHtml;
-      setLocalizedText(metaEl, (summary.category || "Learning") + " · " + (summary.path || "Key section"));
-    }
-
-    function buildLearnDeepLink(sectionKey, summary, fallbackHeading) {
-      var hashKey = encodeURIComponent(String(sectionKey || "overview"));
-      var parentText = toPlainText((summary && summary.title) || fallbackHeading || "");
-      var childText = toPlainText((summary && (summary.anchorText || summary.subtitle)) || "");
-      var query = ["from=home-learn"];
-      if (parentText) query.push("focusParent=" + encodeURIComponent(clipWithEllipsis(parentText, 90)));
-      if (childText) query.push("focusChild=" + encodeURIComponent(clipWithEllipsis(childText, 90)));
-      return getLearningPagePath() + "?" + query.join("&") + "#" + hashKey;
-    }
-
-    titleEl.textContent = txHome("Learn Colors the Smart Way");
-    setLearnSlogan(false);
-    loadLearnTopicCatalog()
-      .then(function (catalog) {
-        if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty learn catalog");
-        var interactiveMode = pickStableSessionIndex(HOME_LEARN_VIEW_MODE_KEY, 100) < 34;
-        if (interactiveMode && renderLearnInteractiveModel()) {
-          setLearnSlogan(true);
-          return;
-        }
-        var sessionSeedIndex = pickStableSessionIndex(HOME_LEARN_PICK_INDEX_KEY, catalog.length);
-        var picked = catalog[sessionSeedIndex];
-        if (!picked || !picked.summary) throw new Error("Invalid learn item");
-        setLearnSlogan(false);
-        renderLearnSummary(picked.summary);
-        interactiveSavedHref = buildLearnDeepLink(picked.sectionKey, picked.summary, picked.heading);
-        linkEl.href = interactiveSavedHref;
-        linkEl.setAttribute("aria-label", txHome("Open Learn module topic: ") + String(txHome(picked.summary.title || picked.heading || "Learn topic")));
-      })
-      .catch(function () {
-        setLearnSlogan(false);
-        renderLearnSummary(null);
-        interactiveSavedHref = getLearningPagePath() + "#overview";
-        linkEl.href = interactiveSavedHref;
-      });
+    var cardEl = document.querySelector(".home-card--learn-spotlight");
+    if (!cardEl) return;
+    var titleEl = cardEl.querySelector("[data-home-learn-title]");
+    var subEl = cardEl.querySelector("[data-home-learn-sub]");
+    var module1El = cardEl.querySelector("[data-home-learn-module-1]");
+    var module2El = cardEl.querySelector("[data-home-learn-module-2]");
+    var module3El = cardEl.querySelector("[data-home-learn-module-3]");
+    var module4El = cardEl.querySelector("[data-home-learn-module-4]");
+    if (titleEl) titleEl.textContent = txHome("Learn Colours the Smart Way");
+    if (subEl) subEl.textContent = txHome("Follow four guided modules from colour basics to interactive practice.");
+    if (module1El) module1El.textContent = txHome("Module 1: Colour Basics");
+    if (module2El) module2El.textContent = txHome("Module 2: Encoding Concepts");
+    if (module3El) module3El.textContent = txHome("Module 3: Advanced Topics");
+    if (module4El) module4El.textContent = txHome("Module 4: Interactive Practice");
   }
 
   function extractCommunitySeedPosts(source) {
@@ -1344,38 +1156,37 @@
     var noticeLinkEl = document.querySelector("[data-home-community-notice-link]");
     var postLinkEl = document.querySelector("[data-home-community-post-link]");
     var titleEl = document.querySelector("[data-home-community-title]");
-    var avatarEl = document.querySelector("[data-home-community-avatar]");
-    var authorEl = document.querySelector("[data-home-community-author]");
-    var tagEl = document.querySelector("[data-home-community-tag]");
-    var postEl = document.querySelector("[data-home-community-post]");
-    var bubbleEl = postLinkEl ? postLinkEl.querySelector(".home-community__bubble") : null;
-    if (!cardEl || !noticeLinkEl || !postLinkEl || !titleEl || !avatarEl || !authorEl || !tagEl || !postEl || !bubbleEl) return;
+    var carouselEl = postLinkEl ? postLinkEl.querySelector("[data-home-community-carousel]") : null;
+    if (!cardEl || !noticeLinkEl || !postLinkEl || !titleEl || !carouselEl) return;
+    var slotTopEl = carouselEl.querySelector('[data-home-community-slot="top"]');
+    var slotCenterEl = carouselEl.querySelector('[data-home-community-slot="center"]');
+    var slotBottomEl = carouselEl.querySelector('[data-home-community-slot="bottom"]');
+    if (!slotTopEl || !slotCenterEl || !slotBottomEl) return;
 
-    var leaderboardEl = bubbleEl.querySelector(".home-community__leaderboard");
-    if (!leaderboardEl) {
-      leaderboardEl = document.createElement("section");
-      leaderboardEl.className = "home-community__leaderboard";
-      leaderboardEl.setAttribute("aria-label", "Community leaderboard preview");
-      bubbleEl.appendChild(leaderboardEl);
+    if (cardEl._clwCommunityRotateTimer) {
+      window.clearInterval(cardEl._clwCommunityRotateTimer);
+      cardEl._clwCommunityRotateTimer = 0;
     }
 
-    function renderCommunityPost(item) {
-      if (!item) return;
-      var initial = item.author && item.author.charAt(0) ? item.author.charAt(0).toUpperCase() : "U";
-      avatarEl.textContent = initial;
-      authorEl.textContent = "@" + item.author;
-      tagEl.textContent = item.tag || "#Community";
-      postEl.textContent = item.content;
-      postLinkEl.setAttribute("aria-label", txHome("Open community post list, highlighted from @") + item.author);
-      var postHref = "community-posts.html?from=home-community";
-      if (item.id) postHref += "&postId=" + encodeURIComponent(item.id);
-      postLinkEl.href = postHref;
-      bubbleEl.classList.remove("home-community__bubble--leaderboard");
+    function buildCommunityPostHtml(item) {
+      var author = item && item.author ? String(item.author) : "user";
+      var initial = author.charAt(0) ? author.charAt(0).toUpperCase() : "U";
+      var tag = item && item.tag ? String(item.tag) : "#Community";
+      var content = item && item.content ? String(item.content) : txHome("Loading a community post...");
+      return (
+        '<header class="home-community__head">' +
+        '<span class="home-community__avatar" aria-hidden="true">' + escapeHtmlText(initial) + "</span>" +
+        '<span class="home-community__author">@' + escapeHtmlText(author) + "</span>" +
+        "</header>" +
+        '<p class="home-community__tag">' + escapeHtmlText(tag) + "</p>" +
+        '<p class="home-community__post">' + escapeHtmlText(content) + "</p>"
+      );
     }
 
-    function renderCommunityLeaderboard(rows) {
+    function buildCommunityLeaderboardHtml(rows) {
       var list = Array.isArray(rows) ? rows : [];
-      leaderboardEl.innerHTML =
+      return (
+        '<section class="home-community__leaderboard" aria-label="Community leaderboard preview">' +
         '<h4 class="home-community__leaderboard-title">' + escapeHtmlText(txHome("All-time Top Learners")) + "</h4>" +
         '<ol class="home-community__leaderboard-list">' +
         list
@@ -1389,22 +1200,36 @@
             );
           })
           .join("") +
-        "</ol>";
-      postLinkEl.setAttribute("aria-label", txHome("Open community page leaderboard"));
-      postLinkEl.href = "community.html?from=home-community&focus=leaderboard#alltime-title";
-      bubbleEl.classList.add("home-community__bubble--leaderboard");
+        "</ol>" +
+        "</section>"
+      );
     }
 
-    function renderCommunityItem(item) {
-      if (!item || typeof item !== "object") return;
+    function renderSlot(slotEl, item) {
+      if (!slotEl || !item) return;
       if (item.type === "leaderboard") {
-        renderCommunityLeaderboard(item.rows);
+        slotEl.innerHTML = buildCommunityLeaderboardHtml(item.rows);
+      } else {
+        slotEl.innerHTML = buildCommunityPostHtml(item);
+      }
+      slotEl.classList.toggle("home-community__bubble--leaderboard", item.type === "leaderboard");
+    }
+
+    function applyCenterLink(item) {
+      if (!item) return;
+      if (item.type === "leaderboard") {
+        postLinkEl.setAttribute("aria-label", txHome("Open community page leaderboard"));
+        postLinkEl.href = "community.html?from=home-community&focus=leaderboard#alltime-title";
         return;
       }
-      renderCommunityPost(item);
+      var author = item.author ? String(item.author) : "user";
+      postLinkEl.setAttribute("aria-label", txHome("Open community post list, highlighted from @") + author);
+      var postHref = "community-posts.html?from=home-community";
+      if (item.id) postHref += "&postId=" + encodeURIComponent(item.id);
+      postLinkEl.href = postHref;
     }
 
-    titleEl.textContent = txHome("👥 Join the Color Community");
+    titleEl.textContent = txHome("👥 Join the Colour Community");
     noticeLinkEl.href = "community.html";
     postLinkEl.href = "community-posts.html?from=home-community";
     var pauseRotation = false;
@@ -1428,33 +1253,81 @@
         var currentIndex = pickStableSessionIndex(HOME_COMMUNITY_PICK_INDEX_KEY, items.length);
         var picked = items[currentIndex];
         if (!picked) throw new Error("Invalid community item");
-        renderCommunityItem(picked);
+        function getItemByOffset(offset) {
+          var len = items.length;
+          if (!len) return null;
+          var normalized = ((currentIndex + offset) % len + len) % len;
+          return items[normalized];
+        }
+
+        function renderWindow() {
+          renderSlot(slotTopEl, getItemByOffset(-1));
+          renderSlot(slotCenterEl, getItemByOffset(0));
+          renderSlot(slotBottomEl, getItemByOffset(1));
+          applyCenterLink(getItemByOffset(0));
+        }
+
+        function applySlotState(activeSlotName, hideTopSlot) {
+          var slots = [
+            { name: "top", el: slotTopEl },
+            { name: "center", el: slotCenterEl },
+            { name: "bottom", el: slotBottomEl }
+          ];
+          slots.forEach(function (slot) {
+            if (!slot.el) return;
+            slot.el.classList.remove(
+              "home-community__bubble--active",
+              "home-community__bubble--inactive",
+              "home-community__bubble--hidden"
+            );
+            if (hideTopSlot && slot.name === "top") {
+              slot.el.classList.add("home-community__bubble--hidden");
+              return;
+            }
+            if (slot.name === activeSlotName) {
+              slot.el.classList.add("home-community__bubble--active");
+              return;
+            }
+            slot.el.classList.add("home-community__bubble--inactive");
+          });
+        }
+
+        renderWindow();
+        applySlotState("center", false);
 
         if (items.length < 2) return;
         var switching = false;
-        window.setInterval(function () {
+        var timerId = window.setInterval(function () {
           if (switching || document.hidden || pauseRotation) return;
           switching = true;
-          bubbleEl.classList.remove("home-community__bubble--slide-in");
-          bubbleEl.classList.add("home-community__bubble--slide-out");
+          applySlotState("bottom", true);
+          carouselEl.classList.add("home-community__carousel--rolling");
           window.setTimeout(function () {
             currentIndex = (currentIndex + 1) % items.length;
-            renderCommunityItem(items[currentIndex]);
-            bubbleEl.classList.remove("home-community__bubble--slide-out");
-            bubbleEl.classList.add("home-community__bubble--slide-in");
-            window.setTimeout(function () {
-              bubbleEl.classList.remove("home-community__bubble--slide-in");
-              switching = false;
-            }, HOME_COMMUNITY_SWITCH_IN_MS + 40);
-          }, HOME_COMMUNITY_SWITCH_OUT_MS);
+            renderWindow();
+            applySlotState("center", false);
+            carouselEl.classList.add("home-community__carousel--snap");
+            carouselEl.classList.remove("home-community__carousel--rolling");
+            void carouselEl.offsetWidth;
+            carouselEl.classList.remove("home-community__carousel--snap");
+            switching = false;
+          }, HOME_COMMUNITY_SWITCH_OUT_MS + 40);
         }, HOME_COMMUNITY_ROTATE_MS);
+        cardEl._clwCommunityRotateTimer = timerId;
       })
       .catch(function () {
-        renderCommunityItem({
-          author: "colorLearner",
+        var fallbackItem = {
+          author: "colourLearner",
           tag: "#Community",
-          content: txHome("Share one color insight, palette, or learning takeaway with peers in the community.")
-        });
+          content: txHome("Share one colour insight, palette, or learning takeaway with peers in the community.")
+        };
+        renderSlot(slotTopEl, fallbackItem);
+        renderSlot(slotCenterEl, fallbackItem);
+        renderSlot(slotBottomEl, fallbackItem);
+        slotTopEl.classList.add("home-community__bubble--inactive");
+        slotCenterEl.classList.add("home-community__bubble--active");
+        slotBottomEl.classList.add("home-community__bubble--inactive");
+        applyCenterLink(fallbackItem);
       });
   }
 
@@ -1765,7 +1638,7 @@
         drawing.draw(ctx, previewCanvas.width, previewCanvas.height);
 
         previewLink.href = "game.html?openDrawing=" + String(randomIndex);
-        previewLink.setAttribute("aria-label", txHome("Start your color challenge with ") + txHome(drawingName));
+        previewLink.setAttribute("aria-label", txHome("Start your colour challenge with ") + txGame(drawingName));
         if (previewTitle) renderLocalizedGameTitle(previewTitle, drawingName);
       })
       .catch(function () {
@@ -1857,7 +1730,7 @@
       basics: "Foundations",
       models: "Encoding Fundamentals",
       meaning: "Advanced Display Technologies",
-      workflow: "Color Management Workflow",
+      workflow: "Colour Management Workflow",
       practice: "Tool Use & Applied Practice"
     };
     return names[chapterId] || toTitleCase(String(chapterId || "test"));
@@ -2109,7 +1982,7 @@
         unitNumber: 1,
         unitFocusLabel: "Overview & Core Concepts",
         questionIndex: 0,
-        prompt: "Which pair is complementary on a simple color wheel?",
+        prompt: "Which pair is complementary on a simple colour wheel?",
         optionTexts: ["Blue and orange", "Blue and green", "Yellow and orange", "Red and purple"]
       },
       {
@@ -2121,9 +1994,9 @@
         unitNumber: 2,
         unitFocusLabel: "ICC Profiles",
         questionIndex: 0,
-        prompt: "Why is an ICC profile useful in a color workflow?",
+        prompt: "Why is an ICC profile useful in a colour workflow?",
         optionTexts: [
-          "It maps color values between devices more consistently",
+          "It maps colour values between devices more consistently",
           "It increases monitor brightness automatically",
           "It removes the need for calibration",
           "It converts every image to grayscale"
@@ -2136,11 +2009,11 @@
         levelName: "Hard",
         unitId: "unit-3",
         unitNumber: 3,
-        unitFocusLabel: "Wide Color Gamut",
+        unitFocusLabel: "Wide Colour Gamut",
         questionIndex: 0,
-        prompt: "A wider color gamut display mainly allows what?",
+        prompt: "A wider colour gamut display mainly allows what?",
         optionTexts: [
-          "Showing more saturated and varied colors",
+          "Showing more saturated and varied colours",
           "Always reducing file size",
           "Removing the need for tone mapping",
           "Guaranteeing perfect print matching"
@@ -2149,9 +2022,9 @@
     ];
   }
 
-  function renderHomeTestCard(linkEl, promptEl, optionsEl, metaEl, picked) {
-    if (!linkEl || !promptEl || !optionsEl || !metaEl || !picked) return;
-    setLocalizedText(promptEl, picked.prompt || "Tap to jump into a random color challenge question.", "test");
+  function renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, picked) {
+    if (!cardEl || !promptEl || !optionsEl || !metaEl || !fullQuizActionEl || !picked) return;
+    setLocalizedText(promptEl, picked.prompt || "Tap to jump into a random colour challenge question.", "test");
     var optionRows = Array.isArray(picked.optionTexts) ? picked.optionTexts.slice(0, 4) : [];
     if (optionRows.length) {
       optionsEl.innerHTML = optionRows
@@ -2169,8 +2042,8 @@
       optionsEl.innerHTML = '<p class="home-test__option"><span class="home-test__option-key">i</span><span class="home-test__option-text" data-home-i18n-base="Open to view options">' + escapeHtmlText(txHome("Open to view options")) + "</span></p>";
     }
     setLocalizedText(metaEl, formatTestBreadcrumbBase(picked));
-    linkEl.href = buildHomeTestQuizHref(picked);
-    linkEl.setAttribute("aria-label", txHome("Open test question: ") + String(txTest(picked.prompt || "Random question")));
+    fullQuizActionEl.setAttribute("href", buildHomeTestQuizHref(picked));
+    cardEl.setAttribute("aria-label", txHome("Open test question: ") + String(txTest(picked.prompt || "Random question")));
     bindHomeTestOptionResize(optionsEl);
     scheduleAdaptiveOptionWidth(optionsEl);
   }
@@ -2189,14 +2062,15 @@
   }
 
   function setupHomeTestSpotlight() {
-    var linkEl = document.querySelector("[data-home-test-link]");
+    var cardEl = document.querySelector("[data-home-test-link]");
     var promptEl = document.querySelector("[data-home-test-prompt]");
     var optionsEl = document.querySelector("[data-home-test-options]");
     var metaEl = document.querySelector("[data-home-test-meta]");
-    if (!linkEl || !promptEl || !metaEl || !optionsEl) return;
+    var fullQuizActionEl = document.querySelector("[data-home-test-full-quiz]");
+    if (!cardEl || !promptEl || !metaEl || !optionsEl || !fullQuizActionEl) return;
     var currentPicked = null;
 
-    linkEl.addEventListener("click", function (event) {
+    cardEl.addEventListener("click", function (event) {
       if (!currentPicked || !event || !event.target || !event.target.closest) return;
       var optionEl = event.target.closest("[data-home-test-option-index]");
       if (!optionEl || !optionsEl.contains(optionEl)) return;
@@ -2212,13 +2086,13 @@
         var picked = catalog[pickStableSessionIndex(HOME_TEST_PICK_INDEX_KEY, catalog.length)];
         if (!picked || !picked.prompt) throw new Error("Invalid question item");
         currentPicked = picked;
-        renderHomeTestCard(linkEl, promptEl, optionsEl, metaEl, picked);
+        renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, picked);
       })
       .catch(function () {
         var fallbackCatalog = getHomeTestFallbackCatalog();
         var pickedFallback = fallbackCatalog[pickStableSessionIndex(HOME_TEST_PICK_INDEX_KEY, fallbackCatalog.length)];
         currentPicked = pickedFallback;
-        renderHomeTestCard(linkEl, promptEl, optionsEl, metaEl, pickedFallback);
+        renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, pickedFallback);
       });
   }
 

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Introduction — Colour Learning</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <style>
+      :root {
+        --pi-max: 46rem;
+        --pi-muted: var(--color-text-muted, #64748b);
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        font-family: var(--font-sans, system-ui, sans-serif);
+        background: linear-gradient(180deg, #fffdf8 0%, var(--color-surface, #f8fafc) 40%);
+        color: var(--color-text, #0f172a);
+        line-height: 1.6;
+      }
+      .pi-wrap {
+        max-width: var(--pi-max);
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 3rem;
+      }
+      .pi-back {
+        display: inline-block;
+        margin-bottom: 1.25rem;
+        font-size: var(--text-sm, 0.875rem);
+        font-weight: 600;
+        color: var(--color-primary, #ea580c);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+      .pi-back:hover {
+        color: var(--color-primary-hover, #c2410c);
+      }
+      .pi-back:focus-visible {
+        outline: 2px solid var(--color-accent, #fb923c);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+      .pi-title {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.35rem, 4vw, 1.72rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      .pi-slogan {
+        margin: 0 0 1.75rem;
+        font-size: var(--text-xs, 0.75rem);
+        color: var(--pi-muted);
+      }
+      .pi-stack {
+        display: block;
+      }
+      .pi-block {
+        padding: 1.15rem 1.2rem;
+        border-radius: 1rem;
+        border: 1px solid color-mix(in srgb, var(--color-primary, #ea580c) 28%, var(--color-border, #e2e8f0));
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+      }
+      .pi-block p {
+        margin: 0 0 0.82rem;
+        font-size: var(--text-sm, 0.875rem);
+      }
+      .pi-block p:last-child {
+        margin-bottom: 0;
+      }
+      [data-intro-lang="en"] .pi-block--zh {
+        display: none;
+      }
+      [data-intro-lang="zh"] .pi-block--en {
+        display: none;
+      }
+    </style>
+    <script>
+      (function () {
+        var q = new URLSearchParams(window.location.search).get("lang");
+        window.__CLW_INTRO_LANG__ = q === "zh" ? "zh" : "en";
+        document.documentElement.lang = window.__CLW_INTRO_LANG__;
+      })();
+    </script>
+  </head>
+  <body data-intro-lang="en">
+    <script>
+      (function () {
+        var lang = window.__CLW_INTRO_LANG__ || "en";
+        document.body.setAttribute("data-intro-lang", lang);
+      })();
+    </script>
+
+    <div class="pi-wrap">
+      <a class="pi-back" href="index.html">← Back to Home</a>
+      <h1 class="pi-title">Project Introduction</h1>
+      <p class="pi-slogan">Short notice for the Color Learning coursework site.</p>
+
+      <div class="pi-stack">
+        <article class="pi-block pi-block--en" lang="en">
+          <p>
+            Color Learning Website is an interactive multimedia learning website designed for the EBU6305 Interactive Media Design and Production coursework.
+          </p>
+          <p>
+            This project focuses on digital colour learning and introduces key concepts such as colour basics, colour encoding, colour models, colour spaces, colour gamut, gamma correction, HDR, colour management workflows, and accessibility-related colour usage.
+          </p>
+          <p>
+            The website is designed as a stand-alone web application using HTML, CSS, and JavaScript. It does not require a server or a real database. Instead, it uses interactive pages, visual explanations, quizzes, mini games, and community-style elements to create an engaging learning experience.
+          </p>
+          <p>
+            Our goal is to help users learn colour concepts through visuals, games, quizzes, and challenges. The website includes five main sections: Homepage, Learning, Game, Test, and Community. Each section supports a different part of the learning journey, from understanding concepts to practising, testing, and sharing progress.
+          </p>
+          <p>
+            The design also considers accessibility, multilingual support, responsive layout, ethical data use, and user-friendly interaction. Features such as high contrast mode, bilingual content, and local progress handling are included to make the website more inclusive and practical for different users and devices.
+          </p>
+        </article>
+
+        <article class="pi-block pi-block--zh" lang="zh-Hans">
+          <p><strong>项目介绍</strong></p>
+          <p>
+            Color Learning Website 是一个为 EBU6305 Interactive Media Design and Production 课程作业设计的互动多媒体学习网站。
+          </p>
+          <p>
+            本项目聚焦于数字色彩学习，内容涵盖色彩基础、色彩编码、色彩模型、色彩空间、色域、伽马校正、HDR、色彩管理流程以及与无障碍设计相关的色彩使用等主题。
+          </p>
+          <p>
+            该网站使用 HTML、CSS 和 JavaScript 构建，是一个可独立运行的网页应用，不需要服务器，也不使用真实数据库。网站通过互动页面、可视化解释、测验、小游戏和社区化元素，为用户提供更有趣、更直观的学习体验。
+          </p>
+          <p>
+            我们的目标是帮助用户通过可视化、游戏、测验与挑战学习色彩知识。网站包含五个主要部分：首页、学习、游戏、测试和社区。每个部分都对应不同的学习阶段，从概念理解，到互动练习，再到测试反馈和学习进度分享。
+          </p>
+          <p>
+            在设计过程中，我们也考虑了无障碍体验、多语言支持、响应式布局、数据伦理和用户友好交互。网站加入了高对比度模式、中英双语内容和本地进度处理等功能，以适应不同用户和不同设备的使用需求。
+          </p>
+        </article>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var lang = window.__CLW_INTRO_LANG__ || "en";
+        var back = document.querySelector(".pi-back");
+        var title = document.querySelector(".pi-title");
+        var slogan = document.querySelector(".pi-slogan");
+        if (back) {
+          back.textContent = lang === "zh" ? "← 返回首页" : "← Back to Home";
+          back.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.close();
+            window.setTimeout(function () {
+              window.location.assign(back.getAttribute("href") || "index.html");
+            }, 80);
+          });
+        }
+        if (title) title.textContent = lang === "zh" ? "项目介绍" : "Project Introduction";
+        if (slogan) {
+          slogan.textContent =
+            lang === "zh"
+              ? "色彩学习课程项目网站的简要说明。"
+              : "Short notice for the Color Learning coursework site.";
+        }
+        document.title = lang === "zh" ? "项目介绍 — 色彩学习" : "Project Introduction — Colour Learning";
+      })();
+    </script>
+  </body>
+</html>
