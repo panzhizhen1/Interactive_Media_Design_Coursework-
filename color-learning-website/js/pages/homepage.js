@@ -2104,31 +2104,54 @@
   }
 
   function readHomeTestResumeLock() {
-    var raw = readStoredJson(HOME_TEST_RESUME_LOCK_KEY, null);
-    if (!raw || typeof raw !== "object") return null;
-    var username = raw.username ? String(raw.username).trim() : "";
-    var scope = raw.scope === "guest" ? "guest" : (username ? "user" : "guest");
-    var mode = raw.mode === "basics" ? "basics" : "resume";
-    if (scope === "user" && !username) return null;
-    return {
-      scope: scope,
-      username: username,
-      mode: mode,
-      enabled: raw.enabled !== false
-    };
+    function parseLock(raw) {
+      if (!raw || typeof raw !== "object") return null;
+      var username = raw.username ? String(raw.username).trim() : "";
+      var scope = raw.scope === "guest" ? "guest" : (username ? "user" : "guest");
+      var mode = raw.mode === "basics" ? "basics" : "resume";
+      if (scope === "user" && !username) return null;
+      return {
+        scope: scope,
+        username: username,
+        mode: mode,
+        enabled: raw.enabled !== false
+      };
+    }
+    var sessionLock = parseLock(readSessionJson(HOME_TEST_RESUME_LOCK_KEY, null));
+    if (sessionLock && sessionLock.scope === "guest") return sessionLock;
+
+    var persistentLock = parseLock(readStoredJson(HOME_TEST_RESUME_LOCK_KEY, null));
+    if (!persistentLock) return null;
+    // Legacy cleanup: old guest lock in localStorage can force first question forever.
+    if (persistentLock.scope === "guest") {
+      try {
+        localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
+      } catch (e) {
+        /* ignore */
+      }
+      return null;
+    }
+    return persistentLock;
   }
 
   function writeHomeTestResumeLock(username, enabled, mode) {
     var name = String(username || "").trim();
     var scope = name ? "user" : "guest";
+    var payload = {
+      scope: scope,
+      username: name,
+      mode: mode === "basics" ? "basics" : "resume",
+      enabled: !!enabled,
+      updatedAt: new Date().toISOString()
+    };
     try {
-      localStorage.setItem(HOME_TEST_RESUME_LOCK_KEY, JSON.stringify({
-        scope: scope,
-        username: name,
-        mode: mode === "basics" ? "basics" : "resume",
-        enabled: !!enabled,
-        updatedAt: new Date().toISOString()
-      }));
+      if (scope === "guest") {
+        sessionStorage.setItem(HOME_TEST_RESUME_LOCK_KEY, JSON.stringify(payload));
+        localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
+      } else {
+        localStorage.setItem(HOME_TEST_RESUME_LOCK_KEY, JSON.stringify(payload));
+        sessionStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
+      }
     } catch (e) {
       /* ignore */
     }
@@ -2137,8 +2160,20 @@
   function clearHomeTestResumeLock() {
     try {
       localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
+      sessionStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
     } catch (e) {
       /* ignore */
+    }
+  }
+
+  function readSessionJson(key, fallback) {
+    try {
+      var raw = sessionStorage.getItem(key);
+      if (!raw) return fallback;
+      var parsed = JSON.parse(raw);
+      return parsed == null ? fallback : parsed;
+    } catch (e) {
+      return fallback;
     }
   }
 
