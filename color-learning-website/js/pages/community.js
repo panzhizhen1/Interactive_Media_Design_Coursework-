@@ -34,6 +34,10 @@
   var HIDDEN_PUBLIC_USERS = ["studenta", "studentb", "studentc"];
   var DEMO_MODERATOR_USERS = [];
   var ALLOWED_ORIGINS = ["learning", "game", "test"];
+  var SFX_BASE = "assets/sound%20effects/";
+  var SFX_CLICK = SFX_BASE + "star.mp3";
+  var SFX_SUCCESS = SFX_BASE + "tada.mp3";
+  var SFX_NOTICE = SFX_BASE + "hint.mp3";
 
   var seedPosts = [];
 
@@ -119,6 +123,30 @@
   function isCloudEnabled() {
     var cloud = getCloudApi();
     return !!(cloud && cloud.isConfigured && cloud.isConfigured());
+  }
+
+  function registerCommunitySounds() {
+    if (window.CLWSound && typeof CLWSound.registerTracks === "function") {
+      CLWSound.registerTracks([SFX_CLICK, SFX_SUCCESS, SFX_NOTICE]);
+    }
+  }
+
+  function playSfx(src, opts) {
+    if (window.CLWSound && typeof CLWSound.play === "function") {
+      CLWSound.play(src, opts || { volume: 0.42 });
+    }
+  }
+
+  function playClickSfx() {
+    playSfx(SFX_CLICK, { volume: 0.28, playbackRate: 1.08 });
+  }
+
+  function playSuccessSfx() {
+    playSfx(SFX_SUCCESS, { volume: 0.42 });
+  }
+
+  function playNoticeSfx() {
+    playSfx(SFX_NOTICE, { volume: 0.35 });
   }
 
   function getLocale() {
@@ -1338,13 +1366,13 @@
       if (!users.length) return "";
       var active = users.indexOf(getActorId()) >= 0;
       return (
-        '<button type="button" class="comment-reaction-chip' + (active ? ' is-active' : '') + '" data-comment-reaction="' + emoji + '" data-post-id="' + postId + '" data-comment-id="' + comment.id + '" aria-label="' + escapeHtml(emoji + " " + users.length) + '">' +
+        '<button type="button" class="comment-reaction-chip post-reaction-chip' + (active ? ' is-active' : '') + '" data-comment-reaction="' + emoji + '" data-post-id="' + postId + '" data-comment-id="' + comment.id + '" aria-label="' + escapeHtml(emoji + " " + users.length) + '">' +
           '<span aria-hidden="true">' + emoji + "</span>" +
           '<span>' + users.length + "</span>" +
         "</button>"
       );
     }).join("");
-    return chips ? '<div class="comment-reactions">' + chips + "</div>" : "";
+    return chips ? '<div class="comment-reactions post-reaction-summary">' + chips + "</div>" : "";
   }
 
   function buildEmojiPickerHtml(postId, commentId) {
@@ -1366,7 +1394,6 @@
           '<span class="post-comment__time">' + escapeHtml(timeAgo(comment.createdAt)) + "</span>" +
         "</div>" +
         '<p class="post-comment__content">' + escapeHtml(comment.content) + "</p>" +
-        buildCommentReactionsHtml(postId, comment) +
         '<div class="post-comment__actions">' +
           '<div class="comment-emoji-wrap">' +
             '<button type="button" class="comment-action-btn comment-action-btn--emoji" data-comment-emoji-toggle aria-label="' + escapeHtml(tr("Add reaction")) + '" aria-expanded="false">' +
@@ -1379,6 +1406,7 @@
             "</button>" +
             buildEmojiPickerHtml(postId, comment.id) +
           "</div>" +
+          buildCommentReactionsHtml(postId, comment) +
           '<button type="button" class="comment-action-btn" data-comment-reply="' + escapeHtml(comment.id) + '" data-post-id="' + postId + '" data-comment-author="' + escapeHtml(comment.author) + '">' + tr("Reply") + "</button>" +
         "</div>" +
       "</article>"
@@ -1453,9 +1481,11 @@
           (post.featured ? '<div class="post-card__featured-badge">' + tr("Featured") + "</div>" : "") +
           '<header class="post-header">' +
           '<div class="post-user">' +
+          '<button type="button" class="post-user__profile" data-author-profile="' + username + '" aria-label="' + escapeHtml(tr("View profile for ") + post.author) + '">' +
           '<span class="post-user__avatar" aria-hidden="true">' + initial + '</span>' +
+          '<span class="post-user__name">' + username + '</span>' +
+          '</button>' +
           '<div>' +
-          '<p class="post-user__name">' + username + '</p>' +
           '<div class="post-meta">' +
           '<button type="button" class="post-tag post-tag--button" data-filter-tag="' + tag + '">' + tag + '</button>' +
           '<span class="post-origin"><strong>' + tr("From:") + '</strong> ' + originText + '</span>' +
@@ -1893,10 +1923,12 @@
     var now = Date.now();
     if (now < state.submitLockUntil) {
       setFeedback(tr("Please wait a moment before publishing another post."), "error");
+      playNoticeSfx();
       return;
     }
     if (!isLoggedIn()) {
       setFeedback(tr("Log in from the avatar menu before posting."), "error");
+      playNoticeSfx();
       return;
     }
 
@@ -1908,6 +1940,7 @@
     var text = input.value.trim();
     if (text.length < MIN_POST_LENGTH) {
       setFeedback((isZhLocale() ? "请至少输入 " + MIN_POST_LENGTH + " 个字符，让每条帖子都有实际学习价值。" : "Write at least " + MIN_POST_LENGTH + " characters so each post has real learning value."), "error");
+      playNoticeSfx();
       input.focus();
       return;
     }
@@ -1924,12 +1957,14 @@
         var cloudSave = await getCloudApi().savePost(post);
         if (cloudSave && cloudSave.error) {
           setFeedback(tr("Could not publish this post to the shared community yet."), "error");
+          playNoticeSfx();
           console.warn("[community.js] save post failed:", cloudSave.error);
           return;
         }
         post = normalizePost(cloudSave && cloudSave.data ? cloudSave.data : post);
       } catch (error) {
         setFeedback(tr("Could not publish this post to the shared community yet."), "error");
+        playNoticeSfx();
         console.warn("[community.js] save post failed:", error);
         return;
       }
@@ -1961,6 +1996,7 @@
     setTagSearch("");
     setFilter(DEFAULT_FILTER);
     setFeedback(tr("Post published. You earned 5 points."), "success");
+    playSuccessSfx();
     if (isCloudEnabled()) await syncCommunityStateFromCloud({ silent: true });
     refreshAll();
     document.dispatchEvent(new CustomEvent("clw:post-created", { detail: { post: post } }));
@@ -1971,6 +2007,7 @@
     if (!btn) return false;
     if (!isLoggedIn()) {
       setFeedback(tr("Log in to like posts and save your reaction."), "error");
+      playNoticeSfx();
       return true;
     }
 
@@ -2023,6 +2060,7 @@
     state.activityLog = readLocalActivityLog();
 
     setFeedback("", "");
+    playClickSfx();
     refreshAll();
     return true;
   }
@@ -2063,6 +2101,7 @@
     if (!form) return false;
     if (!isLoggedIn()) {
       setFeedback(tr("Log in to comment on posts."), "error");
+      playNoticeSfx();
       return true;
     }
     var postId = form.getAttribute("data-comment-form") || "";
@@ -2073,6 +2112,7 @@
     var content = String(input.value || "").trim().replace(/\s+/g, " ");
     if (content.length < COMMENT_MIN_LENGTH) {
       setFeedback(isZhLocale() ? "评论至少输入 2 个字符。" : "Write at least 2 characters before commenting.", "error");
+      playNoticeSfx();
       input.focus();
       return true;
     }
@@ -2106,6 +2146,7 @@
       return true;
     }
     setFeedback(parentId ? tr("Reply posted.") : tr("Comment posted."), "success");
+    playClickSfx();
     return true;
   }
 
@@ -2114,6 +2155,7 @@
     if (!btn) return false;
     if (!isLoggedIn()) {
       setFeedback(tr("Log in to react to comments."), "error");
+      playNoticeSfx();
       return true;
     }
     var emoji = btn.getAttribute("data-comment-reaction") || "";
@@ -2139,7 +2181,8 @@
     });
     closeAllCommentEmojiMenus();
     if (!target) return true;
-    await persistPostUpdate(target, tr("Could not sync your comment reaction right now."));
+    var saved = await persistPostUpdate(target, tr("Could not sync your comment reaction right now."));
+    if (saved) playClickSfx();
     return true;
   }
 
@@ -2178,6 +2221,7 @@
     }
     writePosts(state.posts);
     setFeedback(tr("Demo highlight updated for showcase."), "success");
+    playSuccessSfx();
     refreshAll();
   }
 
@@ -2212,16 +2256,18 @@
     writePosts(state.posts);
     if (state.selectedPostId === postId) state.selectedPostId = "";
     var auth = getAuthApi();
-    if (auth && auth.getUserStats && auth.updateUserStats) {
-      var stats = auth.getUserStats(target.author);
-      auth.updateUserStats(target.author, {
-        points: Number(stats && stats.points ? stats.points : 0),
-        postCount: Math.max(0, Number(stats && stats.postCount ? stats.postCount : 0) - 1),
-        streakDays: Number(stats && stats.streakDays ? stats.streakDays : 0),
-        lastActiveDate: stats && stats.lastActiveDate ? stats.lastActiveDate : ""
+    if (auth && auth.recordActivity) {
+      await auth.recordActivity(target.author, {
+        pointsDelta: -Math.max(0, Number(target.pointsAwarded || POINTS_PER_POST)),
+        postDelta: -1,
+        source: "community",
+        type: "delete_post",
+        refId: postId
       });
+      state.activityLog = readLocalActivityLog();
     }
     setFeedback(tr("Post deleted from the shared community feed."), "success");
+    playNoticeSfx();
     refreshAll();
   }
 
@@ -2233,6 +2279,7 @@
     if (!postId) return true;
     if (!isLoggedIn()) {
       setFeedback(tr("Log in to use moderation actions."), "error");
+      playNoticeSfx();
       return true;
     }
 
@@ -2243,12 +2290,14 @@
     if (action === "hide") {
       toggleHidePost(postId);
       setFeedback(tr("Visibility preference updated for your account."), "success");
+      playNoticeSfx();
       refreshAll();
       return true;
     }
     if (action === "report") {
       reportPost(postId).then(function (saved) {
         setFeedback(saved ? tr("Thanks. The post was sent for review.") : tr("You already reported this post."), saved ? "success" : "error");
+        playNoticeSfx();
       }).catch(function (error) {
         console.warn("[community.js] report action failed:", error);
         setFeedback(tr("Could not send this report right now."), "error");
@@ -2256,6 +2305,7 @@
       return true;
     }
     if (action === "delete") {
+      playNoticeSfx();
       void deletePost(postId);
       return true;
     }
@@ -2266,6 +2316,7 @@
     var modal = document.querySelector("[data-guidelines-modal]");
     if (modal) {
       modal.hidden = false;
+      playClickSfx();
       updateOverlayScrollLock();
     }
   }
@@ -2274,6 +2325,7 @@
     var modal = document.querySelector("[data-guidelines-modal]");
     if (modal) {
       modal.hidden = true;
+      playClickSfx();
       updateOverlayScrollLock();
     }
   }
@@ -2286,6 +2338,7 @@
     if (!safe) return;
     img.src = safe;
     modal.hidden = false;
+    playClickSfx();
     updateOverlayScrollLock();
   }
 
@@ -2294,6 +2347,7 @@
     var img = document.querySelector("[data-lightbox-image]");
     if (img) img.src = "";
     if (modal) modal.hidden = true;
+    playClickSfx();
     updateOverlayScrollLock();
   }
 
@@ -2304,6 +2358,82 @@
     document.querySelectorAll("[data-post-menu-toggle]").forEach(function (btn) {
       btn.setAttribute("aria-expanded", "false");
     });
+  }
+
+  function getAuthorProfileStats(username) {
+    var name = String(username || "");
+    var activityStats = getUserActivityStats(name);
+    var pointsMap = getTotalPointsMap();
+    var points = Math.max(0, Number(pointsMap[name] || activityStats.points || 0));
+    var postCount = state.posts.filter(function (post) {
+      return post && post.author === name;
+    }).length;
+    return {
+      points: points,
+      postCount: postCount,
+      streakDays: Math.max(0, Number(activityStats.streakDays || 0)),
+      latestPost: state.posts
+        .filter(function (post) { return post && post.author === name; })
+        .sort(function (a, b) { return Date.parse(b.createdAt || "") - Date.parse(a.createdAt || ""); })[0] || null
+    };
+  }
+
+  function ensureAuthorProfilePanel() {
+    var panel = document.querySelector("[data-author-profile-panel]");
+    if (panel) return panel;
+    panel = document.createElement("aside");
+    panel.className = "author-profile-popover";
+    panel.setAttribute("data-author-profile-panel", "");
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", tr("Learning Progress"));
+    panel.hidden = true;
+    document.body.appendChild(panel);
+    return panel;
+  }
+
+  function closeAuthorProfilePanel() {
+    var panel = document.querySelector("[data-author-profile-panel]");
+    if (panel) panel.hidden = true;
+    document.querySelectorAll("[data-author-profile]").forEach(function (btn) {
+      btn.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function openAuthorProfilePanel(button) {
+    if (!button) return;
+    var username = button.getAttribute("data-author-profile") || "";
+    if (!username) return;
+    var panel = ensureAuthorProfilePanel();
+    var stats = getAuthorProfileStats(username);
+    var initial = escapeHtml(username.slice(0, 1).toUpperCase() || "?");
+    var latest = stats.latestPost ? escapeHtml(timeAgo(stats.latestPost.createdAt)) : tr("No posts yet");
+    panel.innerHTML =
+      '<div class="author-profile-popover__head">' +
+        '<span class="author-profile-popover__avatar" aria-hidden="true">' + initial + "</span>" +
+        '<div>' +
+          '<strong>' + escapeHtml(username) + "</strong>" +
+          '<span>' + (stats.postCount ? tr("Active learner") : tr("New learner")) + "</span>" +
+        "</div>" +
+      "</div>" +
+      '<div class="author-profile-popover__label">' + tr("Learning Progress") + "</div>" +
+      '<div class="author-profile-popover__stats">' +
+        '<p><span>' + tr("Total Points") + '</span><strong>' + stats.points + "</strong></p>" +
+        '<p><span>' + tr("Posts") + '</span><strong>' + stats.postCount + "</strong></p>" +
+        '<p><span>' + tr("Streak") + '</span><strong>' + stats.streakDays + "</strong></p>" +
+      "</div>" +
+      '<p class="author-profile-popover__note">' + tr("Latest community activity: ") + latest + "</p>";
+
+    var rect = button.getBoundingClientRect();
+    var width = 260;
+    var left = Math.min(Math.max(12, rect.left), window.innerWidth - width - 12);
+    var top = Math.min(rect.bottom + 8, window.innerHeight - 190);
+    panel.style.left = left + "px";
+    panel.style.top = Math.max(12, top) + "px";
+    panel.hidden = false;
+    document.querySelectorAll("[data-author-profile]").forEach(function (btn) {
+      btn.setAttribute("aria-expanded", btn === button ? "true" : "false");
+    });
+    playClickSfx();
   }
 
   function togglePostActionMenu(button) {
@@ -2428,6 +2558,7 @@
 
     document.querySelectorAll("[data-filter]").forEach(function (btn) {
       btn.addEventListener("click", function () {
+        playClickSfx();
         setFilter(btn.getAttribute("data-filter"));
       });
     });
@@ -2442,7 +2573,20 @@
       var scrollBtn = event.target.closest("[data-scroll-composer]");
       if (scrollBtn) {
         event.preventDefault();
+        playClickSfx();
         scrollToComposer();
+        return;
+      }
+      var authorProfileBtn = event.target.closest("[data-author-profile]");
+      if (authorProfileBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        openAuthorProfilePanel(authorProfileBtn);
+        return;
+      }
+      var viewAllBtn = event.target.closest("[data-view-all-posts]");
+      if (viewAllBtn) {
+        playClickSfx();
         return;
       }
       var postReactionBtn = event.target.closest("[data-post-reaction]");
@@ -2456,6 +2600,7 @@
       if (postReactionToggle) {
         event.preventDefault();
         event.stopPropagation();
+        playClickSfx();
         togglePostReactionMenu(postReactionToggle);
         return;
       }
@@ -2470,6 +2615,7 @@
       if (commentEmojiBtn) {
         event.preventDefault();
         event.stopPropagation();
+        playClickSfx();
         toggleCommentEmojiMenu(commentEmojiBtn);
         return;
       }
@@ -2477,6 +2623,7 @@
       if (commentReplyBtn) {
         event.preventDefault();
         event.stopPropagation();
+        playClickSfx();
         setCommentReplyTarget(commentReplyBtn);
         return;
       }
@@ -2484,6 +2631,7 @@
       if (commentCancelReplyBtn) {
         event.preventDefault();
         event.stopPropagation();
+        playClickSfx();
         clearCommentReplyTarget(commentCancelReplyBtn);
         return;
       }
@@ -2491,18 +2639,21 @@
       if (menuToggleBtn) {
         event.preventDefault();
         event.stopPropagation();
+        playClickSfx();
         togglePostActionMenu(menuToggleBtn);
         return;
       }
       var clearBtn = event.target.closest("[data-clear-tag-search]");
       if (clearBtn) {
         event.preventDefault();
+        playClickSfx();
         setTagSearch("");
         return;
       }
       if (!event.target.closest(".post-actions--menu")) closeAllPostActionMenus();
       if (!event.target.closest(".post-reaction-wrap")) closeAllPostReactionMenus();
       if (!event.target.closest(".comment-emoji-wrap")) closeAllCommentEmojiMenus();
+      if (!event.target.closest("[data-author-profile-panel]")) closeAuthorProfilePanel();
     });
 
     document.addEventListener("submit", function (event) {
@@ -2514,6 +2665,7 @@
 
     document.querySelectorAll("[data-tag]").forEach(function (btn) {
       btn.addEventListener("click", function () {
+        playClickSfx();
         setActiveTag(btn.getAttribute("data-tag"));
         persistComposerDraft();
       });
@@ -2575,16 +2727,19 @@
         var image = draft && draft.imageDataUrl ? draft.imageDataUrl : "";
         if (!image) {
           setFeedback(tr("Please attach an image first, then extract palette."), "error");
+          playNoticeSfx();
           return;
         }
         extractPaletteFromImageDataUrl(image, 6).then(function (colors) {
           if (!colors.length) {
             setFeedback(tr("Could not extract palette from this image."), "error");
+            playNoticeSfx();
             return;
           }
           var merged = readPaletteFromHiddenInput().concat(colors);
           setComposerPalette(merged, true);
           setFeedback(tr("Palette extracted from image."), "success");
+          playSuccessSfx();
         });
       });
     }
@@ -2596,6 +2751,7 @@
           var seed = nextPalette.length ? nextPalette[nextPalette.length - 1] : DEFAULT_COLOR;
           nextPalette.push(seed);
           setComposerPalette(nextPalette, true);
+          playClickSfx();
           return;
         }
         var deleteBtn = event.target.closest("[data-palette-delete]");
@@ -2605,11 +2761,13 @@
           var deletePalette = readPaletteFromHiddenInput();
           if (deletePalette.length <= 1) {
             setFeedback(tr("At least one color is required."), "error");
+            playNoticeSfx();
             return;
           }
           deletePalette.splice(deleteIdx, 1);
           setComposerPalette(deletePalette, true);
           setFeedback(tr("Color removed."), "success");
+          playNoticeSfx();
           return;
         }
         var blockBtn = event.target.closest("[data-palette-block]");
@@ -2617,6 +2775,7 @@
         var idx = Number(blockBtn.getAttribute("data-palette-block"));
         if (!Number.isFinite(idx)) return;
         var palette = readPaletteFromHiddenInput();
+        playClickSfx();
         openNativeColorPicker(palette[idx], function (nextHex) {
           palette[idx] = nextHex;
           setComposerPalette(palette, true);
@@ -2629,6 +2788,7 @@
         if (!file) return;
         if (!/^image\//.test(file.type)) {
           setFeedback(tr("Please select a valid image file."), "error");
+          playNoticeSfx();
           return;
         }
         var reader = new FileReader();
@@ -2636,6 +2796,7 @@
           var dataUrl = sanitizeImageDataUrl(reader.result);
           if (!dataUrl) {
             setFeedback(tr("Could not read this image."), "error");
+            playNoticeSfx();
             return;
           }
           var draft = readDraft() || {};
@@ -2653,6 +2814,7 @@
           setComposerIncludeOptions(getIncludePalette(), true);
           setComposerImagePreview(dataUrl);
           setFeedback(tr("Image attached to your post."), "success");
+          playSuccessSfx();
         };
         reader.readAsDataURL(file);
       });
@@ -2673,6 +2835,7 @@
           originMeta: draft.originMeta || {}
         });
         setComposerImagePreview("");
+        playNoticeSfx();
       });
     }
 
@@ -2691,7 +2854,9 @@
           event.target.closest("[data-comment-emoji-toggle]") ||
           event.target.closest("[data-comment-reaction]") ||
           event.target.closest("[data-comment-cancel-reply]") ||
-          event.target.closest("[data-comment-emoji-menu]")
+          event.target.closest("[data-comment-emoji-menu]") ||
+          event.target.closest("[data-author-profile]") ||
+          event.target.closest("[data-author-profile-panel]")
         ) {
           return;
         }
@@ -2702,6 +2867,7 @@
         }
         var tagFilterBtn = event.target.closest("[data-filter-tag]");
         if (tagFilterBtn) {
+          playClickSfx();
           setTagSearch(tagFilterBtn.getAttribute("data-filter-tag"));
           setFilter(DEFAULT_FILTER);
           return;
@@ -2713,6 +2879,7 @@
         }
         var selectBtn = event.target.closest("[data-post-select]");
         if (selectBtn) {
+          playClickSfx();
           state.selectedPostId = selectBtn.getAttribute("data-post-select") || "";
           renderPosts();
           scrollDetailIntoViewOnMobile();
@@ -2749,6 +2916,7 @@
         closeAllPostActionMenus();
         closeAllPostReactionMenus();
         closeAllCommentEmojiMenus();
+        closeAuthorProfilePanel();
         closeGuidelines();
         closeImageLightbox();
       }
@@ -2789,6 +2957,7 @@
   async function init() {
     if (document.body.dataset.communityReady === "1") return;
     document.body.dataset.communityReady = "1";
+    registerCommunitySounds();
     setComposerPalette([DEFAULT_COLOR], false);
     hydrateLocalState();
     applyStaticLocale();
