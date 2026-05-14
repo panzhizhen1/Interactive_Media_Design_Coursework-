@@ -185,6 +185,18 @@
       '        <button type="button" class="profile-settings-profile__btn profile-settings-profile__btn--primary" data-profile-settings-signup data-profile-auth-when="guest" hidden>' + tr("Create account") + "</button>" +
       "      </div>" +
       "    </section>" +
+      '    <section class="profile-settings-progress" aria-label="' + tr("Learning Progress") + '">' +
+      '      <div class="profile-settings-progress__head">' +
+      '        <span class="profile-settings-progress__eyebrow">' + tr("Learning Progress") + "</span>" +
+      '        <strong data-profile-progress-rank>--</strong>' +
+      "      </div>" +
+      '      <div class="profile-settings-progress__stats">' +
+      '        <p><span>' + tr("Total Points") + '</span><strong data-profile-progress-points>0</strong></p>' +
+      '        <p><span>' + tr("Posts") + '</span><strong data-profile-progress-posts>0</strong></p>' +
+      '        <p><span>' + tr("Streak") + '</span><strong data-profile-progress-streak>0</strong></p>' +
+      "      </div>" +
+      '      <p class="profile-settings-progress__note" data-profile-progress-note>' + tr("Publish reflections and discuss posts to build your community profile.") + "</p>" +
+      "    </section>" +
       '    <div class="profile-settings-privacy-row">' +
       '      <a class="profile-settings-privacy-link" href="privacy-policy.html" data-privacy-policy-link target="_blank" rel="noopener noreferrer">' +
       tr("Privacy & Data Policy") +
@@ -301,6 +313,40 @@
     if (btnOut) btnOut.hidden = !p.loggedIn;
     if (btnIn) btnIn.hidden = p.loggedIn;
     if (btnUp) btnUp.hidden = p.loggedIn;
+    refreshProgressCard();
+  }
+
+  function refreshProgressCard() {
+    if (!rootEl) return;
+    var p = getAuthProfile();
+    var pointsEl = rootEl.querySelector("[data-profile-progress-points]");
+    var postsEl = rootEl.querySelector("[data-profile-progress-posts]");
+    var streakEl = rootEl.querySelector("[data-profile-progress-streak]");
+    var rankEl = rootEl.querySelector("[data-profile-progress-rank]");
+    var noteEl = rootEl.querySelector("[data-profile-progress-note]");
+    if (!pointsEl || !postsEl || !streakEl || !rankEl || !noteEl) return;
+
+    if (!p.loggedIn || !window.CLWAuth || typeof CLWAuth.getCurrentUsername !== "function") {
+      pointsEl.textContent = "0";
+      postsEl.textContent = "0";
+      streakEl.textContent = "0";
+      rankEl.textContent = tr("Guest");
+      noteEl.textContent = tr("Log in to build a visible community learning profile.");
+      return;
+    }
+
+    var username = CLWAuth.getCurrentUsername();
+    var stats = CLWAuth.getUserStats && CLWAuth.getUserStats(username);
+    var points = Math.max(0, Number(stats && stats.points ? stats.points : 0));
+    var posts = Math.max(0, Number(stats && stats.postCount ? stats.postCount : 0));
+    var streak = Math.max(0, Number(stats && stats.streakDays ? stats.streakDays : 0));
+    pointsEl.textContent = String(points);
+    postsEl.textContent = String(posts);
+    streakEl.textContent = String(streak);
+    rankEl.textContent = points ? tr("Active learner") : tr("New learner");
+    noteEl.textContent = posts
+      ? tr("Your posts and reactions shape your learning identity.")
+      : tr("Publish your first reflection to start your social learning profile.");
   }
 
   function updatePrivacyPolicyLinkHref() {
@@ -347,6 +393,7 @@
     backdropEl = rootEl.querySelector("[data-profile-settings-backdrop]");
     panelEl = rootEl.querySelector("[data-profile-settings-panel]");
     refreshProfileCard();
+    refreshProgressCard();
     applyPrefStateToDom();
     if (isOpen) {
       backdropEl.classList.add("is-open");
@@ -414,6 +461,7 @@
       triggerEl.setAttribute("aria-expanded", "true");
     }
     refreshProfileCard();
+    refreshProgressCard();
     syncSoundFromCLW();
     syncLocaleFromCLW();
     applyPrefStateToDom();
@@ -570,6 +618,8 @@
     syncSoundFromCLW();
     applyPrefStateToDom();
   });
+  document.addEventListener("clw:user-data-updated", refreshProgressCard);
+  document.addEventListener("clw:activity-recorded", refreshProgressCard);
 
   window.CLWProfileSettings = {
     open: openPanel,
