@@ -1255,10 +1255,10 @@
       return renderImageHtml(post, false) + renderPaletteHtml(post);
     }
     var image = sanitizeImageDataUrl(post && post.imageDataUrl ? post.imageDataUrl : "");
-    if (image && post.includeImage !== false) {
-      return renderImageHtml(post, false, { compact: true });
-    }
-    return renderPaletteHtml(post, { compact: true });
+    var imageHtml = image && post.includeImage !== false
+      ? renderImageHtml(post, false, { compact: true })
+      : "";
+    return imageHtml + renderPaletteHtml(post, { compact: true });
   }
 
   function buildPostReactionMenuHtml(postId) {
