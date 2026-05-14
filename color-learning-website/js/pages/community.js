@@ -591,11 +591,18 @@
 
   function readPosts() {
     var saved = readJSON(STORAGE.posts, null);
-    if (!Array.isArray(saved)) saved = readJSON(STORAGE.legacyPostsV2, null);
-    if (!Array.isArray(saved)) saved = readJSON(STORAGE.legacyPostsV1, null);
+    if (!Array.isArray(saved) || !saved.length) saved = readJSON(STORAGE.legacyPostsV2, null);
+    if (!Array.isArray(saved) || !saved.length) saved = readJSON(STORAGE.legacyPostsV1, null);
     if (!Array.isArray(saved) || !saved.length) saved = seedPosts.slice();
     saved = saved
-      .map(normalizePost)
+      .map(function (post) {
+        try {
+          return normalizePost(post);
+        } catch (error) {
+          console.warn("[community.js] skipped invalid local post:", error);
+          return null;
+        }
+      })
       .filter(function (post) {
         return !!post.content && !isHiddenPublicUser(post.author);
       });
@@ -1737,10 +1744,10 @@
       if (activityResult && activityResult.error) console.warn("[community.js] activity sync failed:", activityResult.error);
       if (reportsResult && reportsResult.error) console.warn("[community.js] report sync failed:", reportsResult.error);
 
-      if (postsResult && Array.isArray(postsResult.data) && postsResult.data.length) {
+      if (postsResult && !postsResult.error && Array.isArray(postsResult.data) && postsResult.data.length) {
         writePosts(postsResult.data);
-      } else if (postsResult && Array.isArray(postsResult.data)) {
-        writePosts([]);
+      } else if (postsResult && !postsResult.error && Array.isArray(postsResult.data) && !postsResult.data.length) {
+        console.info("[community.js] cloud returned no posts; keeping local community cache.");
       }
       if (activityResult && Array.isArray(activityResult.data)) {
         state.activityLog = activityResult.data.slice();
@@ -2782,11 +2789,11 @@
   async function init() {
     if (document.body.dataset.communityReady === "1") return;
     document.body.dataset.communityReady = "1";
+    setComposerPalette([DEFAULT_COLOR], false);
     hydrateLocalState();
     applyStaticLocale();
     applyHomeRouteState();
     setActiveTag(DEFAULT_TAG);
-    setComposerPalette([DEFAULT_COLOR], false);
     setComposerIncludeOptions(true, true);
     bindEvents();
     applyRouteQuery();
