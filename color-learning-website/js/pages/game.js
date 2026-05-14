@@ -219,6 +219,15 @@ ctx.beginPath();ctx.moveTo(w*.18,h*.94);ctx.lineTo(w*.82,h*.94);ctx.stroke();
 }}
 ];
 
+var SFX_SUBMIT = "assets/sound effects/hint.mp3";
+var SFX_CLEAR = "assets/sound effects/wrong_answer.mp3";
+
+function playGameSfx(src) {
+  if (window.CLWSound && typeof CLWSound.play === "function") {
+    CLWSound.play(src, { volume: 0.5 });
+  }
+}
+
 function applyReplacements(text, replacements) {
   if (!text || !replacements) return text;
   Object.keys(replacements).forEach(function (name) {
@@ -303,6 +312,12 @@ const colorAdjustCountEl=document.getElementById('color-adjust-count');
 const editorControlsPanel=document.querySelector('.editor-view .controls');
 const editorStatsEl=document.querySelector('.editor-stats');
 const canvasPane=document.querySelector('.canvas-pane');
+const draftBox=document.getElementById('draft-box');
+const draftList=document.getElementById('draft-list');
+const draftOpener=document.getElementById('draft-opener');
+const draftCountBadge=document.getElementById('draft-count-badge');
+const saveDraftBtn=document.getElementById('save-draft');
+const closeDraftBoxBtn=document.getElementById('close-draft-box');
 
 let activeDrawingIndex=0;let activeTool='fill';
 let recentColors=[];
@@ -373,6 +388,8 @@ function translateGameUI() {
   translateText(toolResetLabel, 'Reset Drawing');
   translateText(toolSaveLabel, 'Save as Image');
   translateText(toolShareLabel, 'Share to Community');
+  translateText(saveDraftBtn, 'Save as Draft');
+  translateText(draftOpener, 'Draft Box');
   translateText(challengeSampleHeading, 'Challenge sample');
   translateText(challengeSampleCopy, 'Try to match the sample colors. Submit when you finish.');
   translateText(submitChallengeLabel, 'Submit challenge');
@@ -391,7 +408,7 @@ function updateColorAdjustDisplay(){if(colorAdjustCountEl)colorAdjustCountEl.tex
 function updateTimerDisplay(){if(!sessionTimeEl||editorView.hidden)return;sessionTimeEl.textContent=tx('Session time: ') + formatDuration(performance.now()-sessionStartMs);}
 function startEditorSession(){sessionStartMs=performance.now();reachedFullCompletion=false;completionElapsedMs=null;colorAdjustCount=0;if(sessionTimerId)clearInterval(sessionTimerId);sessionTimerId=setInterval(updateTimerDisplay,1000);updateTimerDisplay();if(completionTimeEl){completionTimeEl.hidden=true;completionTimeEl.textContent=tx('Completed in: —');}updateColorAdjustDisplay();}
 function stopEditorSession(){if(sessionTimerId){clearInterval(sessionTimerId);sessionTimerId=null;}}
-function refreshSessionStats(){if(!editorBaselineSnapshot||editorView.hidden)return;const current=editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height);const {total,filled,pct}=computePaintProgress(editorBaselineSnapshot,current);if(fillProgressLabel)fillProgressLabel.textContent=tx('{pct}% · {filled} / {total} px',{pct:String(pct),filled:filled.toLocaleString(),total:total.toLocaleString()});if(fillProgressFill)fillProgressFill.style.width=`${pct}%`;if(fillProgressTrack){fillProgressTrack.setAttribute('aria-valuenow',String(pct));fillProgressTrack.setAttribute('aria-valuetext',tx('{pct}% complete',{pct:String(pct)}));}if(total>0&&filled<total&&reachedFullCompletion){reachedFullCompletion=false;completionElapsedMs=null;if(completionTimeEl){completionTimeEl.hidden=true;completionTimeEl.textContent=tx('Completed in: —');}}if(total>0&&filled===total&&!reachedFullCompletion){reachedFullCompletion=true;completionElapsedMs=performance.now()-sessionStartMs;if(completionTimeEl){completionTimeEl.hidden=false;completionTimeEl.textContent=tx('Completed in: {duration}', {duration: formatDuration(completionElapsedMs)});}}}
+function refreshSessionStats(){if(!editorBaselineSnapshot||editorView.hidden)return;const current=editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height);const {total,filled,pct}=computePaintProgress(editorBaselineSnapshot,current);if(fillProgressLabel)fillProgressLabel.textContent=tx('{pct}% · {filled} / {total} px',{pct:String(pct),filled:filled.toLocaleString(),total:total.toLocaleString()});if(fillProgressFill){fillProgressFill.style.transition='width 0.25s ease';fillProgressFill.style.width=`${pct}%`;}if(fillProgressTrack){fillProgressTrack.setAttribute('aria-valuenow',String(pct));fillProgressTrack.setAttribute('aria-valuetext',tx('{pct}% complete',{pct:String(pct)}));}if(total>0&&filled<total&&reachedFullCompletion){reachedFullCompletion=false;completionElapsedMs=null;if(completionTimeEl){completionTimeEl.hidden=true;completionTimeEl.textContent=tx('Completed in: —');}}if(total>0&&filled===total&&!reachedFullCompletion){reachedFullCompletion=true;completionElapsedMs=performance.now()-sessionStartMs;if(completionTimeEl){completionTimeEl.hidden=false;completionTimeEl.textContent=tx('Completed in: {duration}', {duration: formatDuration(completionElapsedMs)});}}}
 function randomChallengeColor(){return[Math.floor(35+Math.random()*190),Math.floor(35+Math.random()*190),Math.floor(35+Math.random()*190)];}
 function buildChallengeRegions(baseline){
 const width=baseline.width,height=baseline.height,data=baseline.data,size=width*height,regionMap=new Int32Array(size);
@@ -488,6 +505,7 @@ totalSimilarity+=similarity;
 }
 const finalScore=Math.round((totalSimilarity/challengeRegions.length)*100);
 challengeScoreEl.textContent=tx('Score: ') + finalScore + '/100 (' + challengeRegions.length + ' ' + tx('regions compared') + ')';
+playGameSfx(SFX_SUBMIT);
 }
 
 function clampRange(v,min,max){return Math.min(max,Math.max(min,Number(v)||0));}
@@ -511,8 +529,8 @@ function canFillPixel(data,index,target){const isBlackLine=data[index]<35&&data[
 function floodFill(startX,startY,fillColor){const width=editorCanvas.width,height=editorCanvas.height;if(startX<0||startY<0||startX>=width||startY>=height)return;saveUndoState();const imageData=editorCtx.getImageData(0,0,width,height),data=imageData.data,startIdx=(startY*width+startX)*4,target=[data[startIdx],data[startIdx+1],data[startIdx+2],data[startIdx+3]];if(target[0]===fillColor[0]&&target[1]===fillColor[1]&&target[2]===fillColor[2]&&target[3]===255){undoStack.pop();return;}if(target[0]<35&&target[1]<35&&target[2]<35){undoStack.pop();return;}const stack=[[startX,startY]];while(stack.length){const p=stack.pop();if(!p)continue;const [x,y]=p,idx=(y*width+x)*4;if(!canFillPixel(data,idx,target))continue;data[idx]=fillColor[0];data[idx+1]=fillColor[1];data[idx+2]=fillColor[2];data[idx+3]=255;if(x>0)stack.push([x-1,y]);if(x<width-1)stack.push([x+1,y]);if(y>0)stack.push([x,y-1]);if(y<height-1)stack.push([x,y+1]);}editorCtx.putImageData(imageData,0,0);refreshSessionStats();}
 
 function setActiveTool(tool){activeTool=tool;fillToolBtn.classList.toggle('is-active',tool==='fill');eraserToolBtn.classList.toggle('is-active',tool==='eraser');}
-function openEditor(index){activeDrawingIndex=index;translateGameUI();galleryView.hidden=true;editorView.hidden=false;setActiveTool('fill');startEditorSession();drawEditor(index);setupChallengeRound();}
-function showGallery(){stopEditorSession();editorView.hidden=true;galleryView.hidden=false;challengePanel.hidden=true;}
+function openEditor(index){activeDrawingIndex=index;translateGameUI();galleryView.hidden=true;editorView.hidden=false;setActiveTool('fill');startEditorSession();drawEditor(index);setupChallengeRound();if(backBtn)backBtn.style.display='';}
+function showGallery(){stopEditorSession();editorView.hidden=true;galleryView.hidden=false;challengePanel.hidden=true;if(backBtn)backBtn.style.display='none';}
 function bindGalleryButtons(){document.querySelectorAll('[data-open-drawing]').forEach((button)=>{button.addEventListener('click',()=>{openEditor(Number(button.getAttribute('data-open-drawing')));});});}
 function toCanvasCoords(event){const rect=editorCanvas.getBoundingClientRect(),scaleX=editorCanvas.width/rect.width,scaleY=editorCanvas.height/rect.height;return{x:Math.floor((event.clientX-rect.left)*scaleX),y:Math.floor((event.clientY-rect.top)*scaleY)};}
 function bindEditorCanvas(){editorCanvas.addEventListener('click',(event)=>{const {x,y}=toCanvasCoords(event);if(activeTool==='eraser'){floodFill(x,y,[255,255,255]);return;}const {r,g,b}=getCurrentRgb();pushRecentColor({r,g,b});floodFill(x,y,[r,g,b]);});}
@@ -544,9 +562,45 @@ window.location.href="community.html";
 function saveUndoState(){undoStack.push(editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height));if(undoStack.length>30)undoStack.shift();redoStack=[];}
 function undo(){if(undoStack.length===0)return;redoStack.push(editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height));const state=undoStack.pop();editorCtx.putImageData(state,0,0);refreshSessionStats();}
 function redo(){if(redoStack.length===0)return;undoStack.push(editorCtx.getImageData(0,0,editorCanvas.width,editorCanvas.height));const state=redoStack.pop();editorCtx.putImageData(state,0,0);refreshSessionStats();}
-function bindToolActions(){fillToolBtn.addEventListener('click',()=>setActiveTool('fill'));eraserToolBtn.addEventListener('click',()=>setActiveTool('eraser'));resetBtn.addEventListener('click',resetCurrentDrawing);saveBtn.addEventListener('click',saveCurrentCanvas);if(shareCommunityBtn)shareCommunityBtn.addEventListener('click',shareCanvasToCommunity);}
+function buildResetConfirmDialog() {
+  if (!document.getElementById('reset-confirm-dialog')) {
+    var dialogEl = document.createElement('div');
+    dialogEl.id = 'reset-confirm-dialog';
+    dialogEl.className = 'confirm-dialog-backdrop';
+    dialogEl.setAttribute('role', 'presentation');
+    dialogEl.innerHTML =
+      '<div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="reset-dialog-title">' +
+        '<h2 id="reset-dialog-title" class="confirm-dialog__title">' + tx('Reset this drawing?') + '</h2>' +
+        '<p class="confirm-dialog__body">' + tx('Your current coloring will be cleared. This cannot be undone.') + '</p>' +
+        '<div class="confirm-dialog__actions">' +
+          '<button type="button" class="confirm-dialog__btn confirm-dialog__btn--ghost" data-confirm-action="cancel">' + tx('Cancel') + '</button>' +
+          '<button type="button" class="confirm-dialog__btn confirm-dialog__btn--primary" data-confirm-action="confirm">' + tx('Reset') + '</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(dialogEl);
+    dialogEl.addEventListener('click', function (e) {
+      if (e.target === dialogEl) hideResetConfirmDialog();
+    });
+    dialogEl.querySelector('[data-confirm-action="cancel"]').addEventListener('click', hideResetConfirmDialog);
+    dialogEl.querySelector('[data-confirm-action="confirm"]').addEventListener('click', function () {
+      hideResetConfirmDialog();
+      resetCurrentDrawing();
+    });
+  }
+}
+function showResetConfirmDialog() {
+  buildResetConfirmDialog();
+  playGameSfx(SFX_CLEAR);
+  var dialogEl = document.getElementById('reset-confirm-dialog');
+  if (dialogEl) dialogEl.classList.add('is-visible');
+}
+function hideResetConfirmDialog() {
+  var dialogEl = document.getElementById('reset-confirm-dialog');
+  if (dialogEl) dialogEl.classList.remove('is-visible');
+}
+function bindToolActions(){fillToolBtn.addEventListener('click',()=>setActiveTool('fill'));eraserToolBtn.addEventListener('click',()=>setActiveTool('eraser'));resetBtn.addEventListener('click',showResetConfirmDialog);saveBtn.addEventListener('click',saveCurrentCanvas);if(shareCommunityBtn)shareCommunityBtn.addEventListener('click',shareCanvasToCommunity);}
 
-function bindColorAdjustTracking(){if(!editorControlsPanel)return;editorControlsPanel.addEventListener('input',(e)=>{if(editorView.hidden)return;const t=e.target;if(t.matches&&t.matches('input[type="range"], input[type="number"]')){colorAdjustCount++;updateColorAdjustDisplay();}});}
+function bindColorAdjustTracking(){if(!editorControlsPanel)return;editorControlsPanel.addEventListener('change',(e)=>{if(editorView.hidden)return;const t=e.target;if(t.matches&&t.matches('input[type="range"], input[type="number"]')){colorAdjustCount++;updateColorAdjustDisplay();}});}
 function bindGameMode(){
 if(!gameModeSelect)return;
 gameModeSelect.addEventListener('change',()=>{
@@ -561,5 +615,172 @@ if(!editorView.hidden){setupChallengeRound();}
 }
 function placeStatsAboveCanvas(){if(!editorStatsEl||!canvasPane)return;const canvasEl=document.getElementById('editor-canvas');if(canvasEl&&editorStatsEl.parentElement!==canvasPane){canvasPane.insertBefore(editorStatsEl,canvasEl);}}
 document.addEventListener('clw:locale-changed', translateGameUI);
-function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;placeStatsAboveCanvas();drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);document.getElementById('undo-btn').addEventListener('click',undo);document.getElementById('redo-btn').addEventListener('click',redo);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();translateGameUI();showGallery();}
+
+var DRAFT_STORAGE_KEY = "clw_game_drafts_v1";
+
+function getDrafts() {
+  try {
+    var raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveDraft() {
+  if (!editorBaselineSnapshot || editorView.hidden) return;
+  var drafts = getDrafts();
+  var drawingName = drawings[activeDrawingIndex].name;
+  var imageDataUrl = editorCanvas.toDataURL("image/png");
+  var fillText = fillProgressLabel ? fillProgressLabel.textContent : "";
+  var existingIndex = -1;
+  for (var i = 0; i < drafts.length; i++) {
+    if (drafts[i].drawingName === drawingName) {
+      existingIndex = i;
+      break;
+    }
+  }
+  var draft = {
+    drawingIndex: activeDrawingIndex,
+    drawingName: drawingName,
+    imageDataUrl: imageDataUrl,
+    fillProgress: fillText,
+    savedAt: new Date().toISOString()
+  };
+  if (existingIndex >= 0) {
+    drafts[existingIndex] = draft;
+  } else {
+    drafts.unshift(draft);
+  }
+  if (drafts.length > 20) drafts = drafts.slice(0, 20);
+  try {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
+  } catch (e) {}
+  renderDraftList();
+  showDraftToast();
+}
+
+var draftToastTimer = null;
+var draftToastEl = null;
+var draftToastMessageEl = null;
+
+function getDraftToastEl() {
+  if (!draftToastEl) draftToastEl = document.getElementById("draft-toast");
+  if (!draftToastMessageEl) draftToastMessageEl = document.querySelector("[data-community-toast-message]");
+  return { el: draftToastEl, msg: draftToastMessageEl };
+}
+
+function showDraftToast() {
+  var refs = getDraftToastEl();
+  if (!refs.el || !refs.msg) return;
+  refs.msg.textContent = tx("Draft saved. Find it in the draft box on the top.");
+  refs.el.removeAttribute("hidden");
+  refs.el.classList.add("is-visible");
+  if (draftToastTimer) clearTimeout(draftToastTimer);
+  draftToastTimer = setTimeout(function () {
+    hideDraftToast();
+  }, 3000);
+  var closeBtn = refs.el.querySelector("[data-community-toast-close]");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", hideDraftToast, { once: true });
+  }
+}
+
+function hideDraftToast() {
+  var refs = getDraftToastEl();
+  if (refs.el) {
+    refs.el.setAttribute("hidden", "");
+    refs.el.classList.remove("is-visible");
+  }
+  if (draftToastTimer) {
+    clearTimeout(draftToastTimer);
+    draftToastTimer = null;
+  }
+}
+
+function renderDraftList() {
+  if (!draftList) return;
+  var drafts = getDrafts();
+  if (draftCountBadge) draftCountBadge.textContent = String(drafts.length);
+  if (draftOpener) draftOpener.style.display = drafts.length > 0 ? "flex" : "none";
+  if (!draftList) return;
+  if (drafts.length === 0) {
+    draftList.innerHTML = '<p class="draft-empty">' + tx("No drafts yet. Save your work to continue later.") + "</p>";
+    return;
+  }
+  draftList.innerHTML = "";
+  for (var i = 0; i < drafts.length; i++) {
+    var draft = drafts[i];
+    var item = document.createElement("div");
+    item.className = "draft-item";
+    item.setAttribute("tabindex", "0");
+    item.setAttribute("role", "button");
+    item.setAttribute("aria-label", draft.drawingName + " - " + (draft.fillProgress || ""));
+    item.innerHTML =
+      '<img class="draft-item__preview" src="' + draft.imageDataUrl + '" alt="" loading="lazy" />' +
+      '<div class="draft-item__info">' +
+        '<div class="draft-item__name">' + tx(draft.drawingName) + "</div>" +
+        '<div class="draft-item__progress">' + (draft.fillProgress || "") + "</div>" +
+      "</div>";
+    item.addEventListener("click", (function (idx) {
+      return function () {
+        loadDraft(idx);
+      };
+    })(i));
+    item.addEventListener("keydown", (function (idx) {
+      return function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          loadDraft(idx);
+        }
+      };
+    })(i));
+    draftList.appendChild(item);
+  }
+}
+
+function loadDraft(index) {
+  var drafts = getDrafts();
+  if (index < 0 || index >= drafts.length) return;
+  var draft = drafts[index];
+  openEditor(draft.drawingIndex);
+  var img = new Image();
+  img.onload = function () {
+    editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+    editorCtx.drawImage(img, 0, 0, editorCanvas.width, editorCanvas.height);
+    refreshSessionStats();
+  };
+  img.src = draft.imageDataUrl;
+  hideDraftBox();
+}
+
+function showDraftBox() {
+  if (draftBox) {
+    renderDraftList();
+    draftBox.classList.add("is-visible");
+  }
+}
+
+function hideDraftBox() {
+  if (draftBox) draftBox.classList.remove("is-visible");
+}
+
+function bindDraftBox() {
+  if (draftOpener) draftOpener.addEventListener("click", function (e) {
+    e.stopPropagation();
+    showDraftBox();
+  });
+  if (closeDraftBoxBtn) closeDraftBoxBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    hideDraftBox();
+  });
+  if (saveDraftBtn) saveDraftBtn.addEventListener("click", saveDraft);
+  document.addEventListener("click", function (e) {
+    if (draftBox && draftBox.classList.contains("is-visible") && !draftBox.contains(e.target) && (!draftOpener || !draftOpener.contains(e.target))) {
+      hideDraftBox();
+    }
+  });
+}
+
+function init(){activeGameMode=gameModeSelect?gameModeSelect.value:'standard';if(challengePanel)challengePanel.hidden=true;placeStatsAboveCanvas();drawings.forEach((_,index)=>drawPreview(index));bindGalleryButtons();bindModelControls();bindColorAdjustTracking();bindEditorCanvas();bindToolActions();bindGameMode();backBtn.addEventListener('click',showGallery);submitChallengeBtn.addEventListener('click',scoreChallenge);document.getElementById('undo-btn').addEventListener('click',undo);document.getElementById('redo-btn').addEventListener('click',redo);setVisibleModelGroup(colorModelSelect.value);updateColorPreview();translateGameUI();if(backBtn)backBtn.style.display='none';showGallery();bindDraftBox();renderDraftList();if(window.CLWSound&&typeof CLWSound.registerTracks==='function'){CLWSound.registerTracks([SFX_SUBMIT,SFX_CLEAR]);}}
 init();
