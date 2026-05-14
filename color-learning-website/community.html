@@ -64,7 +64,19 @@
                     <input type="checkbox" data-include-palette checked />
                     <span>Palette</span>
                   </label>
-                  <div class="palette-builder__row" data-palette-row></div>
+                  <div class="palette-builder__row" data-palette-row>
+                    <div class="palette-strip" role="list" aria-label="Post palette colors">
+                      <div class="palette-strip__cell" role="listitem" data-palette-cell="0">
+                        <button type="button" class="palette-strip__block" data-palette-block="0" style="background:#2b78e4;color:#ffffff" aria-label="Edit color #2b78e4">
+                          <span class="palette-strip__hex">2B78E4</span>
+                        </button>
+                        <div class="palette-strip__actions" style="color:#ffffff">
+                          <button type="button" class="palette-strip__action palette-strip__action--danger" data-palette-delete="0" aria-label="Delete color #2b78e4">Remove</button>
+                        </div>
+                      </div>
+                      <button type="button" class="palette-strip__add" role="listitem" data-palette-add aria-label="Add palette color">+</button>
+                    </div>
+                  </div>
                   <div class="palette-builder__actions">
                     <button type="button" class="palette-builder__extract" data-palette-from-image>Extract from image</button>
                   </div>
