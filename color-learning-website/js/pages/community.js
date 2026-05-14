@@ -1288,7 +1288,7 @@
         '<span class="post-reaction-chip' + (actorReaction === emoji ? ' is-active' : '') + '">' +
           '<span aria-hidden="true">' + emoji + "</span>" +
           '<span>' + users.length + "</span>" +
-        "</span>" +
+        "</span>"
       );
     }).join("");
     return chips ? '<div class="post-reaction-summary" aria-label="' + escapeHtml(countReactionActors(reactions) + " " + tr("reactions")) + '">' + chips + "</div>" : "";
