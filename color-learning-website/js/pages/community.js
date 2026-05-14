@@ -28,6 +28,7 @@
   var MAX_POST_LENGTH = 500;
   var COMMENT_MIN_LENGTH = 2;
   var COMMENT_MAX_LENGTH = 220;
+  var COMMENT_REACTIONS = ["👍", "👎", "😄", "🎉", "😮", "❤️", "🚀", "👀"];
   var SUBMIT_COOLDOWN_MS = 2500;
   var LIKE_COOLDOWN_MS = 600;
   var HIDDEN_PUBLIC_USERS = ["studenta", "studentb", "studentc"];
@@ -423,6 +424,15 @@
     var imageDataUrl = sanitizeImageDataUrl(post && post.imageDataUrl ? post.imageDataUrl : "");
     var includePalette = post && typeof post.includePalette === "boolean" ? post.includePalette : true;
     var includeImage = post && typeof post.includeImage === "boolean" ? post.includeImage : !!imageDataUrl;
+    var likedBy = normalizeActorList(post && post.likedBy ? post.likedBy : []);
+    var originMeta = post && post.originMeta && typeof post.originMeta === "object" ? Object.assign({}, post.originMeta) : {};
+    var postReactions = normalizeReactionMap(
+      post && post.reactions ? post.reactions : originMeta.postReactions
+    );
+    if (!Object.keys(postReactions).length && likedBy.length) {
+      postReactions["❤️"] = likedBy.slice();
+    }
+    originMeta.postReactions = postReactions;
     return {
       id: String(post && post.id ? post.id : createId()),
       author: String(post && post.author ? post.author : "Guest"),
@@ -433,26 +443,54 @@
       includePalette: includePalette,
       includeImage: includeImage,
       imageDataUrl: includeImage ? imageDataUrl : "",
-      likes: Math.max(0, Number(post && post.likes ? post.likes : 0)),
-      likedBy: Array.isArray(post && post.likedBy)
-        ? Array.from(new Set(post.likedBy.map(function (item) { return typeof item === "string" ? item.trim() : ""; }).filter(Boolean)))
-        : [],
+      likes: countReactionActors(postReactions),
+      likedBy: getReactionActors(postReactions),
+      reactions: postReactions,
       pointsAwarded: Math.max(0, Number(post && post.pointsAwarded ? post.pointsAwarded : POINTS_PER_POST)),
       createdAt: post && post.createdAt ? post.createdAt : new Date().toISOString(),
       origin: post && post.origin ? String(post.origin) : "community",
-      originMeta: post && post.originMeta && typeof post.originMeta === "object" ? post.originMeta : {},
+      originMeta: originMeta,
       comments: normalizeCommentList(post && post.comments ? post.comments : []),
       featured: !!(post && post.featured)
     };
+  }
+
+  function normalizeActorList(list) {
+    return Array.isArray(list)
+      ? Array.from(new Set(list.map(function (item) { return typeof item === "string" ? item.trim() : ""; }).filter(Boolean)))
+      : [];
+  }
+
+  function normalizeReactionMap(value) {
+    var source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    return COMMENT_REACTIONS.reduce(function (acc, emoji) {
+      var rows = normalizeActorList(source[emoji]);
+      if (rows.length) acc[emoji] = rows;
+      return acc;
+    }, {});
+  }
+
+  function getReactionActors(reactions) {
+    var map = normalizeReactionMap(reactions);
+    return Array.from(new Set(COMMENT_REACTIONS.reduce(function (all, emoji) {
+      return all.concat(normalizeActorList(map[emoji]));
+    }, [])));
+  }
+
+  function countReactionActors(reactions) {
+    return getReactionActors(reactions).length;
   }
 
   function normalizeComment(comment) {
     var text = String(comment && comment.content ? comment.content : "").trim().replace(/\s+/g, " ");
     return {
       id: String(comment && comment.id ? comment.id : ("comment_" + Date.now() + "_" + Math.random().toString(16).slice(2, 7))),
+      parentId: comment && comment.parentId ? String(comment.parentId) : "",
       author: String(comment && comment.author ? comment.author : "Guest"),
       content: text.slice(0, COMMENT_MAX_LENGTH),
-      createdAt: comment && comment.createdAt ? String(comment.createdAt) : new Date().toISOString()
+      createdAt: comment && comment.createdAt ? String(comment.createdAt) : new Date().toISOString(),
+      likedBy: normalizeActorList(comment && comment.likedBy ? comment.likedBy : []),
+      reactions: normalizeReactionMap(comment && comment.reactions ? comment.reactions : {})
     };
   }
 
@@ -892,7 +930,6 @@
       textarea.placeholder = tr("Write a short learning reflection...");
       textarea.setAttribute("aria-label", tr("Post content"));
     }
-    renderComposerRules();
 
     var toggleLabels = document.querySelectorAll(".composer-toggle span");
     if (toggleLabels[0]) toggleLabels[0].textContent = tr("Palette");
@@ -1099,10 +1136,19 @@
     return isLoggedIn() ? getCurrentUsername() : "";
   }
 
-  function hasLiked(post) {
+  function getPostReactionMap(post) {
+    return normalizeReactionMap(post && post.reactions ? post.reactions : {});
+  }
+
+  function getCurrentPostReaction(post) {
     var actor = getActorId();
-    if (!actor || !post || !Array.isArray(post.likedBy)) return false;
-    return post.likedBy.indexOf(actor) >= 0;
+    if (!actor) return "";
+    var reactions = getPostReactionMap(post);
+    for (var i = 0; i < COMMENT_REACTIONS.length; i += 1) {
+      var emoji = COMMENT_REACTIONS[i];
+      if (normalizeActorList(reactions[emoji]).indexOf(actor) >= 0) return emoji;
+    }
+    return "";
   }
 
   function formatOrigin(post) {
@@ -1156,16 +1202,6 @@
       }).join("") +
       "</div>"
     );
-  }
-
-  function renderComposerRules() {
-    var rules = document.querySelector("[data-composer-rules]");
-    if (!rules) return;
-    rules.setAttribute("aria-label", tr("Posting rules"));
-    rules.innerHTML =
-      '<span class="composer-rule-chip composer-rule-chip--required">' + tr("Text required") + "</span>" +
-      '<span class="composer-rule-chip">' + tr("Palette optional") + "</span>" +
-      '<span class="composer-rule-chip">' + tr("Image optional") + "</span>";
   }
 
   function renderImageHtml(post, detailMode, options) {
@@ -1225,17 +1261,47 @@
     return renderPaletteHtml(post, { compact: true });
   }
 
-  function buildLikeButtonHtml(postId, liked, likes) {
-    var ariaLabel = (liked ? tr("Liked post") : tr("Like post")) + " " + likes;
+  function buildPostReactionMenuHtml(postId) {
     return (
-      '<button type="button" class="like-btn' + (liked ? ' is-liked' : '') + '" data-like-id="' + postId + '" aria-pressed="' + (liked ? 'true' : 'false') + '" aria-label="' + escapeHtml(ariaLabel) + '">' +
-        '<span class="like-btn__icon" aria-hidden="true">' +
-          '<svg viewBox="0 0 24 24" focusable="false">' +
-            '<path d="M12 20.3 4.9 13.6A4.8 4.8 0 0 1 11.6 6l.4.4.4-.4a4.8 4.8 0 0 1 6.7 6.8L12 20.3Z"/>' +
-          "</svg>" +
+      '<div class="post-reaction-menu" data-post-reaction-menu hidden>' +
+        COMMENT_REACTIONS.map(function (emoji) {
+          return '<button type="button" class="post-reaction-option" data-post-reaction="' + emoji + '" data-post-id="' + postId + '" aria-label="' + escapeHtml(tr("React with ") + emoji) + '">' + emoji + "</button>";
+        }).join("") +
+      "</div>"
+    );
+  }
+
+  function buildPostReactionSummaryHtml(post) {
+    var reactions = getPostReactionMap(post);
+    var actorReaction = getCurrentPostReaction(post);
+    var chips = COMMENT_REACTIONS.map(function (emoji) {
+      var users = normalizeActorList(reactions[emoji]);
+      if (!users.length) return "";
+      return (
+        '<span class="post-reaction-chip' + (actorReaction === emoji ? ' is-active' : '') + '">' +
+          '<span aria-hidden="true">' + emoji + "</span>" +
+          '<span>' + users.length + "</span>" +
         "</span>" +
-        '<span class="like-btn__count">' + likes + "</span>" +
-      "</button>"
+      );
+    }).join("");
+    return chips ? '<div class="post-reaction-summary" aria-label="' + escapeHtml(countReactionActors(reactions) + " " + tr("reactions")) + '">' + chips + "</div>" : "";
+  }
+
+  function buildPostReactionPickerHtml(post) {
+    var currentReaction = getCurrentPostReaction(post);
+    return (
+      '<div class="post-reaction-wrap">' +
+        '<button type="button" class="post-reaction-btn' + (currentReaction ? ' is-active' : '') + '" data-post-reaction-toggle="' + post.id + '" aria-label="' + escapeHtml(tr("Add reaction")) + '" aria-expanded="false">' +
+          '<span class="post-reaction-btn__icon" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" focusable="false">' +
+              '<circle cx="12" cy="12" r="8.5"/>' +
+              '<path d="M8.8 10h.01M15.2 10h.01M8.8 14.2c1.8 1.65 4.6 1.65 6.4 0"/>' +
+            "</svg>" +
+          "</span>" +
+        "</button>" +
+        buildPostReactionMenuHtml(post.id) +
+      "</div>" +
+      buildPostReactionSummaryHtml(post)
     );
   }
 
@@ -1258,34 +1324,91 @@
     );
   }
 
+  function buildCommentReactionsHtml(postId, comment) {
+    var reactions = normalizeReactionMap(comment && comment.reactions ? comment.reactions : {});
+    var chips = COMMENT_REACTIONS.map(function (emoji) {
+      var users = normalizeActorList(reactions[emoji]);
+      if (!users.length) return "";
+      var active = users.indexOf(getActorId()) >= 0;
+      return (
+        '<button type="button" class="comment-reaction-chip' + (active ? ' is-active' : '') + '" data-comment-reaction="' + emoji + '" data-post-id="' + postId + '" data-comment-id="' + comment.id + '" aria-label="' + escapeHtml(emoji + " " + users.length) + '">' +
+          '<span aria-hidden="true">' + emoji + "</span>" +
+          '<span>' + users.length + "</span>" +
+        "</button>"
+      );
+    }).join("");
+    return chips ? '<div class="comment-reactions">' + chips + "</div>" : "";
+  }
+
+  function buildEmojiPickerHtml(postId, commentId) {
+    return (
+      '<div class="comment-emoji-menu" data-comment-emoji-menu hidden>' +
+        COMMENT_REACTIONS.map(function (emoji) {
+          return '<button type="button" class="comment-emoji-option" data-comment-reaction="' + emoji + '" data-post-id="' + postId + '" data-comment-id="' + commentId + '" aria-label="' + escapeHtml(tr("React with ") + emoji) + '">' + emoji + "</button>";
+        }).join("") +
+      "</div>"
+    );
+  }
+
+  function renderCommentItemHtml(postId, comment, level) {
+    var safeLevel = Math.min(Math.max(Number(level || 0), 0), 3);
+    return (
+      '<article class="post-comment' + (safeLevel ? ' post-comment--reply' : '') + '" data-comment-id="' + escapeHtml(comment.id) + '" style="--comment-level:' + safeLevel + '">' +
+        '<div class="post-comment__head">' +
+          '<strong class="post-comment__author">' + escapeHtml(comment.author) + '</strong>' +
+          '<span class="post-comment__time">' + escapeHtml(timeAgo(comment.createdAt)) + "</span>" +
+        "</div>" +
+        '<p class="post-comment__content">' + escapeHtml(comment.content) + "</p>" +
+        buildCommentReactionsHtml(postId, comment) +
+        '<div class="post-comment__actions">' +
+          '<div class="comment-emoji-wrap">' +
+            '<button type="button" class="comment-action-btn comment-action-btn--emoji" data-comment-emoji-toggle aria-label="' + escapeHtml(tr("Add reaction")) + '" aria-expanded="false">' +
+              '<span class="comment-emoji-icon" aria-hidden="true">' +
+                '<svg viewBox="0 0 24 24" focusable="false">' +
+                  '<circle cx="12" cy="12" r="8.5"/>' +
+                  '<path d="M8.8 10h.01M15.2 10h.01M8.8 14.2c1.8 1.65 4.6 1.65 6.4 0"/>' +
+                "</svg>" +
+              "</span>" +
+            "</button>" +
+            buildEmojiPickerHtml(postId, comment.id) +
+          "</div>" +
+          '<button type="button" class="comment-action-btn" data-comment-reply="' + escapeHtml(comment.id) + '" data-post-id="' + postId + '" data-comment-author="' + escapeHtml(comment.author) + '">' + tr("Reply") + "</button>" +
+        "</div>" +
+      "</article>"
+    );
+  }
+
+  function renderCommentTreeHtml(postId, comments, parentId, level, limitTopLevel) {
+    var rows = comments
+      .filter(function (comment) { return String(comment.parentId || "") === String(parentId || ""); })
+      .sort(function (a, b) { return Date.parse(a.createdAt) - Date.parse(b.createdAt); });
+    if (!parentId && typeof limitTopLevel === "number" && rows.length > limitTopLevel) {
+      rows = rows.slice(rows.length - limitTopLevel);
+    }
+    return rows.map(function (comment) {
+      return renderCommentItemHtml(postId, comment, level) +
+        renderCommentTreeHtml(postId, comments, comment.id, level + 1);
+    }).join("");
+  }
+
   function renderCommentsHtml(post, options) {
     if (!post) return "";
     var opts = options || {};
     var compact = !!opts.compact;
     var detail = !!opts.detail;
     var comments = normalizeCommentList(post.comments || []);
-    var visibleComments = detail ? comments.slice(-6) : comments.slice(-2);
-    var listHtml = visibleComments.length
-      ? (
-        '<div class="post-comments__list">' +
-          visibleComments.map(function (comment) {
-            return (
-              '<article class="post-comment">' +
-                '<div class="post-comment__head">' +
-                  '<strong class="post-comment__author">' + escapeHtml(comment.author) + '</strong>' +
-                  '<span class="post-comment__time">' + escapeHtml(timeAgo(comment.createdAt)) + "</span>" +
-                "</div>" +
-                '<p class="post-comment__content">' + escapeHtml(comment.content) + "</p>" +
-              "</article>"
-            );
-          }).join("") +
-        "</div>"
-      )
+    var listHtml = comments.length
+      ? '<div class="post-comments__list">' + renderCommentTreeHtml(post.id, comments, "", 0, detail ? 6 : 2) + "</div>"
       : '<p class="post-comments__empty">' + tr("No comments yet") + "</p>";
     var formHtml =
       '<form class="post-comments__form' + (compact ? ' post-comments__form--compact' : '') + '" data-comment-form="' + post.id + '">' +
+        '<div class="post-comments__replying" data-comment-replying hidden>' +
+          '<span data-comment-replying-text></span>' +
+          '<button type="button" data-comment-cancel-reply aria-label="' + escapeHtml(tr("Cancel reply")) + '">×</button>' +
+        "</div>" +
+        '<input type="hidden" data-comment-parent-id value="" />' +
         '<input type="text" class="post-comments__input" data-comment-input maxlength="' + COMMENT_MAX_LENGTH + '" placeholder="' + escapeHtml(tr("Share a helpful reply...")) + '" aria-label="' + escapeHtml(tr("Add a comment")) + '" />' +
-        '<button type="submit" class="post-comments__submit">' + tr("Reply") + "</button>" +
+        '<button type="submit" class="post-comments__submit">' + tr("Comment") + "</button>" +
       "</form>";
     return (
       '<section class="post-comments' + (compact ? ' post-comments--compact' : '') + '">' +
@@ -1310,9 +1433,7 @@
         var username = escapeHtml(post.author);
         var tag = escapeHtml(post.tag || "#General");
         var hex = normalizeHex(post.colorHex);
-        var likes = Number(post.likes || 0);
         var points = Number(post.pointsAwarded || POINTS_PER_POST);
-        var liked = hasLiked(post);
         var hidden = isPostHiddenForUser(post.id, currentUser);
         var originText = escapeHtml(formatOrigin(post));
         var initial = escapeHtml((post.author || "?").slice(0, 1).toUpperCase());
@@ -1341,7 +1462,7 @@
           (hidden ? "" : previewMediaHtml) +
           '<footer class="post-footer">' +
           '<div class="post-footer__meta">' +
-          buildLikeButtonHtml(post.id, liked, likes) +
+          buildPostReactionPickerHtml(post) +
           buildCommentCountHtml((post.comments || []).length) +
           (compact ? "" : ('<span class="post-points">' + tr("Community reward +") + points + " " + tr("pts") + "</span>")) +
           "</div>" +
@@ -1382,9 +1503,7 @@
       panel.innerHTML = "<h2>" + tr("Select a post") + "</h2><p>" + tr("Choose a post on the left to preview full details here.") + "</p>";
       return;
     }
-    var likes = Number(post.likes || 0);
     var points = Number(post.pointsAwarded || POINTS_PER_POST);
-    var liked = hasLiked(post);
     var hidden = isPostHiddenForUser(post.id, currentUser);
     panel.innerHTML =
       '<article class="post-detail-card' + (post.featured ? " is-featured" : "") + '">' +
@@ -1401,7 +1520,7 @@
         (hidden ? "" : renderImageHtml(post, true)) +
         (hidden ? "" : renderPaletteHtml(post)) +
         '<div class="post-detail-card__footer">' +
-          buildLikeButtonHtml(post.id, liked, likes) +
+          buildPostReactionPickerHtml(post) +
           buildCommentCountHtml((post.comments || []).length) +
           '<span class="post-points">' + tr("Community reward +") + points + " " + tr("pts") + "</span>" +
         "</div>" +
@@ -1840,15 +1959,17 @@
     document.dispatchEvent(new CustomEvent("clw:post-created", { detail: { post: post } }));
   }
 
-  async function handleLikeClick(event) {
-    var btn = event.target.closest("[data-like-id]");
+  async function handlePostReactionClick(event) {
+    var btn = event.target.closest("[data-post-reaction]");
     if (!btn) return false;
     if (!isLoggedIn()) {
       setFeedback(tr("Log in to like posts and save your reaction."), "error");
       return true;
     }
 
-    var postId = btn.getAttribute("data-like-id");
+    var emoji = btn.getAttribute("data-post-reaction") || "";
+    if (COMMENT_REACTIONS.indexOf(emoji) < 0) return true;
+    var postId = btn.getAttribute("data-post-id");
     var actorId = getActorId();
     if (!postId || !actorId) return true;
 
@@ -1856,49 +1977,37 @@
     if (state.likeLocks[postId] && now - state.likeLocks[postId] < LIKE_COOLDOWN_MS) return true;
     state.likeLocks[postId] = now;
 
-    var addedLike = false;
+    var addedReaction = false;
     var updatedPost = null;
     state.posts = state.posts.map(function (post) {
       if (post.id !== postId) return post;
-      var likedBy = Array.isArray(post.likedBy) ? post.likedBy.slice() : [];
-      var idx = likedBy.indexOf(actorId);
-      var likes = Number(post.likes || 0);
-      if (idx >= 0) {
-        likedBy.splice(idx, 1);
-        likes = Math.max(0, likes - 1);
-      } else {
-        likedBy.push(actorId);
-        likes += 1;
-        addedLike = true;
+      var reactions = getPostReactionMap(post);
+      var alreadySelected = normalizeActorList(reactions[emoji]).indexOf(actorId) >= 0;
+      COMMENT_REACTIONS.forEach(function (reactionEmoji) {
+        var users = normalizeActorList(reactions[reactionEmoji]).filter(function (user) {
+          return user !== actorId;
+        });
+        if (users.length) reactions[reactionEmoji] = users;
+        else delete reactions[reactionEmoji];
+      });
+      if (!alreadySelected) {
+        reactions[emoji] = normalizeActorList(reactions[emoji]).concat([actorId]);
+        addedReaction = true;
       }
-      updatedPost = Object.assign({}, post, { likes: likes, likedBy: likedBy });
+      var originMeta = Object.assign({}, post.originMeta || {}, { postReactions: reactions });
+      updatedPost = normalizePost(Object.assign({}, post, {
+        reactions: reactions,
+        originMeta: originMeta,
+        likes: countReactionActors(reactions),
+        likedBy: getReactionActors(reactions)
+      }));
       return updatedPost;
     });
-    if (isCloudEnabled() && updatedPost) {
-      try {
-        var likeSave = await getCloudApi().savePost(updatedPost);
-        if (likeSave && likeSave.error) {
-          setFeedback(tr("Could not sync your reaction right now."), "error");
-          console.warn("[community.js] like sync failed:", likeSave.error);
-          await syncCommunityStateFromCloud({ silent: true });
-          refreshAll();
-          return true;
-        }
-        updatedPost = normalizePost(likeSave && likeSave.data ? likeSave.data : updatedPost);
-        state.posts = state.posts.map(function (post) {
-          return post.id === postId ? updatedPost : post;
-        });
-      } catch (error) {
-        setFeedback(tr("Could not sync your reaction right now."), "error");
-        console.warn("[community.js] like sync failed:", error);
-        await syncCommunityStateFromCloud({ silent: true });
-        refreshAll();
-        return true;
-      }
-    }
-    writePosts(state.posts);
+    closeAllPostReactionMenus();
+    var saved = updatedPost ? await persistPostUpdate(updatedPost, tr("Could not sync your reaction right now.")) : false;
+    if (!saved) return true;
 
-    if (addedLike) {
+    if (addedReaction) {
       var auth = getAuthApi();
       if (auth && auth.recordActivity) {
         await auth.recordActivity(actorId, { pointsDelta: 0, postDelta: 0, source: "community", type: "like", refId: postId });
@@ -1907,6 +2016,36 @@
     state.activityLog = readLocalActivityLog();
 
     setFeedback("", "");
+    refreshAll();
+    return true;
+  }
+
+  async function persistPostUpdate(updatedPost, errorMessage) {
+    if (!updatedPost || !updatedPost.id) return false;
+    var normalized = normalizePost(updatedPost);
+    if (isCloudEnabled()) {
+      try {
+        var saveResult = await getCloudApi().savePost(normalized);
+        if (saveResult && saveResult.error) {
+          setFeedback(errorMessage, "error");
+          console.warn("[community.js] post update sync failed:", saveResult.error);
+          await syncCommunityStateFromCloud({ silent: true });
+          refreshAll();
+          return false;
+        }
+        normalized = normalizePost(saveResult && saveResult.data ? saveResult.data : normalized);
+      } catch (error) {
+        setFeedback(errorMessage, "error");
+        console.warn("[community.js] post update sync failed:", error);
+        await syncCommunityStateFromCloud({ silent: true });
+        refreshAll();
+        return false;
+      }
+    }
+    state.posts = state.posts.map(function (post) {
+      return post.id === normalized.id ? normalized : post;
+    });
+    writePosts(state.posts);
     refreshAll();
     return true;
   }
@@ -1920,6 +2059,8 @@
       return true;
     }
     var postId = form.getAttribute("data-comment-form") || "";
+    var parentInput = form.querySelector("[data-comment-parent-id]");
+    var parentId = parentInput ? String(parentInput.value || "") : "";
     var input = form.querySelector("[data-comment-input]");
     if (!input) return true;
     var content = String(input.value || "").trim().replace(/\s+/g, " ");
@@ -1937,6 +2078,7 @@
       previousComments = normalizeCommentList(post.comments || []);
       target.comments = normalizeCommentList(previousComments.concat([{
         id: "comment_" + Date.now() + "_" + Math.random().toString(16).slice(2, 7),
+        parentId: parentId,
         author: getCurrentUsername(),
         content: content,
         createdAt: new Date().toISOString()
@@ -1945,37 +2087,52 @@
     });
     if (!target) return true;
 
-    if (isCloudEnabled()) {
-      try {
-        var commentSave = await getCloudApi().savePost(target);
-        if (commentSave && commentSave.error) {
-          setFeedback(tr("Could not publish your comment to the shared community yet."), "error");
-          console.warn("[community.js] comment sync failed:", commentSave.error);
-          await syncCommunityStateFromCloud({ silent: true });
-          refreshAll();
-          return true;
-        }
-        target = normalizePost(commentSave && commentSave.data ? commentSave.data : target);
-        state.posts = state.posts.map(function (post) {
-          return post.id === postId ? target : post;
-        });
-      } catch (error) {
-        console.warn("[community.js] comment sync failed:", error);
-        setFeedback(tr("Could not publish your comment to the shared community yet."), "error");
-        state.posts = state.posts.map(function (post) {
-          if (post.id !== postId) return post;
-          var restored = normalizePost(post);
-          restored.comments = previousComments;
-          return restored;
-        });
-        refreshAll();
-        return true;
-      }
+    var saved = await persistPostUpdate(target, tr("Could not publish your comment to the shared community yet."));
+    if (!saved) {
+      state.posts = state.posts.map(function (post) {
+        if (post.id !== postId) return post;
+        var restored = normalizePost(post);
+        restored.comments = previousComments;
+        return restored;
+      });
+      refreshAll();
+      return true;
     }
+    setFeedback(parentId ? tr("Reply posted.") : tr("Comment posted."), "success");
+    return true;
+  }
 
-    writePosts(state.posts);
-    refreshAll();
-    setFeedback(tr("Comment posted."), "success");
+  async function handleCommentReactionClick(event) {
+    var btn = event.target.closest("[data-comment-reaction]");
+    if (!btn) return false;
+    if (!isLoggedIn()) {
+      setFeedback(tr("Log in to react to comments."), "error");
+      return true;
+    }
+    var emoji = btn.getAttribute("data-comment-reaction") || "";
+    if (COMMENT_REACTIONS.indexOf(emoji) < 0) return true;
+    var postId = btn.getAttribute("data-post-id") || "";
+    var commentId = btn.getAttribute("data-comment-id") || "";
+    var actorId = getActorId();
+    var target = null;
+    state.posts.forEach(function (post) {
+      if (post.id !== postId) return;
+      target = normalizePost(post);
+      target.comments = target.comments.map(function (comment) {
+        if (comment.id !== commentId) return comment;
+        var reactions = normalizeReactionMap(comment.reactions || {});
+        var users = normalizeActorList(reactions[emoji]);
+        var idx = users.indexOf(actorId);
+        if (idx >= 0) users.splice(idx, 1);
+        else users.push(actorId);
+        if (users.length) reactions[emoji] = users;
+        else delete reactions[emoji];
+        return Object.assign({}, comment, { reactions: reactions });
+      });
+    });
+    closeAllCommentEmojiMenus();
+    if (!target) return true;
+    await persistPostUpdate(target, tr("Could not sync your comment reaction right now."));
     return true;
   }
 
@@ -2149,8 +2306,81 @@
     if (!menu) return;
     var willOpen = !!menu.hidden;
     closeAllPostActionMenus();
+    closeAllPostReactionMenus();
     menu.hidden = !willOpen;
     button.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  }
+
+  function closeAllPostReactionMenus() {
+    document.querySelectorAll("[data-post-reaction-menu]").forEach(function (menu) {
+      menu.hidden = true;
+    });
+    document.querySelectorAll("[data-post-reaction-toggle]").forEach(function (btn) {
+      btn.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function togglePostReactionMenu(button) {
+    if (!button) return;
+    var wrap = button.closest(".post-reaction-wrap");
+    var menu = wrap ? wrap.querySelector("[data-post-reaction-menu]") : null;
+    if (!menu) return;
+    var willOpen = !!menu.hidden;
+    closeAllPostReactionMenus();
+    closeAllPostActionMenus();
+    closeAllCommentEmojiMenus();
+    menu.hidden = !willOpen;
+    button.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  }
+
+  function closeAllCommentEmojiMenus() {
+    document.querySelectorAll("[data-comment-emoji-menu]").forEach(function (menu) {
+      menu.hidden = true;
+    });
+    document.querySelectorAll("[data-comment-emoji-toggle]").forEach(function (btn) {
+      btn.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function toggleCommentEmojiMenu(button) {
+    if (!button) return;
+    var wrap = button.closest(".comment-emoji-wrap");
+    var menu = wrap ? wrap.querySelector("[data-comment-emoji-menu]") : null;
+    if (!menu) return;
+    var willOpen = !!menu.hidden;
+    closeAllCommentEmojiMenus();
+    menu.hidden = !willOpen;
+    button.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  }
+
+  function setCommentReplyTarget(button) {
+    if (!button) return;
+    var comments = button.closest(".post-comments");
+    var form = comments ? comments.querySelector("[data-comment-form]") : null;
+    if (!form) return;
+    var parentInput = form.querySelector("[data-comment-parent-id]");
+    var notice = form.querySelector("[data-comment-replying]");
+    var noticeText = form.querySelector("[data-comment-replying-text]");
+    var input = form.querySelector("[data-comment-input]");
+    var author = button.getAttribute("data-comment-author") || "";
+    if (parentInput) parentInput.value = button.getAttribute("data-comment-reply") || "";
+    if (noticeText) noticeText.textContent = tr("Replying to ") + author;
+    if (notice) notice.hidden = false;
+    if (input) {
+      input.placeholder = tr("Write a reply...");
+      input.focus();
+    }
+  }
+
+  function clearCommentReplyTarget(button) {
+    var form = button ? button.closest("[data-comment-form]") : null;
+    if (!form) return;
+    var parentInput = form.querySelector("[data-comment-parent-id]");
+    var notice = form.querySelector("[data-comment-replying]");
+    var input = form.querySelector("[data-comment-input]");
+    if (parentInput) parentInput.value = "";
+    if (notice) notice.hidden = true;
+    if (input) input.placeholder = tr("Share a helpful reply...");
   }
 
   function scrollDetailIntoViewOnMobile() {
@@ -2208,6 +2438,48 @@
         scrollToComposer();
         return;
       }
+      var postReactionBtn = event.target.closest("[data-post-reaction]");
+      if (postReactionBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        void handlePostReactionClick(event);
+        return;
+      }
+      var postReactionToggle = event.target.closest("[data-post-reaction-toggle]");
+      if (postReactionToggle) {
+        event.preventDefault();
+        event.stopPropagation();
+        togglePostReactionMenu(postReactionToggle);
+        return;
+      }
+      var commentReactionBtn = event.target.closest("[data-comment-reaction]");
+      if (commentReactionBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        void handleCommentReactionClick(event);
+        return;
+      }
+      var commentEmojiBtn = event.target.closest("[data-comment-emoji-toggle]");
+      if (commentEmojiBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleCommentEmojiMenu(commentEmojiBtn);
+        return;
+      }
+      var commentReplyBtn = event.target.closest("[data-comment-reply]");
+      if (commentReplyBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        setCommentReplyTarget(commentReplyBtn);
+        return;
+      }
+      var commentCancelReplyBtn = event.target.closest("[data-comment-cancel-reply]");
+      if (commentCancelReplyBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        clearCommentReplyTarget(commentCancelReplyBtn);
+        return;
+      }
       var menuToggleBtn = event.target.closest("[data-post-menu-toggle]");
       if (menuToggleBtn) {
         event.preventDefault();
@@ -2222,6 +2494,8 @@
         return;
       }
       if (!event.target.closest(".post-actions--menu")) closeAllPostActionMenus();
+      if (!event.target.closest(".post-reaction-wrap")) closeAllPostReactionMenus();
+      if (!event.target.closest(".comment-emoji-wrap")) closeAllCommentEmojiMenus();
     });
 
     document.addEventListener("submit", function (event) {
@@ -2401,11 +2675,17 @@
         if (event.target.closest("[data-post-menu-toggle]")) {
           return;
         }
-        if (event.target.closest("[data-comment-form]")) {
-          return;
-        }
-        if (event.target.closest("[data-like-id]")) {
-          void handleLikeClick(event);
+        if (
+          event.target.closest("[data-post-reaction-toggle]") ||
+          event.target.closest("[data-post-reaction]") ||
+          event.target.closest("[data-post-reaction-menu]") ||
+          event.target.closest("[data-comment-form]") ||
+          event.target.closest("[data-comment-reply]") ||
+          event.target.closest("[data-comment-emoji-toggle]") ||
+          event.target.closest("[data-comment-reaction]") ||
+          event.target.closest("[data-comment-cancel-reply]") ||
+          event.target.closest("[data-comment-emoji-menu]")
+        ) {
           return;
         }
         if (event.target.closest("[data-post-action]")) {
@@ -2460,6 +2740,8 @@
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
         closeAllPostActionMenus();
+        closeAllPostReactionMenus();
+        closeAllCommentEmojiMenus();
         closeGuidelines();
         closeImageLightbox();
       }
