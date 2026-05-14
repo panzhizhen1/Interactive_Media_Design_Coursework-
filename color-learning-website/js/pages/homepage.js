@@ -10,6 +10,8 @@
     "Learn colour through visuals, games, quizzes, and challenges.": "用可视化、游戏、测验与挑战学习色彩。",
     "Check your understanding with quick quizzes, levels, and instant feedback.": "通过快速测验、分级题目与即时反馈检查学习效果。",
     "Take Full Quiz": "进入完整测验",
+    "Continue Last Quiz": "继续上次测验",
+    "Start from Basics": "从基础测试开始",
     "Follow four guided modules from colour basics to interactive practice.": "从基础概念到互动实践，按照四个模块建立完整理解。",
     "Module 1: Colour Basics": "模块 1：色彩基础",
     "Module 2: Encoding Concepts": "模块 2：编码概念",
@@ -290,6 +292,8 @@
     if (testSubEl) testSubEl.textContent = txHome("Check your understanding with quick quizzes, levels, and instant feedback.");
     var testFullQuizActionEl = document.querySelector("[data-home-test-full-quiz]");
     if (testFullQuizActionEl) testFullQuizActionEl.textContent = txHome("Take Full Quiz");
+    var testResumeActionEl = document.querySelector("[data-home-test-resume]");
+    if (testResumeActionEl) testResumeActionEl.textContent = txHome("Continue Last Quiz");
     var gameTitleEl = document.querySelector(".home-card__text--game");
     if (gameTitleEl) {
       var drawingBase = gameTitleEl.dataset.homeGameDrawingBase;
@@ -370,6 +374,7 @@
   var WHEEL_COLOR_STORAGE_KEY = "clw_theme_wheel_color";
   var HOME_GAME_PICK_INDEX_KEY = "clw_home_game_pick_index";
   var HOME_TEST_PICK_INDEX_KEY = "clw_home_test_pick_index";
+  var HOME_TEST_RESUME_LOCK_KEY = "clw_home_test_resume_lock_v1";
   var HOME_LEARN_PICK_INDEX_KEY = "clw_home_learn_pick_index";
   var HOME_LEARN_VIEW_MODE_KEY = "clw_home_learn_view_mode";
   var HOME_LEARN_MODEL_PICK_INDEX_KEY = "clw_home_learn_model_pick_index";
@@ -1234,6 +1239,19 @@
       postLinkEl.href = postHref;
     }
 
+    function buildImmediateItems() {
+      var items = [];
+      var saved = readStoredJson("clw_posts_v3", null);
+      if (!Array.isArray(saved) || !saved.length) saved = readStoredJson("clw_posts_v2", null);
+      if (!Array.isArray(saved) || !saved.length) saved = readStoredJson("clw_posts_v1", null);
+      if (Array.isArray(saved) && saved.length) {
+        items = saved
+          .map(normalizeCommunityPost)
+          .filter(function (item) { return !!item; });
+      }
+      return items.slice(0, 6);
+    }
+
     titleEl.textContent = txHome("👥 Join the Colour Community");
     noticeLinkEl.href = "community.html";
     postLinkEl.href = "community-posts.html?from=home-community";
@@ -1244,6 +1262,32 @@
     cardEl.addEventListener("pointerleave", function () {
       pauseRotation = false;
     });
+
+    // First paint: render immediately from local cached posts (or fallback),
+    // then replace with full async data once loading completes.
+    var fallbackItem = {
+      author: "colourLearner",
+      tag: "#Community",
+      content: txHome("Share one colour insight, palette, or learning takeaway with peers in the community.")
+    };
+    var immediateItems = buildImmediateItems();
+    if (!immediateItems.length) immediateItems = [fallbackItem];
+    var immediateIndex = pickStableSessionIndex(HOME_COMMUNITY_PICK_INDEX_KEY, immediateItems.length);
+    if (!(immediateIndex >= 0)) immediateIndex = 0;
+    var immediateLen = immediateItems.length;
+    var immediateTop = immediateItems[((immediateIndex - 1) % immediateLen + immediateLen) % immediateLen];
+    var immediateCenter = immediateItems[immediateIndex % immediateLen];
+    var immediateBottom = immediateItems[(immediateIndex + 1) % immediateLen];
+    renderSlot(slotTopEl, immediateTop);
+    renderSlot(slotCenterEl, immediateCenter);
+    renderSlot(slotBottomEl, immediateBottom);
+    slotTopEl.classList.remove("home-community__bubble--active", "home-community__bubble--hidden");
+    slotCenterEl.classList.remove("home-community__bubble--inactive", "home-community__bubble--hidden");
+    slotBottomEl.classList.remove("home-community__bubble--active", "home-community__bubble--hidden");
+    slotTopEl.classList.add("home-community__bubble--inactive");
+    slotCenterEl.classList.add("home-community__bubble--active");
+    slotBottomEl.classList.add("home-community__bubble--inactive");
+    applyCenterLink(immediateCenter);
 
     Promise.all([loadCommunityPostCatalog(), buildHomeCommunityLeaderboardRows(4)])
       .then(function (results) {
@@ -1321,11 +1365,6 @@
         cardEl._clwCommunityRotateTimer = timerId;
       })
       .catch(function () {
-        var fallbackItem = {
-          author: "colourLearner",
-          tag: "#Community",
-          content: txHome("Share one colour insight, palette, or learning takeaway with peers in the community.")
-        };
         renderSlot(slotTopEl, fallbackItem);
         renderSlot(slotCenterEl, fallbackItem);
         renderSlot(slotBottomEl, fallbackItem);
@@ -2027,6 +2066,210 @@
     ];
   }
 
+  function getSignedInHomepageUsername() {
+    var auth = window.CLWAuth || null;
+    if (auth && typeof auth.isLoggedIn === "function" && !auth.isLoggedIn()) return "";
+    if (auth && typeof auth.getCurrentUsername === "function") {
+      var authName = String(auth.getCurrentUsername() || "").trim();
+      if (authName && authName.toLowerCase() !== "guest") return authName;
+    }
+    var user = readStoredJson(AUTH_USER_KEY, null);
+    if (!user || typeof user !== "object") return "";
+    var username = user.username ? String(user.username).trim() : "";
+    if (!username || username.toLowerCase() === "guest") return "";
+    return username;
+  }
+
+  function readHomeUserTestState(username) {
+    var name = String(username || "").trim();
+    if (!name) return null;
+    var exactKey = "clw_test_module_state_v2__" + name;
+    var exactState = readStoredJson(exactKey, null);
+    if (exactState && typeof exactState === "object") return exactState;
+    try {
+      var prefix = "clw_test_module_state_v2__";
+      var targetLower = name.toLowerCase();
+      for (var i = 0; i < localStorage.length; i += 1) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf(prefix) !== 0) continue;
+        var storedUser = key.slice(prefix.length).toLowerCase();
+        if (storedUser !== targetLower) continue;
+        var matched = readStoredJson(key, null);
+        if (matched && typeof matched === "object") return matched;
+      }
+    } catch (e) {
+      /* ignore */
+    }
+    return null;
+  }
+
+  function readHomeTestResumeLock() {
+    var raw = readStoredJson(HOME_TEST_RESUME_LOCK_KEY, null);
+    if (!raw || typeof raw !== "object") return null;
+    var username = raw.username ? String(raw.username).trim() : "";
+    var scope = raw.scope === "guest" ? "guest" : (username ? "user" : "guest");
+    var mode = raw.mode === "basics" ? "basics" : "resume";
+    if (scope === "user" && !username) return null;
+    return {
+      scope: scope,
+      username: username,
+      mode: mode,
+      enabled: raw.enabled !== false
+    };
+  }
+
+  function writeHomeTestResumeLock(username, enabled, mode) {
+    var name = String(username || "").trim();
+    var scope = name ? "user" : "guest";
+    try {
+      localStorage.setItem(HOME_TEST_RESUME_LOCK_KEY, JSON.stringify({
+        scope: scope,
+        username: name,
+        mode: mode === "basics" ? "basics" : "resume",
+        enabled: !!enabled,
+        updatedAt: new Date().toISOString()
+      }));
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function clearHomeTestResumeLock() {
+    try {
+      localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function hasHomeTestProgress(state) {
+    if (!state || typeof state !== "object") return false;
+    return Array.isArray(state.history) && state.history.length > 0;
+  }
+
+  function getHomeTestFirstQuestion(catalog) {
+    if (!Array.isArray(catalog) || !catalog.length) return null;
+    var basicsFirst = findHomeTestCatalogQuestion(catalog, "basics", "easy", "unit-1", 0);
+    if (basicsFirst) return basicsFirst;
+    for (var i = 0; i < catalog.length; i += 1) {
+      if (catalog[i] && catalog[i].prompt) return catalog[i];
+    }
+    return catalog[0] || null;
+  }
+
+  function findHomeTestCatalogQuestion(catalog, chapterId, levelId, unitId, questionIndex) {
+    var chapter = String(chapterId || "");
+    var level = String(levelId || "");
+    var unit = String(unitId || "");
+    var qIndex = Number.parseInt(questionIndex, 10);
+    if (!Array.isArray(catalog) || !catalog.length || !chapter || !level || !unit) return null;
+    var sameUnitRows = catalog.filter(function (item) {
+      return (
+        item &&
+        String(item.chapterId || "") === chapter &&
+        String(item.levelId || "") === level &&
+        String(item.unitId || "") === unit
+      );
+    });
+    if (!sameUnitRows.length) return null;
+    sameUnitRows.sort(function (a, b) {
+      return Number(a.questionIndex || 0) - Number(b.questionIndex || 0);
+    });
+    if (Number.isFinite(qIndex) && qIndex >= 0) {
+      for (var i = 0; i < sameUnitRows.length; i += 1) {
+        if (Number(sameUnitRows[i].questionIndex || 0) === qIndex) return sameUnitRows[i];
+      }
+    }
+    return sameUnitRows[0];
+  }
+
+  function buildHomeResumeQuestion(catalog) {
+    var username = getSignedInHomepageUsername();
+    if (!username) return null;
+    var state = readHomeUserTestState(username);
+    if (!hasHomeTestProgress(state)) return null;
+
+    var currentQuiz = state.currentQuiz && typeof state.currentQuiz === "object" ? state.currentQuiz : null;
+    if (currentQuiz) {
+      var nextIndex = Number.parseInt(currentQuiz.currentIndex, 10);
+      var inProgressRow = findHomeTestCatalogQuestion(catalog, currentQuiz.chapterId, currentQuiz.levelId, currentQuiz.unitId, nextIndex);
+      if (inProgressRow) return inProgressRow;
+    }
+
+    var progressRoot = state.progress && typeof state.progress === "object" ? state.progress : {};
+    function fromProgress(chapterId, levelId, fallbackUnitId) {
+      var chapter = progressRoot[chapterId];
+      var level = chapter && chapter[levelId];
+      var unitId = level && level.currentUnit ? String(level.currentUnit) : String(fallbackUnitId || "");
+      if (!unitId) return null;
+      return findHomeTestCatalogQuestion(catalog, chapterId, levelId, unitId, 0);
+    }
+
+    var lastSubmit = state.lastQuizSubmit && typeof state.lastQuizSubmit === "object" ? state.lastQuizSubmit : null;
+    if (lastSubmit && lastSubmit.chapterId && lastSubmit.levelId) {
+      var submitRow = fromProgress(lastSubmit.chapterId, lastSubmit.levelId, lastSubmit.unitId);
+      if (submitRow) return submitRow;
+      var submitFallback = findHomeTestCatalogQuestion(catalog, lastSubmit.chapterId, lastSubmit.levelId, lastSubmit.unitId, 0);
+      if (submitFallback) return submitFallback;
+    }
+
+    var selectedChapter = state.selection && state.selection.chapter ? String(state.selection.chapter) : "";
+    var selectedLevel = state.selection && state.selection.level ? String(state.selection.level) : "";
+    if (selectedChapter && selectedLevel) {
+      var selectedRow = fromProgress(selectedChapter, selectedLevel, "unit-1");
+      if (selectedRow) return selectedRow;
+    }
+
+    var latestRow = null;
+    var latestTime = 0;
+    Object.keys(progressRoot).forEach(function (chapterId) {
+      var levels = progressRoot[chapterId];
+      if (!levels || typeof levels !== "object") return;
+      Object.keys(levels).forEach(function (levelId) {
+        var row = levels[levelId];
+        if (!row || typeof row !== "object") return;
+        var hasSignal = (Array.isArray(row.completedUnits) && row.completedUnits.length > 0) || !!row.lastPlayed;
+        if (!hasSignal) return;
+        var ts = row.lastPlayed ? Date.parse(row.lastPlayed) : 0;
+        var candidate = fromProgress(chapterId, levelId, "unit-1");
+        if (!candidate) return;
+        if (!latestRow || ts >= latestTime) {
+          latestRow = candidate;
+          latestTime = Number.isFinite(ts) ? ts : latestTime;
+        }
+      });
+    });
+    if (latestRow) return latestRow;
+
+    if (Array.isArray(state.history) && state.history.length) {
+      var latestResult = state.history[0];
+      if (latestResult) {
+        var historyRow = fromProgress(latestResult.chapter, latestResult.level, latestResult.unit);
+        if (historyRow) return historyRow;
+      }
+    }
+    return null;
+  }
+
+  function updateHomeTestResumeAction(resumeActionEl, picked, mode) {
+    if (!resumeActionEl) return;
+    if (!picked) {
+      resumeActionEl.hidden = true;
+      resumeActionEl.setAttribute("aria-hidden", "true");
+      resumeActionEl.setAttribute("tabindex", "-1");
+      return;
+    }
+    resumeActionEl.hidden = false;
+    resumeActionEl.setAttribute("aria-hidden", "false");
+    resumeActionEl.removeAttribute("tabindex");
+    var basicsMode = mode === "basics";
+    setLocalizedText(resumeActionEl, basicsMode ? "Start from Basics" : "Continue Last Quiz");
+    resumeActionEl.setAttribute(
+      "aria-label",
+      txHome("Open test question: ") + String(txTest(picked.prompt || (basicsMode ? "Start from basics" : "Continue last quiz")))
+    );
+  }
+
   function renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, picked) {
     if (!cardEl || !promptEl || !optionsEl || !metaEl || !fullQuizActionEl || !picked) return;
     setLocalizedText(promptEl, picked.prompt || "Tap to jump into a random colour challenge question.", "test");
@@ -2072,8 +2315,14 @@
     var optionsEl = document.querySelector("[data-home-test-options]");
     var metaEl = document.querySelector("[data-home-test-meta]");
     var fullQuizActionEl = document.querySelector("[data-home-test-full-quiz]");
+    var resumeActionEl = document.querySelector("[data-home-test-resume]");
     if (!cardEl || !promptEl || !metaEl || !optionsEl || !fullQuizActionEl) return;
     var currentPicked = null;
+    var resumePicked = null;
+    var basicsPicked = null;
+    var quickActionMode = "";
+    var quickActionPicked = null;
+    var currentCatalog = null;
 
     cardEl.addEventListener("click", function (event) {
       if (!currentPicked || !event || !event.target || !event.target.closest) return;
@@ -2085,19 +2334,90 @@
       window.location.href = buildHomeTestQuizHref(currentPicked, pickedOptionIndex);
     });
 
+    if (resumeActionEl) {
+      resumeActionEl.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (!quickActionPicked) return;
+        var username = getSignedInHomepageUsername();
+        writeHomeTestResumeLock(username, true, quickActionMode || "resume");
+        currentPicked = quickActionPicked;
+        renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, currentPicked);
+      });
+    }
+
+    function shouldPreferLockedPicked(mode) {
+      if (!mode) return false;
+      var username = getSignedInHomepageUsername();
+      var lock = readHomeTestResumeLock();
+      if (!lock || !lock.enabled) return false;
+      if (String(lock.mode || "") !== String(mode)) return false;
+      if (username) {
+        return lock.scope === "user" && String(lock.username || "").toLowerCase() === username.toLowerCase();
+      }
+      return lock.scope === "guest";
+    }
+
+    function syncResumeAction() {
+      var username = getSignedInHomepageUsername();
+      if (!currentCatalog) {
+        updateHomeTestResumeAction(resumeActionEl, null, "");
+        return;
+      }
+      resumePicked = buildHomeResumeQuestion(currentCatalog);
+      basicsPicked = getHomeTestFirstQuestion(currentCatalog);
+
+      var hasHistory = !!(username && resumePicked);
+      quickActionMode = hasHistory ? "resume" : "basics";
+      quickActionPicked = hasHistory ? resumePicked : basicsPicked;
+
+      var activeLock = readHomeTestResumeLock();
+      if (activeLock && activeLock.enabled && String(activeLock.mode || "") !== quickActionMode) {
+        var lockMatchesViewer = username
+          ? (activeLock.scope === "user" && String(activeLock.username || "").toLowerCase() === username.toLowerCase())
+          : activeLock.scope === "guest";
+        if (lockMatchesViewer) clearHomeTestResumeLock();
+      }
+
+      updateHomeTestResumeAction(resumeActionEl, quickActionPicked, quickActionMode);
+      if (quickActionPicked && shouldPreferLockedPicked(quickActionMode)) {
+        currentPicked = quickActionPicked;
+        renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, currentPicked);
+      }
+    }
+
+    document.addEventListener("clw:auth-changed", function () {
+      syncResumeAction();
+    });
+
     loadTestQuestionCatalog()
       .then(function (catalog) {
         if (!Array.isArray(catalog) || !catalog.length) throw new Error("Empty question catalog");
+        currentCatalog = catalog.slice();
         var picked = catalog[pickStableSessionIndex(HOME_TEST_PICK_INDEX_KEY, catalog.length)];
         if (!picked || !picked.prompt) throw new Error("Invalid question item");
+        resumePicked = buildHomeResumeQuestion(currentCatalog);
+        basicsPicked = getHomeTestFirstQuestion(currentCatalog);
+        var initialUsername = getSignedInHomepageUsername();
+        var initialMode = initialUsername && resumePicked ? "resume" : "basics";
+        if (initialMode === "resume" && resumePicked && shouldPreferLockedPicked("resume")) picked = resumePicked;
+        if (initialMode === "basics" && basicsPicked && shouldPreferLockedPicked("basics")) picked = basicsPicked;
         currentPicked = picked;
         renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, picked);
+        syncResumeAction();
       })
       .catch(function () {
         var fallbackCatalog = getHomeTestFallbackCatalog();
+        currentCatalog = fallbackCatalog.slice();
         var pickedFallback = fallbackCatalog[pickStableSessionIndex(HOME_TEST_PICK_INDEX_KEY, fallbackCatalog.length)];
+        resumePicked = buildHomeResumeQuestion(currentCatalog);
+        basicsPicked = getHomeTestFirstQuestion(currentCatalog);
+        var fallbackUsername = getSignedInHomepageUsername();
+        var fallbackMode = fallbackUsername && resumePicked ? "resume" : "basics";
+        if (fallbackMode === "resume" && resumePicked && shouldPreferLockedPicked("resume")) pickedFallback = resumePicked;
+        if (fallbackMode === "basics" && basicsPicked && shouldPreferLockedPicked("basics")) pickedFallback = basicsPicked;
         currentPicked = pickedFallback;
         renderHomeTestCard(cardEl, promptEl, optionsEl, metaEl, fullQuizActionEl, pickedFallback);
+        syncResumeAction();
       });
   }
 

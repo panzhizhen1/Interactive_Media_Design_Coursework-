@@ -13,6 +13,12 @@
     accounts: "clw_accounts_v1",
     activityLog: "clw_activity_log_v1"
   };
+  var LEGACY_ACCOUNT_KEYS = ["clw_accounts", "clw_accounts_v0", "clw_users"];
+  var DEMO_ACCOUNTS = [
+    { username: "studentA", password: "StudentA123!" },
+    { username: "studentB", password: "StudentB123!" },
+    { username: "studentC", password: "StudentC123!" }
+  ];
   function readJSON(key, fallback) {
     try {
       var raw = localStorage.getItem(key);
@@ -45,6 +51,45 @@
     return typeof password === "string" && password.length >= 6;
   }
 
+  function clonePlain(value, fallback) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return fallback;
+    return Object.assign({}, value);
+  }
+
+  function isUserRecordShape(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+    if (typeof value.password === "string") return true;
+    if (value.profile && typeof value.profile === "object") return true;
+    if (value.stats && typeof value.stats === "object") return true;
+    return typeof value.username === "string";
+  }
+
+  function normalizeAccountsStore(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { users: {} };
+    if (raw.users && typeof raw.users === "object" && !Array.isArray(raw.users)) {
+      return { users: clonePlain(raw.users, {}) };
+    }
+    var keys = Object.keys(raw);
+    if (!keys.length) return { users: {} };
+    var looksLikeUsersMap = keys.every(function (key) {
+      return isUserRecordShape(raw[key]);
+    });
+    if (looksLikeUsersMap) return { users: clonePlain(raw, {}) };
+    return { users: {} };
+  }
+
+  function findStoredUsername(store, username) {
+    var name = normalizeUsername(username);
+    if (!name || !store || !store.users || typeof store.users !== "object") return "";
+    if (Object.prototype.hasOwnProperty.call(store.users, name)) return name;
+    var lowered = name.toLowerCase();
+    var keys = Object.keys(store.users);
+    for (var i = 0; i < keys.length; i += 1) {
+      if (String(keys[i]).toLowerCase() === lowered) return keys[i];
+    }
+    return "";
+  }
+
   function buildDefaultStats() {
     return {
       points: 0,
@@ -55,11 +100,16 @@
   }
 
   function readAccounts() {
-    var data = readJSON(STORAGE.accounts, { users: {} });
-    if (!data || typeof data !== "object" || !data.users || typeof data.users !== "object") {
-      return { users: {} };
+    var normalized = normalizeAccountsStore(readJSON(STORAGE.accounts, null));
+    if (Object.keys(normalized.users).length) return normalized;
+    for (var i = 0; i < LEGACY_ACCOUNT_KEYS.length; i += 1) {
+      var legacyKey = LEGACY_ACCOUNT_KEYS[i];
+      var legacyNormalized = normalizeAccountsStore(readJSON(legacyKey, null));
+      if (!Object.keys(legacyNormalized.users).length) continue;
+      writeAccounts(legacyNormalized);
+      return legacyNormalized;
     }
-    return data;
+    return { users: {} };
   }
 
   function writeAccounts(data) {
@@ -113,7 +163,8 @@
     var name = normalizeUsername(username);
     if (!name) return null;
     var store = readAccounts();
-    return store.users[name] || null;
+    var matchedName = findStoredUsername(store, name);
+    return matchedName ? store.users[matchedName] || null : null;
   }
 
   function getUserStats(username) {
@@ -125,39 +176,42 @@
     var name = normalizeUsername(username);
     if (!name) return null;
     var store = readAccounts();
-    if (!store.users[name]) {
-      store.users[name] = {
-        username: name,
+    var matchedName = findStoredUsername(store, name);
+    var key = matchedName || name;
+    if (!store.users[key]) {
+      store.users[key] = {
+        username: key,
         password: "",
         profile: {
-          displayName: name,
+          displayName: key,
           avatarColor: "#2b78e4"
         },
         stats: buildDefaultStats(),
         createdAt: new Date().toISOString()
       };
       writeAccounts(store);
-    } else if (!store.users[name].stats) {
-      store.users[name].stats = buildDefaultStats();
+    } else if (!store.users[key].stats) {
+      store.users[key].stats = buildDefaultStats();
       writeAccounts(store);
     }
-    return store.users[name];
+    return store.users[key];
   }
 
   function updateUserStats(username, patch) {
     var name = normalizeUsername(username);
     if (!name) return buildDefaultStats();
     var store = readAccounts();
-    if (!store.users[name]) return buildDefaultStats();
-    var prev = store.users[name].stats || buildDefaultStats();
-    store.users[name].stats = Object.assign({}, prev, patch || {});
+    var matchedName = findStoredUsername(store, name);
+    if (!matchedName || !store.users[matchedName]) return buildDefaultStats();
+    var prev = store.users[matchedName].stats || buildDefaultStats();
+    store.users[matchedName].stats = Object.assign({}, prev, patch || {});
     writeAccounts(store);
     document.dispatchEvent(
       new CustomEvent("clw:user-data-updated", {
-        detail: { username: name, stats: Object.assign({}, store.users[name].stats) }
+        detail: { username: matchedName, stats: Object.assign({}, store.users[matchedName].stats) }
       })
     );
-    return Object.assign({}, store.users[name].stats);
+    return Object.assign({}, store.users[matchedName].stats);
   }
 
   function recordActivity(username, payload) {
@@ -228,7 +282,7 @@
     }
 
     var store = readAccounts();
-    if (store.users[username]) {
+    if (findStoredUsername(store, username)) {
       return { ok: false, message: "Username already exists." };
     }
 
@@ -249,11 +303,36 @@
   function verifyCredentials(usernameInput, passwordInput) {
     var username = normalizeUsername(usernameInput);
     var password = String(passwordInput || "");
-    var user = getUserRecord(username);
+    var store = readAccounts();
+    var matchedName = findStoredUsername(store, username);
+    var user = matchedName ? store.users[matchedName] : null;
     if (!user || user.password !== password) {
       return { ok: false, message: "Invalid username or password." };
     }
-    return { ok: true, username: username };
+    return { ok: true, username: matchedName };
+  }
+
+  function ensureDemoAccounts() {
+    var store = readAccounts();
+    var changed = false;
+    DEMO_ACCOUNTS.forEach(function (entry) {
+      var username = normalizeUsername(entry && entry.username);
+      if (!username) return;
+      var matched = findStoredUsername(store, username);
+      if (matched) return;
+      store.users[username] = {
+        username: username,
+        password: String(entry.password || ""),
+        profile: {
+          displayName: username,
+          avatarColor: "#2b78e4"
+        },
+        stats: buildDefaultStats(),
+        createdAt: new Date().toISOString()
+      };
+      changed = true;
+    });
+    if (changed) writeAccounts(store);
   }
 
   function updateAvatarUI() {
@@ -580,6 +659,7 @@
   }
 
   function init() {
+    ensureDemoAccounts();
     initAuthAPI();
     updateAvatarUI();
   }

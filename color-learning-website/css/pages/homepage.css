@@ -1094,6 +1094,10 @@ main.page-home {
   transition: transform 180ms ease, box-shadow 180ms ease, filter 170ms ease, background-color 170ms ease, border-color 170ms ease;
 }
 
+.home-test__action[hidden] {
+  display: none !important;
+}
+
 .home-test__action--review {
   background: rgba(34, 102, 171, 0.82);
   border-color: rgba(34, 102, 171, 0.44);
