@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/pages/game.css" />
   </head>
-  <body>
+  <body class="game-module">
     <header class="site-header" role="banner">
       <div id="site-navbar" aria-live="polite"></div>
     </header>
@@ -18,13 +18,29 @@
       <section class="game-intro">
         <h1 class="page-title" data-i18n="Painting Game">Painting Game</h1>
         <p class="lead" data-i18n="Pick a black-line drawing, choose a color model (RGB / HSV / CMYK), and click a closed region to fill it like a paint bucket.">Pick a black-line drawing, choose a color model (RGB / HSV / CMYK), and click a closed region to fill it like a paint bucket.</p>
-        <label class="mode-picker" for="game-mode">
-          <span data-i18n="Mode">Mode</span>
-          <select id="game-mode">
-            <option value="standard" selected data-i18n="Standard mode">Standard mode</option>
-            <option value="challenge" data-i18n="Challenge mode">Challenge mode</option>
-          </select>
-        </label>
+        <div class="game-intro__actions">
+          <label class="mode-picker" for="game-mode">
+            <span data-i18n="Mode">Mode</span>
+            <select id="game-mode">
+              <option value="standard" selected data-i18n="Standard mode">Standard mode</option>
+              <option value="challenge" data-i18n="Challenge mode">Challenge mode</option>
+            </select>
+          </label>
+          <div class="draft-box-wrapper">
+            <button type="button" id="draft-opener" class="draft-opener" aria-label="Open Draft Box">
+              <span data-i18n="Draft Box">Draft Box</span>
+              <span id="draft-count-badge" class="draft-opener__badge">0</span>
+            </button>
+
+            <div id="draft-box" class="draft-box">
+              <div class="draft-box__header">
+                <h2 data-i18n="Draft Box">Draft Box</h2>
+                <button type="button" id="close-draft-box" class="draft-box__close" aria-label="Close draft box"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+              </div>
+              <div id="draft-list" class="draft-list"></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="gallery-view" class="gallery-view" aria-label="Drawing selection area">
@@ -230,9 +246,10 @@
               <button type="button" id="tool-eraser" class="tool-btn btn-with-icon"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16.24 3.56a2 2 0 00-2.83 0L3.56 13.41a2 2 0 000 2.83L7.34 20H20a1 1 0 100-2h-4.93l4.17-4.17a2 2 0 000-2.83l-3-3zM8.76 18l-3.79-3.79 9.85-9.85L18.61 8.15 8.76 18z"/></svg></span><span data-i18n="Region Eraser">Region Eraser</span></button>
               <button type="button" id="undo-btn" class="tool-btn btn-with-icon" title="Undo"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg></span><span data-i18n="Undo">Undo</span></button>
               <button type="button" id="redo-btn" class="tool-btn btn-with-icon" title="Redo"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg></span><span data-i18n="Redo">Redo</span></button>
-              <button type="button" id="reset-drawing" class="tool-btn btn-with-icon tool-btn--warn"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6a6 6 0 01-10.24 4.24l-1.42 1.42A8 8 0 1012 5z"/></svg></span><span data-i18n="Reset Drawing">Reset Drawing</span></button>
+              <button type="button" id="reset-drawing" class="tool-btn btn-with-icon tool-btn--danger"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6a6 6 0 01-10.24 4.24l-1.42 1.42A8 8 0 1012 5z"/></svg></span><span data-i18n="Reset Drawing">Reset Drawing</span></button>
               <button type="button" id="save-image" class="tool-btn btn-with-icon tool-btn--success"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 3H5a2 2 0 00-2 2v14h18V7l-4-4zM7 5h8v4H7V5zm5 12a3 3 0 110-6 3 3 0 010 6z"/></svg></span><span data-i18n="Save as Image">Save as Image</span></button>
               <button type="button" id="share-community" class="tool-btn btn-with-icon tool-btn--community"><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.3 3.3 0 000-1.39l7.05-4.11A2.99 2.99 0 1015 5c0 .23.03.45.08.66L8.03 9.77a3 3 0 100 4.46l7.1 4.17c-.05.19-.07.39-.07.6a2.94 2.94 0 102.94-2.92z"/></svg></span><span data-i18n="Share to Community">Share to Community</span></button>
+              <button type="button" id="save-draft" class="tool-btn tool-btn--community"><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H7a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg><span data-i18n="Save as Draft">Save as Draft</span></button>
             </div>
 
             <div id="challenge-panel" class="challenge-panel" hidden>
@@ -247,6 +264,13 @@
           </aside>
         </div>
       </section>
+
+      <div id="draft-toast" class="draft-toast" hidden data-community-toast>
+        <p class="draft-toast__message" data-community-toast-message></p>
+        <button type="button" class="draft-toast__close" data-community-toast-close aria-label="Close">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
     </main>
 
     <footer class="site-footer" role="contentinfo">
