@@ -1788,19 +1788,21 @@ input[type="color"] {
   background: linear-gradient(135deg, #e8e8ed, #f5f5f7);
   color: #424245;
   font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
-.author-profile-popover__head strong,
-.author-profile-popover__head span {
+.author-profile-popover__head > div > strong,
+.author-profile-popover__head > div > span {
   display: block;
 }
 
-.author-profile-popover__head strong {
+.author-profile-popover__head > div > strong {
   color: #1d1d1f;
   font-size: 0.95rem;
 }
 
-.author-profile-popover__head span {
+.author-profile-popover__head > div > span {
   color: var(--color-primary);
   font-size: 0.76rem;
   font-weight: 700;
