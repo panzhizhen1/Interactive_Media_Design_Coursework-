@@ -24,18 +24,20 @@ You can open this website in either of the following two ways:
   - Open the generated local address (http://127.0.0.1:8080) in your browser.
   - This method provides a zero-configuration, lightweight HTTP server, ensuring full compatibility for dynamic modules and avoiding browser security restrictions associated with the file:// protocol.
 
-## Group Number: 2025EBU6305G12  
+## Group Number: 2025EBU6305G12
 ## Project Title: Hue Hub: Interactive Color Learning
 
 ## Group Members
 
-| Name             | BUPT ID    | QMUL ID   | Email |
-|:-----------------|:-----------|:----------| :--- |
-| **Shen Li**      | 2023213588 | 231224376 | 2023213588@bupt.cn |
-| **Jialu Gu**     | 2023213523 | 231225007 | jp2023213523@qmul.ac.uk |
-| **Zhizhen Pan**  | 2023213604 | 231224929 | panzhizhen@bupt.edu.cn |
-| **Jinglin Wang** | 2023213527 | 231224697 | jinglin.wang@se23.qmul.ac.uk |
-| **Wenyun Zhong** | 2023213579 | 231224516 | 2023213579@bupt.cn |
+
+| Name             | BUPT ID    | QMUL ID   | Email                                                               |
+| ---------------- | ---------- | --------- | ------------------------------------------------------------------- |
+| **Shen Li**      | 2023213588 | 231224376 | [2023213588@bupt.cn](mailto:2023213588@bupt.cn)                     |
+| **Jialu Gu**     | 2023213523 | 231225007 | [jp2023213523@qmul.ac.uk](mailto:jp2023213523@qmul.ac.uk)           |
+| **Zhizhen Pan**  | 2023213604 | 231224929 | [panzhizhen@bupt.edu.cn](mailto:panzhizhen@bupt.edu.cn)             |
+| **Jinglin Wang** | 2023213527 | 231224697 | [jinglin.wang@se23.qmul.ac.uk](mailto:jinglin.wang@se23.qmul.ac.uk) |
+| **Wenyun Zhong** | 2023213579 | 231224516 | [2023213579@bupt.cn](mailto:2023213579@bupt.cn)                     |
+
 
 ## Topic choice & Page Ownership
 
@@ -45,17 +47,20 @@ You can open this website in either of the following two ways:
 
 Each member owns exactly **one** of the **5 main pages/sections**. The page owner is responsible for **content**, **interaction design**, **implementation**, and **integration readiness** for that page.
 
-| Section | Owner |
-| :--- | :--- |
-| 1. Homepage | Wenyun Zhong |
-| 2. Learning | Shen Li |
-| 3. Game | Jialu Gu |
-| 4. Test | Jinglin Wang |
-| 5. Community | Zhizhen Pan |
+
+| Section      | Owner        |
+| ------------ | ------------ |
+| 1. Homepage  | Wenyun Zhong |
+| 2. Learning  | Shen Li      |
+| 3. Game      | Jialu Gu     |
+| 4. Test      | Jinglin Wang |
+| 5. Community | Zhizhen Pan  |
+
 
 ### Page Responsibilities
 
 #### 1) Homepage
+
 - Define and present the **unique selling point** of the website in the first screen.
 - Build a clean, minimalist, and informative landing layout with clear **calls-to-action**.
 - Implement **primary navigation** to all 5 main pages and ensure a consistent header/footer.
@@ -64,6 +69,7 @@ Each member owns exactly **one** of the **5 main pages/sections**. The page owne
 - Ensure strong **responsiveness** (desktop/tablet/mobile) and basic accessibility (contrast, keyboard focus).
 
 #### 2) Learning
+
 - Design the learning page information architecture (sections, headings, and progression).
 - Create **engaging learning content** (not just text): visuals, interactive cards, expand/collapse, mini checks.
 - Add optional **sub-pages/anchors** if the topic is large (but keep navigation simple).
@@ -99,51 +105,54 @@ Each member owns exactly **one** of the **5 main pages/sections**. The page owne
 - Keep the Test interface **readable, responsive, and low-friction** with progress indicators, clear buttons, error prevention, responsive layouts, and SVG icons across desktop, tablet, and mobile.
 
 #### 5) Community
-- Create a community area that supports **social learning** (sharing results, tips, or short posts).
-- Implement **profiles** (simple cards) and a **leaderboard/scoreboard** tied to Game/Test outcomes (if available).
-- Highlight **star learners** (top scores or featured members) with a clear selection rule.
-- If interactions are simulated (no backend), clearly indicate the behaviour (sample data, local storage, or mock UI).
-- Define basic community guidelines (what can be shared) and keep the UI friendly and motivating.
-
-### Community
 
 **Purpose:** turn work from **Learning + Game + Test** into visible social learning evidence.
 
-| Area | Key features |
-| :--- | :--- |
-| ✍️ Posting | Required reflection text, tags, optional palette, optional image |
-| 🔗 Cross-page sharing | Learning notes, Game artwork + palette, Test result image + score |
-| 💬 Discussion | Emoji reactions, comments, threaded replies |
-| 🔎 Discovery | Source filters, tag search, full-post detail page |
-| 👤 Social profile | Author cards, personal progress, streaks, rankings |
-| 🛡️ Safety | Guidelines, hide/show, report, author delete |
-| ♿ Inclusive design | English/Chinese UI, adjustable font size, responsive layout |
 
-| Page | Role |
-| :--- | :--- |
-| `community.html` | Create posts, preview latest feed, view progress and leaderboards |
-| `community-posts.html` | Browse all posts in a feed + detail layout |
+| Area                  | Key features                                                      |
+| --------------------- | ----------------------------------------------------------------- |
+| ✍️ Posting            | Required reflection text, tags, optional palette, optional image  |
+| 🔗 Cross-page sharing | Learning notes, Game artwork + palette, Test result image + score |
+| 💬 Discussion         | Emoji reactions, comments, threaded replies                       |
+| 🔎 Discovery          | Source filters, tag search, full-post detail page                 |
+| 👤 Social profile     | Author cards, personal progress, streaks, rankings                |
+| 🛡️ Safety            | Guidelines, hide/show, report, author delete                      |
+| ♿ Inclusive design    | English/Chinese UI, adjustable font size, responsive layout       |
+
+
+
+| Page                   | Role                                                              |
+| ---------------------- | ----------------------------------------------------------------- |
+| `community.html`       | Create posts, preview latest feed, view progress and leaderboards |
+| `community-posts.html` | Browse all posts in a feed + detail layout                        |
+
 
 #### Quick Guide
 
-| Click | Action |
-| :--- | :--- |
-| `Avatar` | sign in / language / font size |
-| `Create Post` | text + tag + optional palette/image → `Publish Post` |
-| `😀` | react to posts/comments |
-| `Comment` / `Reply` | discuss with peers |
-| `Latest / From Learning / From Game / From Test` | filter posts |
-| `Browse All Posts` | open the full feed page |
-| `Author avatar` | view learning profile |
-| `...` | hide, show again, report, or delete own post |
+
+| Click                                            | Action                                               |
+| ------------------------------------------------ | ---------------------------------------------------- |
+| `Avatar`                                         | sign in / language / font size                       |
+| `Create Post`                                    | text + tag + optional palette/image → `Publish Post` |
+| `😀`                                             | react to posts/comments                              |
+| `Comment` / `Reply`                              | discuss with peers                                   |
+| `Latest / From Learning / From Game / From Test` | filter posts                                         |
+| `Browse All Posts`                               | open the full feed page                              |
+| `Author avatar`                                  | view learning profile                                |
+| `...`                                            | hide, show again, report, or delete own post         |
+
 
 #### Data Note
 
-| State | Behaviour |
-| :--- | :--- |
-| `Supabase configured` | shared public posts across devices |
-| `No cloud config` | fallback to browser `localStorage` |
-| `Local only` | drafts, hidden posts, login session, language, font size |
+
+| State                 | Behaviour                                                |
+| --------------------- | -------------------------------------------------------- |
+| `Supabase configured` | shared public posts across devices                       |
+| `No cloud config`     | fallback to browser `localStorage`                       |
+| `Local only`          | drafts, hidden posts, login session, language, font size |
+
 
 ## Assigned TA: Jun Gu
+
 ### hint: Remember to merge all the code changes together and push them to the main branch.
+
