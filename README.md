@@ -1,5 +1,21 @@
 # EBU6305 - Interactive Media Design Coursework
 
+## Website Access
+
+You can open this website in either of the following two ways:
+
+- **Method 1: VS Code lightweight local server (for development/testing)**
+  - Open this project in VS Code.
+  - Start a lightweight server extension (for example, Live Server).
+  - Open the generated local address (such as `http://127.0.0.1:5500/...`) in your browser.
+  - This method provides full compatibility for dynamic modules during local debugging.
+
+- **Method 2: Public website URL (for direct access)**
+  - Open our deployed public URL directly in your browser.
+  - This is the recommended method for demo/review because it matches the real online environment.
+
+Note: directly opening `index.html` via `file://` may cause some dynamic homepage modules to load incompletely due to browser security restrictions on local file requests.
+
 ## Group Number: 2025EBU6305G12  
 ## Project Title: Hue Hub: Interactive Color Learning
 
