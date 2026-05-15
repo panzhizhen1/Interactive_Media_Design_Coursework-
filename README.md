@@ -11,7 +11,7 @@ You can open this website in either of the following two ways:
   - This method provides full compatibility for dynamic modules during local debugging.
 
 - **Method 2: Public website URL (for direct access)**
-  - Open our deployed public URL directly in your browser.
+  - Open our deployed public URL directly in your browser. (https://panzhizhen1.github.io/Interactive_Media_Design_Coursework-/)
   - This is the recommended method for demo/review because it matches the real online environment.
 
 - **Method 3: Node.js http-server (for custom port testing)**
