@@ -67,5 +67,45 @@ Each member owns exactly **one** of the **5 main pages/sections**. The page owne
 - If interactions are simulated (no backend), clearly indicate the behaviour (sample data, local storage, or mock UI).
 - Define basic community guidelines (what can be shared) and keep the UI friendly and motivating.
 
+### Community
+
+**Purpose:** turn work from **Learning + Game + Test** into visible social learning evidence.
+
+| Area | Key features |
+| :--- | :--- |
+| ✍️ Posting | Required reflection text, tags, optional palette, optional image |
+| 🔗 Cross-page sharing | Learning notes, Game artwork + palette, Test result image + score |
+| 💬 Discussion | Emoji reactions, comments, threaded replies |
+| 🔎 Discovery | Source filters, tag search, full-post detail page |
+| 👤 Social profile | Author cards, personal progress, streaks, rankings |
+| 🛡️ Safety | Guidelines, hide/show, report, author delete |
+| ♿ Inclusive design | English/Chinese UI, adjustable font size, responsive layout |
+
+| Page | Role |
+| :--- | :--- |
+| `community.html` | Create posts, preview latest feed, view progress and leaderboards |
+| `community-posts.html` | Browse all posts in a feed + detail layout |
+
+#### Quick Guide
+
+| Click | Action |
+| :--- | :--- |
+| `Avatar` | sign in / language / font size |
+| `Create Post` | text + tag + optional palette/image → `Publish Post` |
+| `😀` | react to posts/comments |
+| `Comment` / `Reply` | discuss with peers |
+| `Latest / From Learning / From Game / From Test` | filter posts |
+| `Browse All Posts` | open the full feed page |
+| `Author avatar` | view learning profile |
+| `...` | hide, show again, report, or delete own post |
+
+#### Data Note
+
+| State | Behaviour |
+| :--- | :--- |
+| `Supabase configured` | shared public posts across devices |
+| `No cloud config` | fallback to browser `localStorage` |
+| `Local only` | drafts, hidden posts, login session, language, font size |
+
 ## Assigned TA: Jun Gu
 ### hint: Remember to merge all the code changes together and push them to the main branch.
