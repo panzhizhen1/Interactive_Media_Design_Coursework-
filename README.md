@@ -61,12 +61,11 @@ Each member owns exactly **one** of the **5 main pages/sections**. The page owne
 
 #### 1) Homepage
 
-- Define and present the **unique selling point** of the website in the first screen.
-- Build a clean, minimalist, and informative landing layout with clear **calls-to-action**.
-- Implement **primary navigation** to all 5 main pages and ensure a consistent header/footer.
-- Add **hero media** (video / animation / slideshow) that introduces the theme.
-- Provide space for **announcements/adverts** (banner or card area) without harming usability.
-- Ensure strong **responsiveness** (desktop/tablet/mobile) and basic accessibility (contrast, keyboard focus).
+- Define and communicate the site’s unique selling points in the first screen through a focused hero message and immediate action paths.
+- Deliver a clean, minimalist, and informative landing experience with clear CTAs (Start Learning / Do a Test / Start Challenge / Enter Community).
+- Provide consistent **primary navigation** across all five core pages, supported by shared header/footer components and unified interaction patterns.
+- Use lightweight hero motion and dynamic module previews (instead of heavy media) to introduce the color-learning theme while keeping performance stable.
+- Ensure **strong responsive behavior** across desktop/tablet/mobile and maintain baseline accessibility through readable contrast, focus visibility, and keyboard-friendly interactions.
 
 #### 2) Learning
 
