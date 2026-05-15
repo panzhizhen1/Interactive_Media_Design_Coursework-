@@ -54,11 +54,19 @@ Each member owns exactly **one** of the **5 main pages/sections**. The page owne
 - Optimize performance and prevent obvious bugs (reset states, edge cases, consistent rendering).
 
 #### 4) Test
-- Build a **mock test** experience with a clear flow: start → questions → submit → feedback/results.
-- Provide **interactive feedback** per question (correct/incorrect, explanation, references to Learning page).
-- Support a small **question bank** (multiple questions; randomization optional).
-- Show a final **results summary** (score, time if used, review missed questions).
-- Keep the UI readable and reduce friction (progress indicator, clear buttons, error prevention).
+- Build a quiz-based testing module with a clear flow: **chapter and difficulty selection → questions → submission → feedback → final results → review**. The Test homepage includes themed chapter entries, difficulty switching, progress snapshots, resume links, mistake/bookmark access, and shortcuts back to related Learning modules.
+
+- Provide **240 questions** in total: 5 chapters × 3 difficulty levels × 4 units × 4 questions. **Each question includes a hint, explanation, and Learning-related knowledge point**, covering single-choice, true/false, ordering, and image-based formats.
+
+- Offer **interactive question feedback** through instant correct/incorrect responses, hints, explanations, Learning references, question overview navigation, real-time progress analysis, and bookmark support. **Sound effects** are used for answers, hints, stars, ribbons, and achievements, with both colour and **icon cues** for better accessibility.
+
+- Show a **detailed result summary** with score, accuracy, time used, hint usage, attempt history, strengths, weak points, motivational feedback, recommended review sections, missed-question review, and star-based performance. Three-star results trigger ribbon animation and sound, and results can be shared to Community.
+
+- Collect **missed and bookmarked questions** in one review page. It records mistake status, source chapter, difficulty, wrong count, and latest wrong time, with filters and options for **batch mistake practice**, bookmarked question practice, and bookmark removal.
+
+- Display an **achievement system** with total stars, highest streak, and total score, with score data linked to the Community leaderboard. Completing all units in a chapter with three stars unlocks a chapter-specific title with animation and sound.
+
+- Keep the Test interface **readable, responsive, and low-friction** with progress indicators, clear buttons, error prevention, responsive layouts, and SVG icons across desktop, tablet, and mobile.
 
 #### 5) Community
 - Create a community area that supports **social learning** (sharing results, tips, or short posts).

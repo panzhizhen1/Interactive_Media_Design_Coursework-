@@ -11,6 +11,7 @@
   var registrySet = Object.create(null);
   var audioBuffers = Object.create(null);
   var audioBufferPromises = Object.create(null);
+  var htmlAudioElements = Object.create(null);
   var audioContext = null;
   var sfxUnlocked = false;
   var soundEnabled = true;
@@ -97,13 +98,90 @@
     });
   }
 
+  function shouldUseHtmlAudioFallback() {
+    return window.location && window.location.protocol === "file:";
+  }
+
+  function getHtmlAudioForSrc(src) {
+    if (!src || typeof Audio !== "function") return null;
+    if (!htmlAudioElements[src]) {
+      try {
+        var audio = new Audio(src);
+        audio.preload = "auto";
+        htmlAudioElements[src] = audio;
+      } catch (e) {
+        return null;
+      }
+    }
+    return htmlAudioElements[src];
+  }
+
+  function preloadHtmlAudio(src) {
+    var audio = getHtmlAudioForSrc(src);
+    if (!audio || typeof audio.load !== "function") return;
+    try {
+      audio.load();
+    } catch (e) {}
+  }
+
+  function playHtmlAudio(src, opts) {
+    if (!soundEnabled) return;
+    var base = getHtmlAudioForSrc(src);
+    if (!base) return;
+
+    try {
+      var audio = base.cloneNode ? base.cloneNode(true) : new Audio(src);
+      var conf = opts || {};
+      var volume = typeof conf.volume === "number" ? conf.volume : 1;
+      audio.volume = Math.max(0, Math.min(1, volume));
+      if (typeof conf.playbackRate === "number") {
+        audio.playbackRate = Math.max(0.25, Math.min(4, conf.playbackRate));
+      }
+      audio.currentTime = 0;
+      var started = audio.play();
+      if (started && typeof started.catch === "function") started.catch(function () {});
+    } catch (e) {}
+  }
+
+  function singleLayerOptions(opts) {
+    var conf = opts || {};
+    var copy = {};
+    var key;
+    for (key in conf) {
+      if (Object.prototype.hasOwnProperty.call(conf, key)) copy[key] = conf[key];
+    }
+    copy.layers = 1;
+    copy.staggerMs = 0;
+    return copy;
+  }
+
+  function scheduleHtmlAudio(src, delayMs, opts) {
+    if (!soundEnabled) return;
+    var conf = opts || {};
+    var layers = Math.max(1, Number(conf.layers) || 1);
+    var staggerMs = Math.max(0, Number(conf.staggerMs) || 0);
+    var baseDelayMs = Math.max(0, Number(delayMs) || 0);
+    var i;
+
+    for (i = 0; i < layers; i++) {
+      var delay = baseDelayMs + i * staggerMs;
+      if (delay <= 0) {
+        playHtmlAudio(src, conf);
+      } else {
+        window.setTimeout(function () {
+          playHtmlAudio(src, conf);
+        }, delay);
+      }
+    }
+  }
+
   function ensureBufferForSrc(src) {
     if (!src) return Promise.reject(new Error("Missing sound source"));
     if (audioBuffers[src]) return Promise.resolve(audioBuffers[src]);
     if (audioBufferPromises[src]) return audioBufferPromises[src];
 
     var ctx = getAudioContext();
-    if (!ctx || typeof fetch !== "function") {
+    if (shouldUseHtmlAudioFallback() || !ctx || typeof fetch !== "function") {
       return Promise.reject(new Error("Web Audio is unavailable"));
     }
 
@@ -133,7 +211,11 @@
     getAudioContext();
     var i;
     for (i = 0; i < registry.length; i++) {
-      ensureBufferForSrc(registry[i]).catch(function () {});
+      if (shouldUseHtmlAudioFallback()) {
+        preloadHtmlAudio(registry[i]);
+      } else {
+        ensureBufferForSrc(registry[i]).catch(function () {});
+      }
     }
   }
 
@@ -145,14 +227,23 @@
       if (!s || registrySet[s]) continue;
       registrySet[s] = true;
       registry.push(s);
-      if (soundEnabled) ensureBufferForSrc(s).catch(function () {});
+      if (soundEnabled) {
+        if (shouldUseHtmlAudioFallback()) {
+          preloadHtmlAudio(s);
+        } else {
+          ensureBufferForSrc(s).catch(function () {});
+        }
+      }
     }
   }
 
   function scheduleSource(src, whenSeconds, opts) {
     if (!soundEnabled) return;
     var ctx = getAudioContext();
-    if (!ctx) return;
+    if (!ctx || shouldUseHtmlAudioFallback()) {
+      scheduleHtmlAudio(src, 0, opts);
+      return;
+    }
     resumeAudioContext();
 
     var conf = opts || {};
@@ -171,13 +262,24 @@
           source.start(Math.max(ctx.currentTime, whenSeconds));
         } catch (e) {}
       })
-      .catch(function () {});
+      .catch(function () {
+        var fallbackDelayMs = Math.max(0, (whenSeconds - ctx.currentTime) * 1000);
+        scheduleHtmlAudio(src, fallbackDelayMs, singleLayerOptions(opts));
+      });
   }
 
   function schedule(src, delayMs, opts) {
     if (!soundEnabled) return;
+    if (shouldUseHtmlAudioFallback()) {
+      scheduleHtmlAudio(src, delayMs, opts);
+      return;
+    }
+
     var ctx = getAudioContext();
-    if (!ctx) return;
+    if (!ctx) {
+      scheduleHtmlAudio(src, delayMs, opts);
+      return;
+    }
 
     var conf = opts || {};
     var layers = Math.max(1, Number(conf.layers) || 1);
