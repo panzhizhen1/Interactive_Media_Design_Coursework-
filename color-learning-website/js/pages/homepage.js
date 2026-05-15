@@ -22,7 +22,7 @@
     "Choose Your Colour Path": "开启你的色彩之旅",
     "Pick the way you want to explore colour today.": "选择今天最适合你的色彩学习方式。",
     "Start Learning": "开始学习",
-    "Try Challenge": "快速测试",
+    "Do a Test": "快速小测",
     "Learn Colours the Smart Way": "色彩知识随手学",
     "Learn a Colour Concept!": "每天认识一个色彩概念",
     "See Colour in Action!": "拖一拖，理解颜色如何变化",
@@ -249,7 +249,7 @@
     }
     var quickTestBtn = document.querySelector("[data-home-hero-test]");
     if (quickTestBtn) {
-      setLocalizedText(quickTestBtn, "Try Challenge");
+      setLocalizedText(quickTestBtn, "Do a Test");
       quickTestBtn.setAttribute("href", "test-quiz.html?chapter=basics&level=easy&unit=unit-1&fresh=1&hq=0");
     }
 
@@ -375,6 +375,7 @@
   var HOME_GAME_PICK_INDEX_KEY = "clw_home_game_pick_index";
   var HOME_TEST_PICK_INDEX_KEY = "clw_home_test_pick_index";
   var HOME_TEST_RESUME_LOCK_KEY = "clw_home_test_resume_lock_v1";
+  var HOME_RETURN_SCROLL_KEY = "clw_home_return_scroll_v1";
   var HOME_LEARN_PICK_INDEX_KEY = "clw_home_learn_pick_index";
   var HOME_LEARN_VIEW_MODE_KEY = "clw_home_learn_view_mode";
   var HOME_LEARN_MODEL_PICK_INDEX_KEY = "clw_home_learn_model_pick_index";
@@ -385,7 +386,7 @@
     return window.CLWCommunityCloud || null;
   }
   var AUTH_USER_KEY = "clw_current_user";
-  var HOME_COMMUNITY_ROTATE_MS = 6800;
+  var HOME_COMMUNITY_ROTATE_MS = 4600;
   var HOME_COMMUNITY_SWITCH_OUT_MS = 230;
   var HOME_COMMUNITY_SWITCH_IN_MS = 320;
 
@@ -2117,21 +2118,15 @@
         enabled: raw.enabled !== false
       };
     }
+    // Use session-only lock to avoid sticky resume state across re-login.
     var sessionLock = parseLock(readSessionJson(HOME_TEST_RESUME_LOCK_KEY, null));
-    if (sessionLock && sessionLock.scope === "guest") return sessionLock;
-
-    var persistentLock = parseLock(readStoredJson(HOME_TEST_RESUME_LOCK_KEY, null));
-    if (!persistentLock) return null;
-    // Legacy cleanup: old guest lock in localStorage can force first question forever.
-    if (persistentLock.scope === "guest") {
-      try {
-        localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
-      } catch (e) {
-        /* ignore */
-      }
-      return null;
+    // Cleanup legacy persistent lock format from localStorage.
+    try {
+      localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
+    } catch (e) {
+      /* ignore */
     }
-    return persistentLock;
+    return sessionLock;
   }
 
   function writeHomeTestResumeLock(username, enabled, mode) {
@@ -2145,13 +2140,8 @@
       updatedAt: new Date().toISOString()
     };
     try {
-      if (scope === "guest") {
-        sessionStorage.setItem(HOME_TEST_RESUME_LOCK_KEY, JSON.stringify(payload));
-        localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
-      } else {
-        localStorage.setItem(HOME_TEST_RESUME_LOCK_KEY, JSON.stringify(payload));
-        sessionStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
-      }
+      sessionStorage.setItem(HOME_TEST_RESUME_LOCK_KEY, JSON.stringify(payload));
+      localStorage.removeItem(HOME_TEST_RESUME_LOCK_KEY);
     } catch (e) {
       /* ignore */
     }
@@ -2175,6 +2165,75 @@
     } catch (e) {
       return fallback;
     }
+  }
+
+  function saveHomeReturnScrollPosition(source) {
+    try {
+      sessionStorage.setItem(HOME_RETURN_SCROLL_KEY, JSON.stringify({
+        y: Math.max(0, Math.floor(window.scrollY || window.pageYOffset || 0)),
+        source: String(source || "home"),
+        path: String(window.location.pathname || ""),
+        at: Date.now()
+      }));
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function readHomeReturnScrollPosition() {
+    return readSessionJson(HOME_RETURN_SCROLL_KEY, null);
+  }
+
+  function clearHomeReturnScrollPosition() {
+    try {
+      sessionStorage.removeItem(HOME_RETURN_SCROLL_KEY);
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function setupHomeReturnScrollRestore() {
+    var projectLinks = [
+      document.querySelector("[data-home-link-project-intro]"),
+      document.querySelector("[data-home-link-privacy]"),
+      document.querySelector("[data-home-link-contact]")
+    ].filter(function (node) { return !!node; });
+
+    projectLinks.forEach(function (link) {
+      link.addEventListener("click", function () {
+        saveHomeReturnScrollPosition("project-links");
+      });
+    });
+
+    var saved = readHomeReturnScrollPosition();
+    if (!saved || typeof saved !== "object") return;
+    var y = Number(saved.y || 0);
+    var ageMs = Date.now() - Number(saved.at || 0);
+    var samePath = String(saved.path || "") === String(window.location.pathname || "");
+    if (!Number.isFinite(y) || y < 0) {
+      clearHomeReturnScrollPosition();
+      return;
+    }
+    if (!samePath || !Number.isFinite(ageMs) || ageMs < 0 || ageMs > 20 * 60 * 1000) {
+      clearHomeReturnScrollPosition();
+      return;
+    }
+
+    // Restore multiple times to survive late async layout changes.
+    function restoreScroll() {
+      window.scrollTo(0, y);
+    }
+    window.requestAnimationFrame(function () {
+      restoreScroll();
+      window.requestAnimationFrame(restoreScroll);
+    });
+    window.setTimeout(restoreScroll, 80);
+    window.setTimeout(restoreScroll, 220);
+    window.setTimeout(function () {
+      restoreScroll();
+      clearHomeReturnScrollPosition();
+    }, 480);
+    window.addEventListener("load", restoreScroll, { once: true });
   }
 
   function hasHomeTestProgress(state) {
@@ -2421,6 +2480,7 @@
     }
 
     document.addEventListener("clw:auth-changed", function () {
+      if (!getSignedInHomepageUsername()) clearHomeTestResumeLock();
       syncResumeAction();
     });
 
@@ -2602,6 +2662,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    setupHomeReturnScrollRestore();
     applyHomepageLocaleChrome();
     setupHeroTagline();
     setupHomeLearnSpotlight();
