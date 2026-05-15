@@ -63,11 +63,17 @@ Each member owns exactly **one** of the **5 main pages/sections**. The page owne
 - Ensure content is accurate, well-written, and aligned with the project topic.
 
 #### 3) Game
-- Implement **highly interactive, visually clear** game(s) related to the learning topic.
-- Provide onboarding: rules/instructions, start/restart, and clear success/failure conditions.
-- Implement a **feedback loop** (score, hints, progress, or immediate responses to actions).
-- Keep controls accessible (mouse + keyboard where reasonable) and avoid confusing interactions.
-- Optimize performance and prevent obvious bugs (reset states, edge cases, consistent rendering).
+- Build an interactive colouring game module where users can choose from multiple black-and-white vector drawings and freely colour them using different colour models. The interface includes colour selection tools, reusable recent colours, an eraser, undo/clear functions, and artwork saving support.
+
+- Provide scalable SVG/vector-style line drawings to ensure the images remain sharp and undistorted at any screen size or zoom level. Include a variety of themed illustrations such as animals, objects, fantasy elements, and cartoon-style designs.
+
+- Offer real-time colouring assistance through progress tracking, including colouring time, completion percentage, and number of colours used. Users can quickly switch between tools and continue colouring smoothly across desktop, tablet, and mobile devices.
+
+- Include a Challenge Mode where the system randomly generates a fully coloured reference image. Users must recreate the colours as accurately as possible, then submit their work for automatic scoring. Scores are calculated using RGB colour distance comparison, rewarding closer colour matches with higher accuracy scores.
+
+- Display detailed challenge results including final score, colour accuracy, completion time, and star-based performance feedback. High scores trigger celebratory animations and sound effects to increase engagement and motivation.
+
+- Keep the Colouring Game interface simple, responsive, and accessible with clear controls, smooth interactions, progress indicators, and consistent visual feedback across all devices.
 
 #### 4) Test
 - Build a quiz-based testing module with a clear flow: **chapter and difficulty selection → questions → submission → feedback → final results → review**. The Test homepage includes themed chapter entries, difficulty switching, progress snapshots, resume links, mistake/bookmark access, and shortcuts back to related Learning modules.
