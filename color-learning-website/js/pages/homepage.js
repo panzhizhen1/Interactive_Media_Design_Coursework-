@@ -1651,6 +1651,134 @@
       });
   }
 
+  function getHomeGameFallbackDrawings() {
+    return [
+      {
+        name: "House",
+        sourceIndex: 0,
+        draw: function (ctx, w, h) {
+          ctx.beginPath();
+          ctx.moveTo(w * 0.1, h * 0.88);
+          ctx.lineTo(w * 0.9, h * 0.88);
+          ctx.stroke();
+          ctx.strokeRect(w * 0.22, h * 0.42, w * 0.56, h * 0.42);
+          ctx.beginPath();
+          ctx.moveTo(w * 0.16, h * 0.42);
+          ctx.lineTo(w * 0.5, h * 0.12);
+          ctx.lineTo(w * 0.84, h * 0.42);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w * 0.25, h * 0.42);
+          ctx.lineTo(w * 0.5, h * 0.22);
+          ctx.lineTo(w * 0.75, h * 0.42);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.strokeRect(w * 0.61, h * 0.19, w * 0.09, h * 0.15);
+          ctx.strokeRect(w * 0.595, h * 0.16, w * 0.12, h * 0.03);
+          ctx.beginPath();
+          ctx.moveTo(w * 0.44, h * 0.84);
+          ctx.lineTo(w * 0.44, h * 0.64);
+          ctx.quadraticCurveTo(w * 0.5, h * 0.54, w * 0.56, h * 0.64);
+          ctx.lineTo(w * 0.56, h * 0.84);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w * 0.5, h * 0.84);
+          ctx.lineTo(w * 0.5, h * 0.6);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(w * 0.535, h * 0.73, Math.max(2, w * 0.006), 0, Math.PI * 2);
+          ctx.stroke();
+          var drawWindow = function (x) {
+            ctx.strokeRect(w * x, h * 0.54, w * 0.12, h * 0.13);
+            ctx.beginPath();
+            ctx.moveTo(w * (x + 0.06), h * 0.54);
+            ctx.lineTo(w * (x + 0.06), h * 0.67);
+            ctx.moveTo(w * x, h * 0.605);
+            ctx.lineTo(w * (x + 0.12), h * 0.605);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(w * (x - 0.01), h * 0.54);
+            ctx.lineTo(w * (x + 0.06), h * 0.5);
+            ctx.lineTo(w * (x + 0.13), h * 0.54);
+            ctx.closePath();
+            ctx.stroke();
+          };
+          drawWindow(0.29);
+          drawWindow(0.59);
+          ctx.beginPath();
+          ctx.moveTo(w * 0.46, h * 0.84);
+          ctx.lineTo(w * 0.4, h * 0.93);
+          ctx.lineTo(w * 0.6, h * 0.93);
+          ctx.lineTo(w * 0.54, h * 0.84);
+          ctx.closePath();
+          ctx.stroke();
+        }
+      },
+      {
+        name: "Car",
+        sourceIndex: 3,
+        draw: function (ctx, w, h) {
+          ctx.beginPath();
+          ctx.moveTo(w * 0.14, h * 0.71);
+          ctx.lineTo(w * 0.2, h * 0.55);
+          ctx.lineTo(w * 0.34, h * 0.45);
+          ctx.lineTo(w * 0.63, h * 0.45);
+          ctx.lineTo(w * 0.78, h * 0.56);
+          ctx.lineTo(w * 0.86, h * 0.71);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w * 0.14, h * 0.71);
+          ctx.lineTo(w * 0.86, h * 0.71);
+          ctx.lineTo(w * 0.86, h * 0.82);
+          ctx.lineTo(w * 0.14, h * 0.82);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w * 0.28, h * 0.56);
+          ctx.lineTo(w * 0.37, h * 0.49);
+          ctx.lineTo(w * 0.49, h * 0.49);
+          ctx.lineTo(w * 0.49, h * 0.64);
+          ctx.lineTo(w * 0.28, h * 0.64);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w * 0.52, h * 0.49);
+          ctx.lineTo(w * 0.62, h * 0.49);
+          ctx.lineTo(w * 0.73, h * 0.57);
+          ctx.lineTo(w * 0.73, h * 0.64);
+          ctx.lineTo(w * 0.52, h * 0.64);
+          ctx.closePath();
+          ctx.stroke();
+          var wheel = function (x) {
+            ctx.beginPath();
+            ctx.arc(w * x, h * 0.82, w * 0.09, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(w * x, h * 0.82, w * 0.045, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.stroke();
+          };
+          wheel(0.31);
+          wheel(0.69);
+          ctx.strokeRect(w * 0.18, h * 0.67, w * 0.08, h * 0.045);
+          ctx.strokeRect(w * 0.74, h * 0.67, w * 0.08, h * 0.045);
+          ctx.beginPath();
+          ctx.moveTo(w * 0.47, h * 0.64);
+          ctx.lineTo(w * 0.47, h * 0.82);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w * 0.18, h * 0.82);
+          ctx.lineTo(w * 0.82, h * 0.82);
+          ctx.stroke();
+        }
+      }
+    ];
+  }
+
   function setupHomeGameSpotlight() {
     var previewCanvas = document.querySelector("[data-home-game-preview]");
     var previewLink = document.querySelector("[data-home-game-link]");
@@ -1660,35 +1788,61 @@
     var ctx = previewCanvas.getContext("2d");
     if (!ctx) return;
 
-    loadGameDrawingsLibrary()
-      .then(function (drawings) {
-        if (!Array.isArray(drawings) || !drawings.length) return;
-        var validDrawings = drawings
-          .map(function (drawing, index) {
-            return { drawing: drawing, index: index };
-          })
-          .filter(function (item) {
-            return item.drawing && typeof item.drawing.draw === "function";
-          });
-        if (!validDrawings.length) return;
-        var picked = validDrawings[pickStableSessionIndex(HOME_GAME_PICK_INDEX_KEY, validDrawings.length)];
-        var drawing = picked.drawing;
-        var randomIndex = picked.index;
-        var drawingName = drawing.name ? String(drawing.name) : "a random drawing";
+    function renderFromDrawings(drawings) {
+      if (!Array.isArray(drawings) || !drawings.length) return false;
+      var validDrawings = drawings
+        .map(function (drawing, index) {
+          var linkIndex = (drawing && typeof drawing.sourceIndex === "number")
+            ? Number(drawing.sourceIndex)
+            : index;
+          return { drawing: drawing, index: index, linkIndex: linkIndex };
+        })
+        .filter(function (item) {
+          return item.drawing && typeof item.drawing.draw === "function";
+        });
+      if (!validDrawings.length) return false;
+      var picked = validDrawings[pickStableSessionIndex(HOME_GAME_PICK_INDEX_KEY, validDrawings.length)];
+      if (!picked || !picked.drawing) return false;
+      var drawing = picked.drawing;
+      var randomIndex = picked.index;
+      var targetDrawingIndex = picked.linkIndex;
+      var drawingName = drawing.name ? String(drawing.name) : "a random drawing";
 
+      ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+      setSketchStyle(ctx, 0.5);
+      try {
+        drawing.draw(ctx, previewCanvas.width, previewCanvas.height);
+      } catch (error) {
+        var alternative = validDrawings.find(function (item) { return item.index !== randomIndex; });
+        if (!alternative || !alternative.drawing || typeof alternative.drawing.draw !== "function") return false;
+        drawing = alternative.drawing;
+        randomIndex = alternative.index;
+        targetDrawingIndex = alternative.linkIndex;
+        drawingName = drawing.name ? String(drawing.name) : "a random drawing";
         ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
         setSketchStyle(ctx, 0.5);
         drawing.draw(ctx, previewCanvas.width, previewCanvas.height);
+      }
 
-        previewLink.href = "game.html?openDrawing=" + String(randomIndex);
-        previewLink.setAttribute("aria-label", txHome("Start your colour challenge with ") + txGame(drawingName));
-        if (previewTitle) renderLocalizedGameTitle(previewTitle, drawingName);
+      previewLink.href = "game.html?openDrawing=" + String(targetDrawingIndex);
+      previewLink.setAttribute("aria-label", txHome("Start your colour challenge with ") + txGame(drawingName));
+      if (previewTitle) renderLocalizedGameTitle(previewTitle, drawingName);
+      return true;
+    }
+
+    loadGameDrawingsLibrary()
+      .then(function (drawings) {
+        if (!renderFromDrawings(drawings)) throw new Error("No valid drawing");
       })
       .catch(function () {
-        previewLink.href = "game.html";
-        if (previewTitle) renderLocalizedGameTitle(previewTitle, "");
+        if (!renderFromDrawings(getHomeGameFallbackDrawings())) {
+          previewLink.href = "game.html";
+          if (previewTitle) renderLocalizedGameTitle(previewTitle, "");
+        }
       });
   }
 
