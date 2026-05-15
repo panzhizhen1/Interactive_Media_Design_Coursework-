@@ -14,7 +14,15 @@ You can open this website in either of the following two ways:
   - Open our deployed public URL directly in your browser.
   - This is the recommended method for demo/review because it matches the real online environment.
 
-Note: directly opening `index.html` via `file://` may cause some dynamic homepage modules to load incompletely due to browser security restrictions on local file requests.
+- **Method 3: Node.js http-server (for custom port testing)**
+  - Ensure Node.js is installed on your machine.
+  - Open your terminal or command prompt, and globally install http-server by running:
+    npm install http-server -g
+  - Navigate to your project's root directory in the terminal.
+  - Start the local server on your custom port (8080) by running:
+    http-server -p 8080
+  - Open the generated local address (http://127.0.0.1:8080) in your browser.
+  - This method provides a zero-configuration, lightweight HTTP server, ensuring full compatibility for dynamic modules and avoiding browser security restrictions associated with the file:// protocol.
 
 ## Group Number: 2025EBU6305G12  
 ## Project Title: Hue Hub: Interactive Color Learning
